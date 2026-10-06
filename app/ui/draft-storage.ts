@@ -1,0 +1,8 @@
+import { Draft, Quiz } from "@/lib/quiz";
+export type DraftAttempt={quiz:Quiz;revision:number;writeId:string};
+export type LocalDraft={quiz:Quiz;editedAt:number;revision:number;pending?:DraftAttempt|null};
+export const draftKey=(owner:string,id:string)=>`qe_draft_v2:${owner}:${id}`;
+export function readLocal(owner:string,id:string):LocalDraft|null{try{const value=JSON.parse(localStorage.getItem(draftKey(owner,id))||"null");return value?.quiz?.id===id&&Array.isArray(value.quiz.questions)?value:null;}catch{return null;}}
+export function listLocalDrafts(owner:string){const out:LocalDraft[]=[];try{const prefix=`qe_draft_v2:${owner}:`;for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(key?.startsWith(prefix)){const value=readLocal(owner,key.slice(prefix.length));if(value)out.push(value);}}}catch{}return out;}
+export function moveLocalDrafts(from:string,to:string){if(from===to)return;for(const local of listLocalDrafts(from)){const previous=readLocal(to,local.quiz.id);try{if(!previous||local.editedAt>previous.editedAt)localStorage.setItem(draftKey(to,local.quiz.id),JSON.stringify(local));localStorage.removeItem(draftKey(from,local.quiz.id));}catch{}}}
+export function mergedDrafts(remote:Draft[],owner:string):Draft[]{const map=new Map(remote.map(d=>[d.id,d]));for(const local of listLocalDrafts(owner)){const saved=map.get(local.quiz.id);if(!saved||local.editedAt>saved.updatedAt||local.pending){map.set(local.quiz.id,{id:local.quiz.id,quiz:local.quiz,updatedAt:local.editedAt,revision:local.revision,writeId:local.pending?.writeId});}}return [...map.values()].sort((a,b)=>b.updatedAt-a.updatedAt);}

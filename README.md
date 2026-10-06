@@ -6,41 +6,52 @@ Site de quiz ao vivo para educadores, em português, com uma tela para o profess
 
 ## Como usar
 
-1. Clique em **Criar quiz** e escolha um nome para seu acesso temporário.
-2. Escreva as perguntas, preencha de duas a quatro alternativas, marque a correta e configure o tempo.
-3. Clique em **Salvar quiz** e depois **Abrir sala**.
-4. Projete a tela da sala. Os alunos leem o QR code ou digitam o código de seis números na página inicial.
-5. Cada participante escolhe um nome e um avatar. O professor aguarda a turma e clica em **Iniciar quiz**.
-6. A pergunta aparece no telão e nos celulares. As respostas são enviadas ao tocar na alternativa.
-7. Ao esgotar o tempo ou todos responderem, aparecem a resposta correta e a classificação acumulada.
-8. O professor decide quando avançar. Ao final, o primeiro e o segundo lugares recebem destaque e os demais aparecem na classificação.
+1. Use **Continuar com ChatGPT** para guardar suas atividades em uma conta permanente, acessível em outros aparelhos. Também é possível começar com um nome e um acesso temporário. Os alunos não precisam de conta.
+2. Clique em **Criar quiz**, dê um título e, se quiser, informe a disciplina e o assunto.
+3. Escreva as perguntas, preencha de duas a quatro alternativas e marque a correta. Você pode inserir imagens, explicações e questões do seu banco.
+4. Escolha **Competição** (acerto e rapidez) ou **Aprendizagem** (pontuação apenas por acerto). No segundo modo, também é possível responder sem cronômetro.
+5. O rascunho é salvo automaticamente. Use **Salvar quiz** para concluir a atividade e **Abrir sala** para jogar.
+6. Projete a tela da sala. Os alunos leem o QR code ou digitam o código de seis números na página inicial, escolhem nome e avatar e entram.
+7. Aguarde a turma e clique em **Iniciar quiz**. A pergunta aparece no telão e nos celulares.
+8. Ao terminar a rodada, aparecem a resposta correta, a explicação e a classificação acumulada. O professor decide quando avançar.
+9. Ao final, o primeiro e o segundo lugares recebem destaque. Abra **Ver relatório da aula** ou a aba **Minhas aulas** para consultar os resultados, baixar CSV ou imprimir/salvar PDF.
 
-O quiz de exemplo **Brasil e natureza** contém cinco perguntas que podem ser adaptadas. O editor permite ordenar, duplicar e excluir perguntas, guardar uma cópia em JSON e importar uma cópia exportada.
+O exemplo **Brasil e natureza** contém cinco perguntas que podem ser adaptadas. O editor permite ordenar, duplicar e excluir perguntas, exportar JSON e importar uma cópia exportada.
 
-## Regras
+## Biblioteca e recuperação
 
-- Acerto: **500 pontos + até 500 pontos pela rapidez**.
-- Fórmula: `500 + floor(500 * (1 - tempo_de_resposta / tempo_da_pergunta))`. Erros e ausência de resposta valem zero.
-- O servidor mede o tempo. O celular não informa seus próprios pontos, se acertou ou quanto demorou.
-- Cada participante pode enviar **uma única resposta por pergunta**. Reenvios da mesma resposta são idempotentes.
-- As respostas corretas e as explicações não são enviadas aos participantes durante a pergunta.
-- Classificação por pontos; empate resolvido por mais acertos, menor soma dos tempos nas respostas corretas e ordem de entrada.
-- Até **100 participantes** por sala, **50 perguntas** por quiz e **50 quizzes** por acesso temporário.
-- Há uma contagem de preparação de três segundos antes de cada pergunta. A turma fica fechada depois do início.
-- A sala dura 24 horas. O professor pode encerrar uma rodada antecipadamente ou encerrar a sala.
-- O acesso temporário dura 30 dias no navegador utilizado. Os quizzes são guardados no servidor; limpar os cookies ou trocar de aparelho perde a chave desse acesso. **Exporte seus quizzes para conservar uma cópia.**
-- Esta versão oferece acesso temporário, sem senha. Não inclui contas permanentes por e-mail nem recuperação de senha.
-- Professor e alunos precisam de internet. As telas se recuperam ao recarregar a página com o mesmo navegador e cookies.
+- **Conta permanente:** o login do ChatGPT identifica o educador; quizzes, rascunhos, banco e aulas ficam no servidor. Ao vincular o acesso temporário, o trabalho existente é transferido para sua conta. O login não exige chave de API nem assinatura de um serviço de IA.
+- **Acesso temporário:** dura 30 dias no navegador utilizado. Limpar cookies ou trocar de aparelho perde a chave desse acesso. Vincule a conta ou exporte seus quizzes para conservar uma cópia.
+- **Rascunhos:** são salvos no servidor mesmo com campos incompletos. Uma cópia no aparelho preserva alterações durante falhas de conexão e tenta sincronizar novamente. Alterações simultâneas em duas telas são detectadas; a cópia local pode ser exportada ou salva como outro rascunho.
+- **Banco de questões:** organize por disciplina/assunto e pesquise por texto. Adicionar uma questão a um quiz cria uma cópia independente.
+- **Compartilhamento:** um link permite que outro educador veja as perguntas e faça sua própria cópia, incluindo as respostas corretas. O original continua sob seu controle. Você pode atualizar ou desativar o link.
+- **Minhas aulas:** mostra histórico, classificação, acertos por participante, respostas individuais e distribuição das alternativas por questão. O relatório é privado do professor. O CSV contém as respostas individuais; a versão para impressão/PDF contém o resumo, a classificação e a análise das questões.
+
+## Regras do jogo
+
+- **Competição:** `500 + floor(500 * (1 - tempo_de_resposta / tempo_da_pergunta))` por acerto, até 1.000 pontos. Erros e ausência de resposta valem zero. Empates são resolvidos por mais acertos, menor soma dos tempos nos acertos e ordem de entrada.
+- **Aprendizagem:** 1.000 pontos por acerto, sem bônus de rapidez. Empates são resolvidos por mais acertos e ordem de entrada. O professor pode escolher tempo livre.
+- O servidor mede o tempo e calcula os pontos. O celular não decide sua pontuação.
+- Cada participante pode enviar **uma única resposta por pergunta**. Reenvios da mesma resposta são idempotentes; o celular confirma o envio quando o servidor aceita a resposta.
+- As respostas corretas e as explicações não são enviadas aos alunos durante a pergunta.
+- Até **100 participantes** por sala, **50 perguntas** por quiz, **200 quizzes** por conta permanente ou **50** por acesso temporário, **100 rascunhos** e **500 questões** no banco.
+- Há três segundos de preparação antes de cada pergunta. A entrada na turma fecha depois do início.
+- A sala expira em 24 horas. O professor pode encerrar uma rodada antecipadamente ou encerrar a sala. Os relatórios continuam no histórico depois da expiração e da exclusão do quiz original.
+- As telas de professor e aluno oferecem teste de conexão, leitura em voz alta, tamanho de texto e sons opcionais. A voz depende dos recursos do navegador/aparelho. As animações respeitam a preferência por movimento reduzido.
+- O professor vê quem teve contato recente com a sala; isso é um indicador de conexão, não prova de atenção ou de presença física.
+- Imagens JPEG, PNG e WebP são reduzidas no navegador antes do envio, para até 1 MB. Limite por educador: **200 imagens ou 50 MB**. Escreva uma descrição quando a imagem for necessária para compreender a pergunta.
+- Professor e alunos precisam de internet. Respostas pendentes são reenviadas durante a mesma rodada; no modo com cronômetro, a resposta precisa chegar ao servidor antes do prazo.
 
 ## Arquitetura
 
 - React 19 + TypeScript + Vinext/Vite, com componentes acessíveis Radix/Shadcn.
-- Cloudflare Worker para as regras do jogo e APIs; Cloudflare D1/SQLite para quizzes, salas, participantes e respostas.
-- QR code gerado no próprio aplicativo (`qrcode`), sem enviar os dados da sala a um serviço de terceiros.
-- Atualização leve por consultas HTTP: a sala envia atualizações compactas quando a fase não mudou; o placar completo é calculado nas mudanças de etapa. O servidor decide quando a rodada termina.
-- Sessões com chaves aleatórias de 256 bits, cookies HttpOnly/SameSite e somente o hash das chaves no banco. O professor só pode ler/editar seus quizzes e conduzir suas salas.
-- Salas possuem uma cópia imutável das perguntas. Editar/excluir o quiz original não altera uma partida em andamento.
-- Índices, contadores por triggers e uma restrição única por resposta protegem a pontuação e evitam consultas amplas a cada atualização.
+- Cloudflare Worker para as regras e APIs; D1/SQLite para os dados persistentes e R2 para imagens.
+- Identidade permanente fornecida pelo fluxo **Sign in with ChatGPT** da hospedagem gerenciada. O servidor usa o identificador estável da conta; os alunos continuam anônimos.
+- QR code gerado no aplicativo (`qrcode`), sem enviar os dados da sala a terceiros.
+- Consultas HTTP compactas para acompanhar a sala. O servidor determina as mudanças de etapa; a presença é consultada separadamente para o professor.
+- Sessões temporárias com chaves aleatórias de 256 bits, cookies HttpOnly/SameSite e somente o hash das chaves no banco. Quizzes, banco, rascunhos e relatórios exigem autorização do educador responsável.
+- Salas e links compartilhados guardam cópias das perguntas. Editar o original não altera uma partida em andamento ou um compartilhamento até que o professor o atualize.
+- Índices, contadores por triggers, revisões de rascunho e uma restrição única por resposta protegem a pontuação e os dados durante envios simultâneos.
 - Nenhuma chave de API paga ou serviço de IA é necessário.
 
 ## Desenvolvimento local
@@ -61,29 +72,28 @@ Antes de executar a interface local, aplique **somente as migrações ainda não
 ```sh
 node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0000_wonderful_the_phantom.sql
 node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0001_melted_skaar.sql
+node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js d1 execute DB --local --config dist/server/wrangler.json --persist-to .wrangler/state --file drizzle/0002_empty_edwin_jarvis.sql
 pnpm dev
 ```
 
-As migrações em `drizzle/` são versionadas. Não edite uma migração aplicada; gere a próxima ao mudar o esquema. Os triggers complementares de contagem e revisão da turma estão registrados nas migrações SQL.
+As migrações em `drizzle/` são versionadas. Não edite uma migração aplicada; gere a próxima ao mudar o esquema. A terceira migração acrescenta as funcionalidades da versão 2 sem apagar os dados existentes.
+
+O login permanente depende do gateway da hospedagem gerenciada. Em desenvolvimento local, use acesso temporário; não simule uma conta real com cabeçalhos enviados pelo navegador.
 
 ## Verificação
 
 ```sh
 pnpm exec tsc --noEmit
 pnpm build
-node tests/integration.mjs
+pnpm test
 ```
 
-O teste de integração executa o Worker de produção contra um banco D1 descartável. Verifica acesso temporário, isolamento entre professores, validação das perguntas, entrada e nomes repetidos, remoção na sala de espera, privacidade das respostas, início e relógio, respostas duplicadas e simultâneas, acertos mais rápidos, soma de pontos, tempo esgotado, participantes sem resposta, classificação final, reconexão, limite simultâneo de 100 participantes, cópia imutável da sala e proteção contra envio de outra origem.
+Os dois testes de integração executam o Worker compilado contra D1 e R2 descartáveis. A suíte da versão 2 contém **298 verificações**: regras de pontuação, privacidade das respostas, capacidade simultânea de 100 alunos, reconexão, propriedade dos dados, validação de imagens, compartilhamento, relatórios/CSV, migração de conta e concorrência de rascunhos e quizzes. O fluxo da identidade é simulado apenas no ambiente de teste; o login real é fornecido pela hospedagem.
 
-## Operação gratuita
+## Hospedagem e custos
 
-O código não utiliza serviços pagos. A versão publicada usa hospedagem gerenciada, com D1 provisionado pela plataforma. Também é possível hospedar este Worker em sua própria conta **Cloudflare Workers Free + D1 Free**.
+O código não exige serviços pagos. A versão publicada usa hospedagem gerenciada, com D1 e R2 provisionados pela plataforma. Os planos gratuitos dos provedores têm quotas; a capacidade por sala não significa uso diário ilimitado.
 
-Na documentação consultada em 06/10/2026, o plano Workers Free inclui 100.000 requisições por dia; o D1 Free inclui 5 milhões de linhas lidas, 100.000 linhas escritas por dia e 5 GB de armazenamento total. Esses são os limites da conta Cloudflare independente, não uma promessa de uso ilimitado ou de quotas idênticas na hospedagem gerenciada.
+Também é possível hospedar o Worker em sua conta Cloudflare, adicionando D1 e R2. O login permanente desta versão utiliza uma função da hospedagem gerenciada e precisa de uma integração de identidade verificada para funcionar em outro provedor. Consulte [DEPLOY.md](./DEPLOY.md).
 
-Fontes oficiais: [Workers](https://developers.cloudflare.com/workers/platform/pricing/) · [D1](https://developers.cloudflare.com/d1/platform/pricing/).
-
-O plano gratuito interrompe operações ao alcançar suas quotas. Não é preciso contratar um plano pago para iniciar. A capacidade do aplicativo por sala e as quotas diárias da hospedagem são limites diferentes.
-
-Para hospedagem independente, consulte [DEPLOY.md](./DEPLOY.md).
+Documentação dos limites: [Workers](https://developers.cloudflare.com/workers/platform/pricing/) · [D1](https://developers.cloudflare.com/d1/platform/pricing/) · [R2](https://developers.cloudflare.com/r2/pricing/).

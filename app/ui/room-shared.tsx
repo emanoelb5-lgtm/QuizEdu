@@ -5,12 +5,14 @@ import { api } from "./shared";
 import { Player, points, RoomState } from "@/lib/quiz";
 
 export function useRoom(code: string) {
-  const [state, setState] = useState<RoomState | null>(null); const [error, setError] = useState(""); const ref = useRef<RoomState | null>(null);
+  const [state, setState] = useState<RoomState | null>(null); const [error, setError] = useState(""); const ref = useRef<RoomState | null>(null); const lastPresence = useRef(0);
   const apply = useCallback((value: RoomState) => { if (ref.current && (value.index < ref.current.index || value.serverNow < ref.current.serverNow)) return; ref.current = value; setState(value); }, []);
   const refresh = useCallback(async (full = true) => {
-    const suffix = !full && ref.current ? `?since=${encodeURIComponent(ref.current.version)}` : "";
+    const params = new URLSearchParams(); if(!full&&ref.current)params.set("since",ref.current.version);
+    if(ref.current?.isHost&&Date.now()-lastPresence.current>10000){params.set("presence","1");lastPresence.current=Date.now();}
+    const suffix = params.size?`?${params}`:"";
     const data = await api<RoomState & { pulse?: boolean }>(`/api/rooms/${code}${suffix}`);
-    if (data.pulse && ref.current) { if (data.version === ref.current.version) apply({ ...ref.current, serverNow: data.serverNow, answeredCount: data.answeredCount }); } else apply(data);
+    if (data.pulse && ref.current) { if (data.version === ref.current.version) apply({ ...ref.current, serverNow: data.serverNow, answeredCount: data.answeredCount, ...(data.presence?{presence:data.presence}: {}) }); } else apply(data);
     setError(""); return ref.current;
   }, [code, apply]);
   useEffect(() => {
@@ -18,8 +20,8 @@ export function useRoom(code: string) {
     async function poll() { try { await refresh(false); failures = 0; } catch (e) { if (alive) setError((e as Error).message); failures++; }
       if (alive && ref.current?.status !== "closed" && ref.current?.status !== "finished") { const wait = failures ? Math.min(10000, 1500 * failures) : document.hidden ? 4000 : ref.current?.status === "question" ? 1000 : 2000; timeout = setTimeout(poll, wait); }
     }
-    void poll(); const visible = () => { if (!document.hidden) void refresh(true).catch(() => {}); }; document.addEventListener("visibilitychange", visible);
-    return () => { alive = false; clearTimeout(timeout); document.removeEventListener("visibilitychange", visible); };
+    void poll(); const visible = () => { if (!document.hidden) void refresh(true).catch(() => {}); }; document.addEventListener("visibilitychange", visible); window.addEventListener("online",visible);
+    return () => { alive = false; clearTimeout(timeout); document.removeEventListener("visibilitychange", visible); window.removeEventListener("online",visible); };
   }, [refresh]);
   return { state, error, refresh, apply };
 }
