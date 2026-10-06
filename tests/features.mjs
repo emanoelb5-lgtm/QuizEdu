@@ -71,5 +71,17 @@ try{
  await host.request(`/api/quizzes/${quiz.id}`,{},200,"DELETE");eq((await secondDevice.request(`/api/reports/${code}`)).questions[0].question.image,image.url,"Deleting the source quiz preserves the report and its images.");await host.request(`/api/questions/${bank.id}`,{},200,"DELETE");eq((await host.request("/api/questions")).questions.length,0);
  const csrf=await host.raw("/api/account/link","{}","POST",{"content-type":"application/json",Origin:"https://other.test"});eq(csrf.status,403);await csrf.arrayBuffer();await anonymous.request("/api/account/link",{},401);
  const reportPage=await host.request(`/relatorio/${code}`);ok(reportPage.includes("QuizEdu"));const share2=await host.request(`/api/quizzes/${learning.id}/share`,{});const sharePage=await anonymous.request(`/compartilhar/${share2.token}`);ok(sharePage.includes("QuizEdu"));
+ // The editor may persist an unmarked answer only as a draft.
+ const preparing=makeQuiz("Pergunta em preparação");preparing.questions[0].correct=-1;preparing.questions[0].kind="scenario";
+ await host.request("/api/quizzes",preparing,400);await host.request("/api/questions",{question:preparing.questions[0]},400);
+ const unmarkedDraft=await host.request("/api/drafts",{quiz:preparing,revision:0,writeId:crypto.randomUUID()});eq(unmarkedDraft.draft.revision,1);
+ const recovered=(await host.request("/api/dashboard")).drafts.find(d=>d.id===preparing.id);eq(recovered.quiz.questions[0].correct,-1);eq(recovered.quiz.questions[0].kind,"scenario");
+ await host.request("/api/quizzes",{...preparing,questions:[{...preparing.questions[0],correct:0}],draftRevision:1});ok(!(await host.request("/api/dashboard")).drafts.some(d=>d.id===preparing.id));
+ await host.request("/api/quizzes",{...makeQuiz(),questions:[{...question(),kind:"essay"}]},400);
+ await host.request("/api/quizzes",{...makeQuiz(),questions:[{...question(),kind:"image"}]},400);
+ const photographed={...makeQuiz("Identificar a cobertura do solo"),questions:[{...question(),kind:"image",image:image.url,imageAlt:"Solo coberto com folhas"}]};eq((await host.request("/api/quizzes",photographed)).quiz.questions[0].kind,"image");
+ const trueFalse={...makeQuiz("Afirmações da aula"),mode:"accuracy",questions:[{...question("A cobertura vegetal protege o solo."),kind:"true_false",options:["Verdadeiro","Falso"],correct:0}]};await host.request("/api/quizzes",trueFalse);
+ await host.request("/api/quizzes",{...trueFalse,id:crypto.randomUUID(),questions:[{...trueFalse.questions[0],options:["Outras","Alternativas"]}]},400);
+ const vfRoom=await host.request("/api/rooms",{quizId:trueFalse.id},201);const vfStudent=new Client();await vfStudent.request(`/api/rooms/${vfRoom.code}/join`,{name:"Aluno do modelo",avatar:"🐝"},201);await host.request(`/api/rooms/${vfRoom.code}/control`,{action:"start",status:"lobby",index:-1});await database.prepare("UPDATE rooms SET starts_at = ?, ends_at = ? WHERE code = ?").bind(Date.now()-500,Date.now()+9000,vfRoom.code).run();await vfStudent.request(`/api/rooms/${vfRoom.code}/answer`,{index:0,option:0});const vfResults=await host.request(`/api/rooms/${vfRoom.code}`);eq(vfResults.status,"results");eq(vfResults.players[0].score,1000);eq(vfResults.question.options,["Verdadeiro","Falso"]);
  console.log(`✓ QuizEdu 2: permanent accounts, migration, draft concurrency, images, question bank, sharing, private reports, CSV, presence and both game modes. ${checks} checks passed.`);
 }finally{await mf.dispose();}

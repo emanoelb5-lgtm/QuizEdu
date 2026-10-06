@@ -1,25 +1,41 @@
 "use client";
-import { Check, Clock3, Plus } from "lucide-react";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { DURATIONS, LETTERS, Question } from "@/lib/quiz";
-import { ImageField } from "./learning-tools";
-export type QuestionPatch = Partial<Question> | ((current:Question)=>Partial<Question>);
-export function QuestionFields({q,onChange,untimed=false}:{q:Question;onChange:(patch:QuestionPatch)=>void;untimed?:boolean}) {
+import {useState} from "react";
+import {Check,Clock3,ImagePlus,Plus} from "lucide-react";
+import {RadioGroup,RadioGroupItem} from "@/components/ui/radio-group";
+import {Select,SelectContent,SelectItem,SelectTrigger,SelectValue} from "@/components/ui/select";
+import {AlertDialog,AlertDialogAction,AlertDialogCancel,AlertDialogContent,AlertDialogDescription,AlertDialogFooter,AlertDialogTitle} from "@/components/ui/alert-dialog";
+import {applyQuestionTemplate,DURATIONS,LETTERS,QUESTION_TEMPLATES,Question,QuestionIssue,QuestionKind,questionIssues} from "@/lib/quiz";
+import {ImageField} from "./learning-tools";
+
+export type QuestionPatch=Partial<Question>|((current:Question)=>Partial<Question>);
+export function QuestionFields({q,onChange,untimed=false,showErrors=false,onUploadChange}:{q:Question;onChange:(patch:QuestionPatch)=>void;untimed?:boolean;showErrors?:boolean;onUploadChange?:(busy:boolean)=>void}) {
+  const [mediaBusy,setMediaBusy]=useState(0);const [touched,setTouched]=useState<string[]>([]);const [pendingKind,setPendingKind]=useState<QuestionKind|null>(null);
+  function uploadChanged(busy:boolean){setMediaBusy(n=>Math.max(0,n+(busy?1:-1)));onUploadChange?.(busy);}
+  const issues=questionIssues(q);const kind=q.kind||"multiple";const template=QUESTION_TEMPLATES.find(t=>t.kind===kind)||QUESTION_TEMPLATES[0];
+  const touch=(field:string)=>setTouched(old=>old.includes(field)?old:[...old,field]);
+  function matching(field:QuestionIssue["field"],option?:number){return issues.filter(i=>i.field===field&&(option===undefined||i.option===option)&&(i.severity==="warning"||showErrors||touched.includes(option===undefined?field:`${field}-${option}`)));}
+  function messages(field:QuestionIssue["field"],option?:number){return <div id={`help-${field}-${q.id}-${option??"all"}`} className="field-messages">{matching(field,option).map((issue,i)=><p className={issue.severity==="error"?"field-error":"field-warning"} key={i}>{issue.message}</p>)}</div>;}
+  function changeKind(next:QuestionKind){if(next===kind)return;const switches=(next==="true_false")!==(kind==="true_false");if(switches&&(q.correct>=0||q.optionImages?.some(Boolean)||q.options.some(o=>o.trim()&&!["Verdadeiro","Falso"].includes(o))))setPendingKind(next);else onChange(applyQuestionTemplate(q,next));}
   return <>
-    <label htmlFor={`text-${q.id}`}>O que você quer perguntar?</label><textarea id={`text-${q.id}`} rows={3} maxLength={400} value={q.text} onChange={e=>onChange({text:e.target.value})} placeholder="Escreva uma pergunta clara para sua turma…"/><div className="field-counter">{q.text.length}/400</div>
-    <ImageField value={q.image} alt={q.imageAlt} onChange={image=>onChange({image})} onAltChange={imageAlt=>onChange({imageAlt})}/>
-    <div className="alternatives-heading"><label>Alternativas</label><span><Check size={14}/>Marque a correta</span></div>
-    <RadioGroup value={String(q.correct)} onValueChange={value=>onChange({correct:Number(value)})} className="alternatives">
+    <div className="question-template"><label>Modelo da pergunta</label><RadioGroup disabled={mediaBusy>0} className="template-options" value={kind} onValueChange={v=>changeKind(v as QuestionKind)} aria-label="Modelo da pergunta">{QUESTION_TEMPLATES.map(t=><label key={t.kind} className={kind===t.kind?"template-selected":""}><RadioGroupItem value={t.kind}/><span>{t.label}</span></label>)}</RadioGroup><p className="field-help">{template.description}</p></div>
+    <label htmlFor={`text-${q.id}`}>{kind==="true_false"?"Qual afirmação a turma vai avaliar?":kind==="scenario"?"Qual situação você quer apresentar?":"O que você quer perguntar?"}</label>
+    <textarea id={`text-${q.id}`} rows={4} maxLength={400} value={q.text} onChange={e=>onChange({text:e.target.value})} onBlur={()=>touch("text")} placeholder={template.placeholder} aria-invalid={matching("text").some(i=>i.severity==="error")} aria-describedby={`help-text-${q.id}-all`}/><div className="field-counter">{q.text.length}/400</div>{messages("text")}
+    {kind==="image"&&<div className="image-question-field"><ImageField onBusyChange={uploadChanged} value={q.image} alt={q.imageAlt} onChange={image=>onChange({image})} onAltChange={imageAlt=>onChange({imageAlt})}/>{messages("image")}{messages("imageAlt")}</div>}
+    <div className="alternatives-heading"><label>{kind==="true_false"?"Esta afirmação é…":"Alternativas"}</label><span><Check size={14}/>{q.correct>=0?`Correta: ${LETTERS[q.correct]}`:"Escolha a correta"}</span></div>
+    <RadioGroup value={q.correct<0?"":String(q.correct)} onValueChange={value=>{touch("correct");onChange({correct:Number(value)});}} className="alternatives" aria-label="Escolha a resposta correta" aria-describedby={`help-correct-${q.id}-all`} aria-invalid={matching("correct").some(i=>i.severity==="error")}>
       {q.options.map((option,i)=><div className={`alternative-with-image option-${i}`} key={i}>
-        <div className={`alternative-field option-${i} ${q.correct===i?"is-correct":""}`}><span className="letter">{LETTERS[i]}</span><input aria-label={`Alternativa ${LETTERS[i]}`} maxLength={180} value={option} onChange={e=>{const value=e.target.value;onChange(current=>({options:current.options.map((o,at)=>at===i?value:o)}));}} placeholder={`Alternativa ${LETTERS[i]}`}/><RadioGroupItem value={String(i)} aria-label={`Marcar alternativa ${LETTERS[i]} como correta`} className="correct-radio"/>
-          {q.options.length>2&&<button className="remove-option" aria-label={`Remover alternativa ${LETTERS[i]}`} onClick={()=>onChange(current=>({options:current.options.filter((_,at)=>at!==i),optionImages:current.optionImages?.filter((_,at)=>at!==i),correct:current.correct===i?0:current.correct>i?current.correct-1:current.correct}))}>×</button>}
-        </div>
-        <ImageField value={q.optionImages?.[i]} label={`Foto na alternativa ${LETTERS[i]}`} onChange={url=>onChange(current=>({optionImages:current.options.map((_,at)=>at===i?url:current.optionImages?.[at]||"")}))}/>
+        <div className={`alternative-field option-${i} ${q.correct===i?"is-correct":""}`} onClick={()=>{if(kind==="true_false"){touch("correct");onChange({correct:i});}}}><span className="letter">{LETTERS[i]}</span><input id={`option-${q.id}-${i}`} aria-label={`Alternativa ${LETTERS[i]}`} maxLength={180} value={option} readOnly={kind==="true_false"} onChange={e=>{const value=e.target.value;onChange(current=>({options:current.options.map((o,at)=>at===i?value:o)}));}} onBlur={()=>touch(`options-${i}`)} placeholder={`Alternativa ${LETTERS[i]}`} aria-invalid={matching("options",i).some(issue=>issue.severity==="error")} aria-describedby={`help-options-${q.id}-${i}`}/><RadioGroupItem value={String(i)} aria-label={`Marcar alternativa ${LETTERS[i]} como correta`} className="correct-radio" id={`correct-${q.id}-${i}`}/>
+          {kind!=="true_false"&&q.options.length>2&&<button className="remove-option" disabled={mediaBusy>0} aria-label={`Remover alternativa ${LETTERS[i]}`} onClick={()=>onChange(current=>({options:current.options.filter((_,at)=>at!==i),optionImages:current.optionImages?.filter((_,at)=>at!==i),correct:current.correct===i?-1:current.correct>i?current.correct-1:current.correct}))}>×</button>}
+        </div>{messages("options",i)}
+        <details className="option-media" open={!!q.optionImages?.[i]}><summary><ImagePlus size={14}/>{q.optionImages?.[i]?"Imagem desta alternativa":"Adicionar imagem"}</summary><ImageField onBusyChange={uploadChanged} value={q.optionImages?.[i]} label={`Foto na alternativa ${LETTERS[i]}`} onChange={url=>onChange(current=>({optionImages:current.options.map((_,at)=>at===i?url:current.optionImages?.[at]||"")}))}/></details>
       </div>)}
-    </RadioGroup>
-    {q.options.length<4&&<button className="text-button" onClick={()=>onChange(current=>({options:[...current.options,""],...(current.optionImages?{optionImages:[...current.optionImages,""]}:{})}))}><Plus size={15}/>Adicionar alternativa</button>}
-    <div className="question-settings"><div><label><Clock3 size={17}/>Tempo para responder</label>{untimed?<p className="field-help">Tempo livre. A rodada termina quando todos respondem ou quando você a encerra.</p>:<Select value={String(q.seconds)} onValueChange={value=>onChange({seconds:Number(value)})}><SelectTrigger className="duration-select" aria-label="Tempo para responder"><SelectValue/></SelectTrigger><SelectContent>{DURATIONS.map(s=><SelectItem key={s} value={String(s)}>{s} segundos</SelectItem>)}</SelectContent></Select>}</div></div>
-    <label htmlFor={`explanation-${q.id}`}>Explicação após a rodada <span className="optional">(opcional)</span></label><textarea id={`explanation-${q.id}`} rows={2} maxLength={500} value={q.explanation} onChange={e=>onChange({explanation:e.target.value})} placeholder="Explique por que a resposta está correta."/>
+    </RadioGroup>{messages("correct")}
+    {kind!=="true_false"&&q.options.length<4&&<button className="text-button" onClick={()=>onChange(current=>({options:[...current.options,""],...(current.optionImages?{optionImages:[...current.optionImages,""]}:{})}))}><Plus size={15}/>Adicionar alternativa</button>}
+    <details className="question-extras"><summary><span>Mais opções</span><small>{untimed?"Tempo livre":`${q.seconds}s`}{q.explanation?" · com explicação":" · tempo, imagem e explicação"}</small></summary><div className="question-extras-body">
+      {kind!=="image"&&<><ImageField onBusyChange={uploadChanged} value={q.image} alt={q.imageAlt} onChange={image=>onChange({image})} onAltChange={imageAlt=>onChange({imageAlt})}/>{messages("image")}{messages("imageAlt")}</>}
+      <div className="question-settings"><div><label><Clock3 size={17}/>Tempo para responder</label>{untimed?<p className="field-help">Tempo livre. A rodada termina quando todos respondem ou quando você a encerra.</p>:<Select value={String(q.seconds)} onValueChange={value=>onChange({seconds:Number(value)})}><SelectTrigger className="duration-select" aria-label="Tempo para responder"><SelectValue/></SelectTrigger><SelectContent>{DURATIONS.map(s=><SelectItem key={s} value={String(s)}>{s} segundos</SelectItem>)}</SelectContent></Select>}</div></div>{messages("seconds")}
+      <label htmlFor={`explanation-${q.id}`}>Explicação após a rodada <span className="optional">(opcional)</span></label><textarea id={`explanation-${q.id}`} rows={3} maxLength={500} value={q.explanation} onChange={e=>onChange({explanation:e.target.value})} onBlur={()=>touch("explanation")} placeholder="Explique por que a resposta está correta."/><div className="field-counter">{q.explanation.length}/500</div>{messages("explanation")}
+    </div></details>
+    <AlertDialog open={!!pendingKind} onOpenChange={open=>{if(!open)setPendingKind(null);}}><AlertDialogContent className="q-dialog"><AlertDialogTitle>Trocar o modelo desta pergunta?</AlertDialogTitle><AlertDialogDescription>O enunciado, a imagem da pergunta e a explicação continuam. As alternativas e suas imagens serão substituídas, e você precisará marcar a resposta correta novamente.</AlertDialogDescription><AlertDialogFooter><AlertDialogCancel>Manter o modelo</AlertDialogCancel><AlertDialogAction onClick={()=>{if(pendingKind)onChange(applyQuestionTemplate(q,pendingKind));setPendingKind(null);}}>Trocar modelo</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
   </>;
 }

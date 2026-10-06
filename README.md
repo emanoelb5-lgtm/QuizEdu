@@ -8,8 +8,8 @@ Site de quiz ao vivo para educadores, em português, com uma tela para o profess
 
 1. Use **Continuar com ChatGPT** para guardar suas atividades em uma conta permanente, acessível em outros aparelhos. Também é possível começar com um nome e um acesso temporário. Os alunos não precisam de conta.
 2. Clique em **Criar quiz**, dê um título e, se quiser, informe a disciplina e o assunto.
-3. Escreva as perguntas, preencha de duas a quatro alternativas e marque a correta. Você pode inserir imagens, explicações e questões do seu banco.
-4. Escolha **Competição** (acerto e rapidez) ou **Aprendizagem** (pontuação apenas por acerto). No segundo modo, também é possível responder sem cronômetro.
+3. Escolha um modelo: **Múltipla escolha**, **Verdadeiro ou falso**, **Identificar uma imagem** ou **Situação prática**. Escreva o enunciado, preencha as alternativas e marque a correta. Nenhuma resposta vem marcada em uma pergunta nova.
+4. Abra **Configurações da atividade** para escolher **Competição** (acerto e rapidez) ou **Aprendizagem** (pontuação apenas por acerto). No segundo modo, também é possível responder sem cronômetro.
 5. O rascunho é salvo automaticamente. Use **Salvar quiz** para concluir a atividade e **Abrir sala** para jogar.
 6. Projete a tela da sala. Os alunos leem o QR code ou digitam o código de seis números na página inicial, escolhem nome e avatar e entram.
 7. Aguarde a turma e clique em **Iniciar quiz**. A pergunta aparece no telão e nos celulares.
@@ -17,6 +17,18 @@ Site de quiz ao vivo para educadores, em português, com uma tela para o profess
 9. Ao final, o primeiro e o segundo lugares recebem destaque. Abra **Ver relatório da aula** ou a aba **Minhas aulas** para consultar os resultados, baixar CSV ou imprimir/salvar PDF.
 
 O exemplo **Brasil e natureza** contém cinco perguntas que podem ser adaptadas. O editor permite ordenar, duplicar e excluir perguntas, exportar JSON e importar uma cópia exportada.
+
+## Preparar perguntas com menos trabalho
+
+- **Adicionar em lote:** cole uma lista de perguntas com alternativas e gabarito, ou importe CSV, Excel (.xlsx) e texto (.txt). Confira a seleção antes de adicionar. Os arquivos são lidos no aparelho; as perguntas selecionadas passam a fazer parte do rascunho.
+- **Planilha:** baixe o modelo CSV no próprio editor e abra-o no Excel, LibreOffice ou Google Planilhas. Cabeçalhos: `Pergunta`, `A`, `B`, `C`, `D`, `Correta`, `Tempo`, `Explicação`, `Modelo`. A correta pode ser A–D ou 1–4. Campos sem gabarito ficam como rascunho para completar. No Excel, use a primeira aba. Limites de leitura: 3 MB para XLSX, 512 KB para CSV/TXT e até 100 perguntas por importação; selecione apenas as que cabem no limite de 50 do quiz.
+- **Texto colado:** use perguntas numeradas, alternativas `A)`, `B)` etc. e `Resposta: A`. Para afirmações, use `Resposta: Verdadeiro` ou `Resposta: Falso`. Também são aceitos gabaritos coletivos no formato `Gabarito: 1-A; 2-B`. O editor mostra ambiguidades e campos pendentes; não inventa respostas.
+- **Modelos:** são formas de preparar perguntas com uma única resposta correta. Verdadeiro ou falso oferece as duas alternativas prontas. Identificar uma imagem exige a foto antes de salvar o quiz. Situação prática ajuda a escrever um caso com alternativas de decisão. Enunciado, imagem e explicação são preservados ao mudar de modelo; mudanças que substituem alternativas pedem confirmação.
+- **Concluir e próxima:** verifica a pergunta atual e avança. Ao chegar à última, acrescenta outra com o mesmo modelo, tempo e quantidade de alternativas. A edição no celular inclui ações fixas na parte inferior.
+- **Ajustar tempos:** aplique uma duração a todas as perguntas ou só às selecionadas. A mudança é guardada no rascunho.
+- **Revisar quiz:** mostra campos incompletos, alternativas repetidas, gabaritos pendentes e avisos de leitura/descrição de imagens. Os avisos de leitura não bloqueiam o jogo; os campos obrigatórios precisam estar completos.
+- **Testar como aluno:** abre uma simulação da pergunta, com escolha de resposta, cronômetro, resultado e visão do telão. Usa os mesmos componentes de enunciado e alternativas da sala. Não cria participantes, aulas nem respostas no histórico.
+- Imagens e explicações ficam em **Mais opções** quando são opcionais. O envio de imagens precisa terminar antes de salvar ou abrir a sala.
 
 ## Biblioteca e recuperação
 
@@ -88,7 +100,7 @@ pnpm build
 pnpm test
 ```
 
-Os dois testes de integração executam o Worker compilado contra D1 e R2 descartáveis. A suíte da versão 2 contém **298 verificações**: regras de pontuação, privacidade das respostas, capacidade simultânea de 100 alunos, reconexão, propriedade dos dados, validação de imagens, compartilhamento, relatórios/CSV, migração de conta e concorrência de rascunhos e quizzes. O fluxo da identidade é simulado apenas no ambiente de teste; o login real é fornecido pela hospedagem.
+Os testes de integração executam o Worker compilado contra D1 e R2 descartáveis. A suíte também verifica os modelos e os importadores de texto, CSV e Excel: regras de pontuação, privacidade das respostas, capacidade simultânea de 100 alunos, reconexão, propriedade dos dados, validação de imagens, compartilhamento, relatórios/CSV, migração de conta, concorrência de rascunhos e quizzes, gabaritos ambíguos e preservação das alternativas importadas. O fluxo da identidade é simulado apenas no ambiente de teste; o login real é fornecido pela hospedagem.
 
 ## Hospedagem e custos
 

@@ -6,12 +6,12 @@ import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { api } from "./shared";
 
-export function ImageField({value,onChange,label="Imagem da pergunta",alt,onAltChange}:{value?:string;onChange:(url:string)=>void;label?:string;alt?:string;onAltChange?:(text:string)=>void}) {
+export function ImageField({value,onChange,label="Imagem da pergunta",alt,onAltChange,onBusyChange}:{value?:string;onChange:(url:string)=>void;label?:string;alt?:string;onAltChange?:(text:string)=>void;onBusyChange?:(busy:boolean)=>void}) {
   const input=useRef<HTMLInputElement>(null); const [busy,setBusy]=useState(false);
   async function upload(file:File) {
     if(!["image/jpeg","image/png","image/webp"].includes(file.type)){toast.error("Escolha uma foto JPEG, PNG ou WebP.");return;}
     if(file.size>12*1024*1024){toast.error("Escolha uma foto de até 12 MB. Ela será reduzida antes do envio.");return;}
-    setBusy(true); let objectUrl="";
+    setBusy(true); onBusyChange?.(true); let objectUrl="";
     try {
       objectUrl=URL.createObjectURL(file); const img=new Image(); img.src=objectUrl; await img.decode();
       const scale=Math.min(1,1280/Math.max(img.naturalWidth,img.naturalHeight)); const canvas=document.createElement("canvas"); canvas.width=Math.max(1,Math.round(img.naturalWidth*scale));canvas.height=Math.max(1,Math.round(img.naturalHeight*scale));
@@ -20,10 +20,10 @@ export function ImageField({value,onChange,label="Imagem da pergunta",alt,onAltC
       const controller=new AbortController(); const timeout=setTimeout(()=>controller.abort(),25000); let response:Response;
       try {response=await fetch("/api/media",{method:"POST",credentials:"same-origin",headers:{"Content-Type":"image/jpeg"},body:blob,signal:controller.signal});}finally{clearTimeout(timeout);}
       const data=await response.json() as {error?:string;url:string}; if(!response.ok)throw new Error(data.error||"Não foi possível enviar agora."); onChange(data.url);toast.success("Imagem adicionada.");
-    }catch(e){toast.error((e as Error).message||"O envio foi interrompido. Escolha a imagem novamente.");}finally{if(objectUrl)URL.revokeObjectURL(objectUrl);setBusy(false);if(input.current)input.current.value="";}
+    }catch(e){toast.error((e as Error).message||"O envio foi interrompido. Escolha a imagem novamente.");}finally{if(objectUrl)URL.revokeObjectURL(objectUrl);setBusy(false);onBusyChange?.(false);if(input.current)input.current.value="";}
   }
   return <div className={`image-field ${onAltChange?"image-field-main":"image-field-option"}`}>
-    {value&&<div className="image-field-preview"><img src={value} alt={alt||label} loading="lazy"/><button type="button" aria-label={`Remover ${label.toLowerCase()}`} onClick={()=>onChange("")}><X size={16}/></button></div>}
+    {value&&<div className="image-field-preview"><img src={value} alt={alt||label} loading="lazy"/><button type="button" disabled={busy} aria-label={`Remover ${label.toLowerCase()}`} onClick={()=>onChange("")}><X size={16}/></button></div>}
     <button type="button" className="btn btn-outline" disabled={busy} onClick={()=>input.current?.click()}>{busy?<Loader2 size={17} className="spin"/>:<ImagePlus size={17}/>} {value?"Trocar imagem":label}</button>
     <input ref={input} type="file" accept="image/jpeg,image/png,image/webp" hidden onChange={e=>{const file=e.target.files?.[0];if(file)void upload(file);}}/>
     {value&&onAltChange&&<label className="image-description">Descrição da imagem<input maxLength={180} value={alt||""} onChange={e=>onAltChange(e.target.value)} placeholder="Ex.: folha de mandioca com manchas amarelas"/></label>}
