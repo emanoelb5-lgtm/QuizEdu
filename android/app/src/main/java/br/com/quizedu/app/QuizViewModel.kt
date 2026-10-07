@@ -39,6 +39,7 @@ class QuizViewModel(application: Application, val repository: QuizRepository) : 
     var pendingPair by mutableStateOf(repository.preferences.getString("pair_id", "") ?: ""); private set
     var pairExpires by mutableStateOf(repository.preferences.getLong("pair_expires", 0)); private set
     private var lastHeartbeat = 0L
+    private var lastFullRoom = 0L
     val slide: JSONObject? get() = editor?.deck?.arr("slides")?.optJSONObject(slideIndex)
 
     init {
@@ -237,18 +238,20 @@ class QuizViewModel(application: Application, val repository: QuizRepository) : 
         busy = true; notify("Imagem adicionada. Salve a aula para sincronizar.")
     }
     fun openRoom(code: String, asTeacher: Boolean) {
-        currentCode = code; roomTeacher = asTeacher; room = null; screen = AppScreen.Room; roomError = null; connected = true; lastHeartbeat = 0
+        currentCode = code; roomTeacher = asTeacher; room = null; screen = AppScreen.Room; roomError = null; connected = true; lastHeartbeat = 0; lastFullRoom = 0
         repository.preferences.edit().putString(if (asTeacher) "teacher_room" else "student_room", code).apply()
     }
-    suspend fun refreshRoom(): Boolean {
+    suspend fun refreshRoom(force: Boolean = false): Boolean {
         val code = currentCode; if (code.isBlank() || screen != AppScreen.Room) return true
         val client = if (roomTeacher) repository.teacherApi else repository.studentApi
         try {
             val previous = room
-            val query = previous?.version?.takeIf { it.isNotEmpty() }?.let { "?since=${Uri.encode(it)}" } ?: ""
+            val full = force || SystemClock.elapsedRealtime() - lastFullRoom > 20000
+            val query = if (full) "" else previous?.version?.takeIf { it.isNotEmpty() }?.let { "?since=${Uri.encode(it)}" } ?: ""
             val raw = client.request("/api/rooms/$code$query")
             if (code != currentCode || screen != AppScreen.Room) return true
             room = if (raw.optBoolean("pulse") && previous != null) previous.pulse(raw) else RoomSnapshot(raw)
+            if (!raw.optBoolean("pulse")) lastFullRoom = SystemClock.elapsedRealtime()
             receivedAt = SystemClock.elapsedRealtime(); connected = true; roomError = null
             if (roomTeacher && room?.isHost != true) roomError = "Esta sala pertence a outra conta. Vincule a conta usada no computador."
             if (room?.status == "closed") repository.preferences.edit().remove(if (roomTeacher) "teacher_room" else "student_room").apply()
@@ -272,7 +275,7 @@ class QuizViewModel(application: Application, val repository: QuizRepository) : 
     fun answer(option: Int) = perform {
         val snapshot = room ?: return@perform
         try { repository.studentApi.request("/api/rooms/${snapshot.code}/answer", JSONObject().put("index", snapshot.index).put("option", option)) }
-        finally { refreshRoom() }
+        finally { refreshRoom(force = true) }
     }
     fun control(action: String, target: Int? = null, playerId: String? = null) = perform {
         val snapshot = room ?: return@perform
@@ -284,7 +287,11 @@ class QuizViewModel(application: Application, val repository: QuizRepository) : 
             val result = repository.teacherApi.request("/api/rooms/${snapshot.code}/control", command)
             if (result.str("code") == currentCode) { room = RoomSnapshot(result); receivedAt = SystemClock.elapsedRealtime() }
             else refreshRoom()
-        } catch (e: ApiError) { if (e.status == 409) { refreshRoom(); throw IOException("A apresentação mudou em outra tela. O controle foi atualizado.") }; throw e }
+        } catch (e: ApiError) {
+            if (e.status == 409) { refreshRoom(force = true); throw IOException("A apresentação mudou em outra tela. O controle foi atualizado.") }
+            if (e.status in listOf(401, 403)) { roomError = e.message; connected = false }
+            throw e
+        }
     }
     fun showDevices() = perform { devices = repository.teacherApi.request("/api/native/devices").arr("devices").objects(); screen = AppScreen.Devices }
     fun revokeDevice(id: String) = perform {

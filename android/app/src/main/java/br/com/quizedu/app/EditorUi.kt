@@ -110,7 +110,7 @@ private val layouts = listOf("cover" to "Capa", "title" to "Título e texto", "c
                     }
                 }
                 if (slide.arr("elements").length() == 0) Text("Adicione texto, imagens, formas, tabelas, gráficos ou vídeos.", color = EduMuted)
-            } } }
+            } }
         }
         item { EditorCard {
             Text("Slide e anotações", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)

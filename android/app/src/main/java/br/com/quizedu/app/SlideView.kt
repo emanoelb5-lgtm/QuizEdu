@@ -97,7 +97,7 @@ fun annotatedRichText(doc: JSONObject?, scale: Float, baseSize: Float): Annotate
 }
 
 @Composable fun SlideView(slide: JSONObject, modifier: Modifier = Modifier, step: Int = Int.MAX_VALUE,
-    selected: String? = null, editable: Boolean = false, onSelect: (String?) -> Unit = {}, onDrag: (String, Float, Float) -> Unit = {}) {
+    selected: String? = null, editable: Boolean = false, onSelect: (String?) -> Unit = {}, onDrag: (String, Float, Float) -> Unit = { _, _, _ -> }) {
     val density = LocalDensity.current
     val background = slide.optJSONObject("background") ?: JSONObject()
     BoxWithConstraints(modifier.aspectRatio(16f / 9f).clip(RoundedCornerShape(10.dp)).background(hexColor(background.str("color", "#ffffff")))) {
@@ -122,7 +122,7 @@ fun annotatedRichText(doc: JSONObject?, scale: Float, baseSize: Float): Annotate
                     options.forEachIndexed { column, option -> Box(Modifier.weight(1f).background(Color(0xFFEAF0FF), RoundedCornerShape((8 * scale).dp)).padding((16 * scale).dp)) {
                         Text("${('A'.code + row * 2 + column).toChar()}  ${option.ifBlank { "Alternativa" }}", fontSize = (22 * textScale).sp, color = EduNavy, maxLines = 2)
                     }
-                } }
+                } } }
             }
         }
         slide.arr("elements").objects().filter { !it.optBoolean("hidden") && (editable || it.optInt("build") <= step) }.forEach { e ->

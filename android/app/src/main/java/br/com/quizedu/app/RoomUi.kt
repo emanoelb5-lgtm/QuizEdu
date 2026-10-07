@@ -37,7 +37,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
 @Composable fun RoomScreen(vm: QuizViewModel) {
     val state = vm.room
     var closeConfirm by remember { mutableStateOf(false) }
-    if (state == null || (vm.roomTeacher && !state.isHost)) {
+    if (state == null || (vm.roomTeacher && (!state.isHost || vm.roomError != null))) {
         Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.spacedBy(18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Spacer(Modifier.height(25.dp))
             if (vm.roomError == null) CircularProgressIndicator()
@@ -51,7 +51,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
         Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) { Heading("Esta sala foi encerrada.", "Peça ao professor o código da próxima aula."); Button(onClick = vm::leaveRoom) { Text("Entrar em outra sala") } }
         return
     }
-    if (!vm.roomTeacher && state.me == null) { JoinScreen(vm, state); return }
+    if (!vm.roomTeacher && state.me == null && state.status != "finished") { JoinScreen(vm, state); return }
     val context = LocalContext.current
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
         item { Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -100,7 +100,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
         if (vm.roomTeacher && state.status != "finished") state.presentation?.arr("outline")?.objects()?.let { outline ->
             item { Text("Roteiro da aula", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
             itemsIndexed(outline, key = { _, s -> "outline-${s.str("id")}" }) { index, s ->
-                OutlinedButton(onClick = { vm.control("goto", target = index) }, enabled = !vm.busy && vm.connected, modifier = Modifier.fillMaxWidth()) {
+                OutlinedButton(onClick = { vm.control("goto", target = index) }, enabled = !vm.busy && vm.connected && state.status in listOf("slide", "results"), modifier = Modifier.fillMaxWidth()) {
                     Icon(if (s.str("kind") == "question") Icons.Default.Quiz else Icons.Default.AutoAwesomeMotion, null)
                     Spacer(Modifier.width(9.dp)); Text("${index + 1}. ${s.str("title")}", modifier = Modifier.weight(1f), maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
@@ -122,7 +122,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
             FilledTonalButton(onClick = { avatar = item }, colors = ButtonDefaults.filledTonalButtonColors(containerColor = if (avatar == item) Color(0xFFDDE4FF) else Color.White), modifier = Modifier.weight(1f).height(63.dp), contentPadding = PaddingValues(4.dp)) { Text(item, fontSize = 28.sp) }
         } } } } }
         item { Button(onClick = { vm.join(name.trim(), avatar) }, enabled = !vm.busy && vm.connected && name.trim().length >= 2, modifier = Modifier.fillMaxWidth().height(54.dp)) { Text("Entrar e participar", fontWeight = FontWeight.Bold) } }
-        if (state.status != "lobby") item { InfoCard("A aula já começou. Quem participou antes pode retomar com o mesmo aparelho. Novos participantes precisam aguardar outra sala.") }
+        if (state.status in listOf("question", "results")) item { InfoCard("A turma está respondendo. Quem já entrou pode retomar com o mesmo aparelho. Em uma aula com slides, novos participantes podem entrar quando o professor passar para um slide de conteúdo.") }
         item { TextButton(onClick = vm::leaveRoom) { Text("Usar outro código") } }
     }
 }
@@ -151,7 +151,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
                     Text(if (state.status == "question") "Revelar resultado" else "Próximo"); Spacer(Modifier.width(5.dp)); Icon(Icons.Default.SkipNext, null)
                 }
             }
-            if (state.presentation != null) OutlinedButton(onClick = { vm.control("blackout") }, enabled = enabled, modifier = Modifier.fillMaxWidth()) { Icon(if (state.presentation!!.optBoolean("blackout")) Icons.Default.Visibility else Icons.Default.VisibilityOff, null); Spacer(Modifier.width(8.dp)); Text(if (state.presentation!!.optBoolean("blackout")) "Mostrar apresentação" else "Escurecer tela do computador") }
+            if (state.presentation != null) OutlinedButton(onClick = { vm.control("blackout") }, enabled = enabled && state.status in listOf("slide", "results"), modifier = Modifier.fillMaxWidth()) { Icon(if (state.presentation!!.optBoolean("blackout")) Icons.Default.Visibility else Icons.Default.VisibilityOff, null); Spacer(Modifier.width(8.dp)); Text(if (state.presentation!!.optBoolean("blackout")) "Mostrar apresentação" else "Escurecer tela do computador") }
         }
         if (state.status != "finished") TextButton(onClick = onClose, enabled = enabled) { Text("Encerrar sala") }
     } }
