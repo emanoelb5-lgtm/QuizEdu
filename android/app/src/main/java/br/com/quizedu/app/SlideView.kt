@@ -156,7 +156,7 @@ fun annotatedRichText(doc: JSONObject?, scale: Float, baseSize: Float): Annotate
             alignment = BiasAlignment((e.optDouble("positionX", 50.0).toFloat() - 50f) / 50f, (e.optDouble("positionY", 50.0).toFloat() - 50f) / 50f))
         else Box(Modifier.fillMaxSize().background(Color(0xFFEAF0FF)), contentAlignment = Alignment.Center) { Icon(Icons.Default.Image, "Imagem ainda não adicionada", tint = EduMuted, modifier = Modifier.size((70 * scale).dp)) }
         "shape" -> Canvas(Modifier.fillMaxSize()) {
-            val fill = hexColor(e.str("fill"), Color.Transparent)
+            val fill = hexColor(e.str("fill"), Color.Transparent).copy(alpha = e.optDouble("fillOpacity", 100.0).toFloat().coerceIn(0f, 100f) / 100f)
             val stroke = hexColor(e.str("stroke"), Color.Transparent)
             val thickness = e.optDouble("strokeWidth", 0.0).toFloat() * scale * density
             val line = Stroke(thickness.coerceAtLeast(.1f))

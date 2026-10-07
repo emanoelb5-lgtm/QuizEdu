@@ -213,7 +213,18 @@ private val layouts = listOf("cover" to "Capa", "title" to "Título e texto", "c
     val id = e.str("id")
     var expandedText by remember(id) { mutableStateOf(false) }
     if (expandedText) ExpandedTextEditor(e, onClose = { expandedText = false }, onSave = { doc -> vm.changeElement(id) { it.put("doc", doc) } }); val locked = e.optBoolean("locked")
-    fun update(change: (JSONObject) -> Unit) { vm.changeElement(id) { change(it); it } }
+    fun update(change: (JSONObject) -> Unit) { vm.changeElement(id) { obj ->
+        val previous = obj.copy(); change(obj)
+        if (obj.str("type") == "text") {
+            val attrs = JSONObject()
+            if (previous.str("color") != obj.str("color")) attrs.put("color", obj.str("color"))
+            if (previous.str("font") != obj.str("font")) attrs.put("fontFamily", obj.str("font"))
+            if (previous.optDouble("fontSize") != obj.optDouble("fontSize")) attrs.put("fontSize", "${obj.optDouble("fontSize")}px")
+            if (attrs.length() > 0) obj.put("doc", formatStyledText(obj.optJSONObject("doc"), 0, 0, "textStyle", attrs))
+            if (previous.str("align") != obj.str("align")) obj.optJSONObject("doc")?.arr("content")?.objects()?.forEach { p -> p.put("attrs", (p.optJSONObject("attrs") ?: JSONObject()).put("textAlign", obj.str("align"))) }
+        }
+        obj
+    } }
     Text("Editar ${when (e.str("type")) { "text" -> "texto"; "image" -> "imagem"; "shape" -> "forma"; "table" -> "tabela"; "chart" -> "gráfico"; else -> "vídeo" }}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
     if (locked) {
         InfoCard("Este objeto está bloqueado. Desbloqueie para editar ou mover.")
