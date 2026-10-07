@@ -1,0 +1,16 @@
+import fs from "node:fs";
+import path from "node:path";
+import {spawnSync} from "node:child_process";
+import {createHash} from "node:crypto";
+const apk="android/app/build/outputs/apk/release/app-release.apk";
+if (!fs.existsSync(apk)) throw new Error("Signed release APK missing.");
+const verifier=path.join(process.env.ANDROID_HOME||process.env.ANDROID_SDK_ROOT,"build-tools/35.0.0/apksigner");
+const verified=spawnSync(verifier,["verify","--verbose","--print-certs",apk],{encoding:"utf8"});
+if(verified.status!==0)throw new Error("APK signature verification failed.");
+const certificate=verified.stdout.match(/Signer #1 certificate SHA-256 digest:\s*([a-f0-9]+)/i)?.[1]?.toLowerCase();
+if(certificate!==process.env.QUIZEDU_CERT_SHA256)throw new Error("APK signed with an unexpected certificate.");
+fs.mkdirSync("release-assets",{recursive:true});
+const name="QuizEdu-Android-1.0.0.apk",data=fs.readFileSync(apk);
+fs.writeFileSync("release-assets/"+name,data);
+fs.writeFileSync("release-assets/SHA256SUMS.txt",createHash("sha256").update(data).digest("hex")+"  "+name+"\n");
+console.log("APK de distribuição verificado. "+Math.round(data.length/1024/1024)+" MB.");

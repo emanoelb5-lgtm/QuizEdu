@@ -27,6 +27,13 @@ export async function temporaryEducator(request: Request) {
   return /^[a-f0-9]{64}$/.test(token) ? db().prepare("SELECT id, name, expires_at, auth_id FROM educators WHERE secret_hash = ? AND expires_at > ? AND auth_id IS NULL").bind(await hash(token), Date.now()).first<Educator>() : null;
 }
 export async function educator(request: Request, required = true) {
+  const authorization = request.headers.get("Authorization");
+  if (authorization) {
+    const token = authorization.match(/^Bearer ([a-f0-9]{64})$/)?.[1];
+    const user = token ? await db().prepare("SELECT e.id,e.name,e.expires_at,e.auth_id FROM native_sessions n JOIN educators e ON e.id = n.owner WHERE n.secret_hash = ? AND n.approved_at IS NOT NULL AND n.expires_at > ? AND e.expires_at > ?").bind(await hash(token),Date.now(),Date.now()).first<Educator>() : null;
+    if (!user && required) throw new HttpError(401,"Vincule novamente sua conta no aplicativo.");
+    return user;
+  }
   const identity = platformIdentity(request);
   const permanent = identity ? await db().prepare("SELECT id, name, expires_at, auth_id FROM educators WHERE auth_id = ?").bind(identity.id).first<Educator>() : null;
   const user = permanent || await temporaryEducator(request);

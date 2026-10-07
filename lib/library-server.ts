@@ -18,7 +18,7 @@ export async function linkAccount(request: Request) {
   if (temporary && temporary.id !== permanent.id) {
     // A single D1 transaction preserves ownership of all the existing work.
     await db().batch([
-      ...["quizzes","rooms","drafts","question_bank","uploads","shares","presentations"].map(table => db().prepare(`UPDATE ${table} SET owner = ? WHERE owner = ?`).bind(permanent.id,temporary.id)),
+      ...["quizzes","rooms","drafts","question_bank","uploads","shares","presentations","native_sessions"].map(table => db().prepare(`UPDATE ${table} SET owner = ? WHERE owner = ?`).bind(permanent.id,temporary.id)),
       db().prepare("UPDATE educators SET expires_at = ?, secret_hash = ? WHERE id = ? AND auth_id IS NULL").bind(Date.now(),await hash(secret()),temporary.id)
     ]);
   }

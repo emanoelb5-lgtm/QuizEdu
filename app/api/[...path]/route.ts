@@ -2,10 +2,21 @@ import { answer, appManifest, body, controlRoom, createRoom, dashboard, deleteQu
 import { copySharedQuiz, deleteDraft, deleteQuestion, linkAccount, listQuestions, logout, readImage, reportCsv, reportData, saveDraft, saveQuestion, sharedQuiz, shareQuiz, unshareQuiz, uploadImage } from "@/lib/library-server";
 import { heartbeat } from "@/lib/server";
 import {deletePresentation,listPresentations,readPresentation,savePresentation} from "@/lib/presentation-server";
+import {approveNative,listNative,nativeInfo,nativeStatus,revokeNative,startNative} from "@/lib/native-server";
+import {androidSigning} from "@/lib/android-signing";
 export const dynamic = "force-dynamic";
 async function handle(request: Request) {
   try {
     const path = new URL(request.url).pathname.slice(5).split("/").filter(Boolean); const method = request.method;
+    if(method==="POST"&&path.join("/")==="android/signing")return await androidSigning(request);
+    if(path[0]==="native"){
+      if(method==="POST"&&path.join("/")==="native/start")return await startNative(request);
+      if(method==="POST"&&path.join("/")==="native/status")return await nativeStatus(request);
+      if(method==="POST"&&path.join("/")==="native/approve")return await approveNative(request);
+      if(method==="GET"&&path.join("/")==="native/devices")return await listNative(request);
+      if(method==="GET"&&path[1]==="requests"&&path.length===3)return await nativeInfo(path[2]);
+      if(method==="DELETE"&&path[1]==="devices"&&path.length===3)return await revokeNative(request,path[2]);
+    }
     if (method === "GET" && path.join("/") === "ping") return json({serverNow:Date.now()});
     if (method === "GET" && path.join("/") === "app-manifest") return await appManifest(request);
     if (method === "GET" && path[0] === "dashboard" && path.length === 1) return await dashboard(request);
