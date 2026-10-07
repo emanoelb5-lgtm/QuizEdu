@@ -39,6 +39,9 @@ jobs:
           gradle-version: '8.13'
       - name: Instalar ferramentas Android
         uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407
+        with:
+          packages: platform-tools
+          log-accepted-android-sdk-licenses: false
       - name: Preparar Android SDK
         run: sdkmanager 'platforms;android-36' 'build-tools;35.0.0'
       - name: Compilar e verificar modelos, código e testes de interface
