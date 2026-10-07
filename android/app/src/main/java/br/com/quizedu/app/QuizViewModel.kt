@@ -12,6 +12,13 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
@@ -51,6 +58,9 @@ class QuizViewModel(application: Application, val repository: QuizRepository) : 
     var roomError by mutableStateOf<String?>(null); private set
     var connected by mutableStateOf(true); private set
     var receivedAt by mutableStateOf(SystemClock.elapsedRealtime()); private set
+    var liveClock by mutableStateOf<LiveClock?>(null); private set
+    private val roomRefresh = Mutex()
+    private var roomGeneration = 0
     var pendingPair by mutableStateOf(repository.preferences.getString("pair_id", "") ?: ""); private set
     var pairExpires by mutableStateOf(repository.preferences.getLong("pair_expires", 0)); private set
     private var lastHeartbeat = 0L
@@ -296,34 +306,96 @@ class QuizViewModel(application: Application, val repository: QuizRepository) : 
         busy = true; notify("Imagem adicionada. Salve a aula para sincronizar.")
     }
     fun openRoom(code: String, asTeacher: Boolean) {
+        roomGeneration++; liveClock = null
         currentCode = code; roomTeacher = asTeacher; room = null; screen = AppScreen.Room; roomError = null; connected = true; lastHeartbeat = 0; lastFullRoom = 0
         repository.preferences.edit().putString(if (asTeacher) "teacher_room" else "student_room", code).apply()
     }
-    suspend fun refreshRoom(force: Boolean = false): Boolean {
+    suspend fun refreshRoom(force: Boolean = false): Boolean { return roomRefresh.withLock {
         val code = currentCode; if (code.isBlank() || screen != AppScreen.Room) return true
+        val generation = roomGeneration
         val client = if (roomTeacher) repository.teacherApi else repository.studentApi
         try {
             val previous = room
             val full = force || SystemClock.elapsedRealtime() - lastFullRoom > 20000
             val query = if (full) "" else previous?.version?.takeIf { it.isNotEmpty() }?.let { "?since=${Uri.encode(it)}" } ?: ""
+            val sent = SystemClock.elapsedRealtime()
             val raw = client.request("/api/rooms/$code$query")
-            if (code != currentCode || screen != AppScreen.Room) return true
-            room = if (raw.optBoolean("pulse") && previous != null) previous.pulse(raw) else RoomSnapshot(raw)
+            val received = SystemClock.elapsedRealtime()
+            if (code != currentCode || screen != AppScreen.Room || generation != roomGeneration) return true
+            val latest = room
+            val next = if (raw.optBoolean("pulse")) {
+                if (latest == null || raw.str("version") != latest.version) return true
+                latest.pulse(raw)
+            } else RoomSnapshot(raw)
+            if (latest != null && olderRoom(next, latest)) return true
+            room = next
+            if (liveClock == null) liveClock = LiveClock.sample(raw.optLong("serverNow"), sent, received)
             if (!raw.optBoolean("pulse")) lastFullRoom = SystemClock.elapsedRealtime()
             receivedAt = SystemClock.elapsedRealtime(); connected = true; roomError = null
             if (roomTeacher && room?.isHost != true) roomError = "Esta sala pertence a outra conta. Vincule a conta usada no computador."
             if (room?.status == "closed") repository.preferences.edit().remove(if (roomTeacher) "teacher_room" else "student_room").apply()
-            if (SystemClock.elapsedRealtime() - lastHeartbeat > 20000 && (roomTeacher || room?.me != null)) {
-                client.request("/api/rooms/$code/heartbeat", JSONObject()); lastHeartbeat = SystemClock.elapsedRealtime()
-            }
             return true
         } catch (e: Exception) {
+            if (e is CancellationException) throw e
             if (code != currentCode) return true
             connected = false
             if (e is ApiError && e.status in listOf(401, 403, 404, 410)) roomError = e.message
             else if (room == null) roomError = "Não foi possível conectar. Confira a internet e tente novamente."
             return false
         }
+    }
+    }
+    fun serverTime(monotonic: Long): Long = liveClock?.now(monotonic) ?: (room?.serverNow ?: 0) + (monotonic - receivedAt).coerceAtLeast(0)
+    suspend fun observeRoom() = coroutineScope {
+        val code = currentCode; val generation = roomGeneration
+        val client = if (roomTeacher) repository.teacherApi else repository.studentApi
+        val signals = Channel<JSONObject>(Channel.CONFLATED)
+        var lastSignal = 0L
+        if (client.supportsRoomEvents) launch {
+            var failures = 0
+            while (isActive && generation == roomGeneration && code == currentCode && room?.status !in listOf("closed", "finished")) {
+                try { client.roomEvents(code) { signals.trySend(it) }; failures = 0; delay(100) }
+                catch (e: CancellationException) { throw e }
+                catch (_: Exception) { lastSignal = 0; failures++; delay((250L * failures).coerceAtMost(2500)) }
+            }
+        }
+        launch {
+            for (signal in signals) {
+                if (generation != roomGeneration || code != currentCode) break
+                lastSignal = SystemClock.elapsedRealtime()
+                if (room == null || signal.str("version") != room?.version) refreshRoom(force = true)
+                else {
+                    room = RoomSnapshot(room!!.raw.copy().put("answeredCount", signal.optInt("answeredCount")).put("serverNow", signal.optLong("serverNow")))
+                    connected = true
+                }
+            }
+        }
+        launch {
+            while (isActive && generation == roomGeneration && code == currentCode) {
+                val sent = SystemClock.elapsedRealtime()
+                try {
+                    val pong = client.request("/api/ping")
+                    if (generation == roomGeneration && code == currentCode) liveClock = LiveClock.best(liveClock, LiveClock.sample(pong.optLong("serverNow"), sent, SystemClock.elapsedRealtime()))
+                } catch (e: CancellationException) { throw e } catch (_: Exception) {}
+                delay(10000)
+            }
+        }
+        // Presence is independent of state updates. A slow heartbeat must never
+        // hold up a slide, and teachers do not have a student heartbeat cookie.
+        launch {
+            while (isActive && generation == roomGeneration && code == currentCode) {
+                if (!roomTeacher && room?.me != null) try { client.request("/api/rooms/$code/heartbeat", JSONObject()) }
+                catch (e: CancellationException) { throw e } catch (_: Exception) {}
+                delay(20000)
+            }
+        }
+        try {
+            refreshRoom(force = true)
+            while (isActive && generation == roomGeneration && code == currentCode) {
+                delay(500)
+                if (room?.status !in listOf("closed", "finished") && (SystemClock.elapsedRealtime() - lastSignal > 2500 || SystemClock.elapsedRealtime() - lastFullRoom > 20000)) refreshRoom()
+            }
+        } finally { signals.close() }
     }
     fun join(name: String, avatar: String) = perform {
         repository.studentApi.request("/api/rooms/$currentCode/join", JSONObject().put("name", name).put("avatar", avatar))
@@ -343,7 +415,7 @@ class QuizViewModel(application: Application, val repository: QuizRepository) : 
         if (action == "blackout") command.put("blackout", !(snapshot.presentation?.optBoolean("blackout") ?: false))
         try {
             val result = repository.teacherApi.request("/api/rooms/${snapshot.code}/control", command)
-            if (result.str("code") == currentCode) { room = RoomSnapshot(result); receivedAt = SystemClock.elapsedRealtime() }
+            if (result.str("code") == currentCode) { val next = RoomSnapshot(result); if (room == null || !olderRoom(next, room!!)) { room = next; receivedAt = SystemClock.elapsedRealtime() } }
             else refreshRoom()
         } catch (e: ApiError) {
             if (e.status == 409) { refreshRoom(force = true); throw IOException("A apresentação mudou em outra tela. O controle foi atualizado.") }

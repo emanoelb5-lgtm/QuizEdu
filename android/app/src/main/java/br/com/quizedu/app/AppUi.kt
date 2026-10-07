@@ -59,12 +59,7 @@ fun openWeb(context: Context, path: String) {
     LaunchedEffect(vm.currentCode, vm.screen, vm.roomTeacher, lifecycle) {
         if (vm.screen != AppScreen.Room) return@LaunchedEffect
         lifecycle.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
-            var failures = 0
-            while (isActive) {
-                if (vm.refreshRoom()) failures = 0 else failures++
-                val base = when (vm.room?.status) { "question" -> 1600L; "slide" -> 4000L; else -> 2800L }
-                delay(if (failures == 0) base else (base * (1L shl failures.coerceAtMost(3))).coerceAtMost(15000L))
-            }
+            vm.observeRoom()
         }
     }
     LaunchedEffect(vm.pendingPair, lifecycle) {

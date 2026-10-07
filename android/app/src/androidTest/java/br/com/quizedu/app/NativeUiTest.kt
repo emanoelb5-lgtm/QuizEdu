@@ -17,15 +17,31 @@ class NativeUiTest {
     private lateinit var vm: QuizViewModel
     private lateinit var repository: QuizRepository
     private lateinit var app: Application
+    private lateinit var client: FixtureClient
     @Before fun setup() {
         app = InstrumentationRegistry.getInstrumentation().targetContext.applicationContext as Application
         app.getSharedPreferences("quizedu_preferences", Context.MODE_PRIVATE).edit().clear().commit()
         app.filesDir.resolve("lessons").deleteRecursively()
-        val client = FixtureClient()
+        client = FixtureClient()
         repository = QuizRepository(app, client, client)
         repository.profile = JSONObject().put("id", "11111111-1111-4111-8111-111111111111").put("name", "Professora Clara").put("permanent", true)
         vm = QuizViewModel(app, repository)
         compose.setContent { QuizEduTheme { QuizEduApp(vm) } }
+    }
+    @Test fun liveSignalsAdvanceTheRoomAndOldSnapshotsCannotRollItBack() {
+        val now = System.currentTimeMillis()
+        val initial = JSONObject().put("code", "123456").put("title", "Aula ao vivo").put("teacher", "Clara").put("status", "slide").put("index", -1).put("total", 1).put("serverNow", now).put("version", "slide:1").put("revision", 1).put("isHost", false).put("players", JSONArray()).put("me", JSONObject().put("id", uid()).put("name", "Luana").put("avatar", "🦁"))
+        client.transition(initial)
+        compose.runOnIdle { vm.openRoom("123456", false) }
+        compose.waitUntil(10000) { vm.room?.version == "slide:1" }
+        val next = initial.copy().put("status", "question").put("index", 0).put("version", "question:2").put("revision", 2).put("serverNow", now + 1).put("startsAt", now + 3000).put("endsAt", now + 13000).put("question", JSONObject().put("text", "Qual alternativa?").put("options", JSONArray(listOf("A", "B"))).put("seconds", 10))
+        client.transition(next)
+        compose.waitUntil(1500) { vm.room?.version == "question:2" }
+        assertEquals(now + 3000, vm.room!!.startsAt)
+        val requests = client.roomRequests
+        client.transition(initial.copy().put("serverNow", now + 99999))
+        compose.waitUntil(1500) { client.roomRequests > requests }
+        compose.runOnIdle { assertEquals("question:2", vm.room!!.version); assertEquals(2, vm.room!!.raw.optInt("revision")) }
     }
     @Test fun editorUndoesAndRedoesObjectsAndKeepsClipboardAcrossSlides() {
         compose.runOnIdle { vm.mode(true) }
@@ -82,14 +98,27 @@ class NativeUiTest {
     }
     private class FixtureClient : QuizClient {
         private var participant: JSONObject? = null
+        @Volatile private var liveRoom: JSONObject? = null
+        @Volatile var roomRequests = 0
+        private val changes = kotlinx.coroutines.channels.Channel<Unit>(kotlinx.coroutines.channels.Channel.CONFLATED)
+        override val supportsRoomEvents: Boolean get() = true
+        fun transition(state: JSONObject) { liveRoom = state.copy(); changes.trySend(Unit) }
+        override suspend fun roomEvents(code: String, onSignal: (JSONObject) -> Unit) {
+            while (kotlinx.coroutines.currentCoroutineContext()[kotlinx.coroutines.Job]?.isActive == true) {
+                val state = liveRoom
+                onSignal(JSONObject().put("version", state?.str("version") ?: "lobby:-1:0").put("status", state?.str("status") ?: "lobby").put("answeredCount", 0).put("serverNow", System.currentTimeMillis()))
+                kotlinx.coroutines.withTimeoutOrNull(1000) { changes.receive() }
+            }
+        }
         override fun clear() {}
         override suspend fun image(bytes: ByteArray): JSONObject = throw IllegalStateException("No network uploads in UI tests.")
         override suspend fun request(path: String, data: JSONObject?, method: String): JSONObject {
+            if (path == "/api/ping") return JSONObject().put("serverNow", System.currentTimeMillis())
             if (path == "/api/dashboard") return JSONObject().put("profile", JSONObject().put("id", "11111111-1111-4111-8111-111111111111").put("name", "Professora Clara").put("permanent", true)).put("quizzes", JSONArray()).put("rooms", JSONArray())
             if (path == "/api/presentations") return JSONObject().put("presentations", JSONArray())
             if (path.endsWith("/join")) { participant = JSONObject().put("id", uid()).put("name", data!!.str("name")).put("avatar", data.str("avatar")).put("score", 0).put("position", 1); return JSONObject().put("joined", true) }
             if (path.endsWith("/heartbeat")) return JSONObject().put("ok", true)
-            if (path.startsWith("/api/rooms/")) return JSONObject().put("code", "123456").put("title", "Aula de ciências").put("teacher", "Clara").put("status", "lobby").put("index", -1).put("total", 1).put("isHost", false).put("serverNow", System.currentTimeMillis()).put("version", "lobby:-1:0").put("players", if (participant == null) JSONArray() else JSONArray().put(participant)).put("me", participant ?: JSONObject.NULL)
+            if (path.startsWith("/api/rooms/")) { roomRequests++; return liveRoom?.copy() ?: JSONObject().put("code", "123456").put("title", "Aula de ciências").put("teacher", "Clara").put("status", "lobby").put("index", -1).put("total", 1).put("isHost", false).put("serverNow", System.currentTimeMillis()).put("version", "lobby:-1:0").put("players", if (participant == null) JSONArray() else JSONArray().put(participant)).put("me", participant ?: JSONObject.NULL) }
             throw IllegalStateException("Unexpected fixture route: $path")
         }
     }

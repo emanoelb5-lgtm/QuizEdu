@@ -12,6 +12,9 @@ import android.util.AtomicFile
 import android.util.Base64
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.ByteArrayOutputStream
@@ -27,6 +30,8 @@ import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
 import kotlin.math.max
 import kotlin.math.roundToInt
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
 
 class ApiError(val status: Int, override val message: String) : IOException(message)
 class SecretStore(context: Context) {
@@ -64,6 +69,8 @@ interface QuizClient {
     suspend fun image(bytes: ByteArray): JSONObject
     suspend fun presentation(bytes: ByteArray, name: String): JSONObject = throw IOException("Importação indisponível neste acesso.")
     suspend fun importImage(bytes: ByteArray, mime: String): JSONObject = image(bytes)
+    val supportsRoomEvents: Boolean get() = false
+    suspend fun roomEvents(code: String, onSignal: (JSONObject) -> Unit) {}
 }
 class QuizApi(private val secrets: SecretStore, private val teacher: Boolean) : QuizClient {
     private val cookieKey = if (teacher) "teacher_cookies" else "student_cookies"
@@ -73,12 +80,45 @@ class QuizApi(private val secrets: SecretStore, private val teacher: Boolean) : 
     override suspend fun image(bytes: ByteArray): JSONObject = exchange("/api/media", "POST", bytes, "image/jpeg")
     override suspend fun importImage(bytes: ByteArray, mime: String): JSONObject = exchange("/api/media", "POST", bytes, mime)
     override suspend fun presentation(bytes: ByteArray, name: String): JSONObject = exchange("/api/presentation-import", "POST", bytes, "application/octet-stream", java.net.URLEncoder.encode(name, "UTF-8").replace("+", "%20"))
+    override val supportsRoomEvents: Boolean get() = true
+    override suspend fun roomEvents(code: String, onSignal: (JSONObject) -> Unit) {
+        require(code.matches(Regex("[0-9]{6}")))
+        val connection = URL(BuildConfig.SITE_URL + "/api/rooms/$code/events").openConnection() as HttpURLConnection
+        suspendCancellableCoroutine<Unit> { continuation ->
+            val reader = CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    connection.connectTimeout = 5000; connection.readTimeout = 5000
+                    connection.instanceFollowRedirects = false
+                    connection.setRequestProperty("Accept", "text/event-stream")
+                    connection.setRequestProperty("User-Agent", "QuizEdu-Android/${BuildConfig.VERSION_NAME}")
+                    if (connection.responseCode != 200) throw ApiError(connection.responseCode, "Reconectando à sala…")
+                    if (connection.contentType?.startsWith("text/event-stream") != true) throw IOException("Atualização contínua indisponível.")
+                    connection.inputStream.bufferedReader(Charsets.UTF_8).use { input ->
+                        var event = ""
+                        while (continuation.isActive) {
+                            val line = input.readLine() ?: break
+                            if (line.length > 4096) throw IOException("Atualização inválida.")
+                            when {
+                                line.startsWith("event:") -> event = line.substringAfter(':').trim()
+                                line.startsWith("data:") && event == "sync" -> onSignal(JSONObject(line.substringAfter(':').trim()))
+                                line.isEmpty() -> event = ""
+                            }
+                        }
+                    }
+                    if (continuation.isActive) continuation.resume(Unit)
+                } catch (e: Exception) { if (continuation.isActive) continuation.resumeWithException(e) }
+                finally { connection.disconnect() }
+            }
+            continuation.invokeOnCancellation { connection.disconnect(); reader.cancel() }
+        }
+    }
     private suspend fun exchange(path: String, method: String, bytes: ByteArray?, contentType: String, presentationName: String? = null): JSONObject = withContext(Dispatchers.IO) {
         require(path.startsWith("/api/") && !path.contains("..") && !path.contains("\\"))
         val connection = URL(BuildConfig.SITE_URL + path).openConnection() as HttpURLConnection
         try {
             connection.requestMethod = method
-            connection.connectTimeout = 12000; connection.readTimeout = if (presentationName != null) 90000 else 15000
+            val live = path.startsWith("/api/rooms/") || path == "/api/ping"
+            connection.connectTimeout = if (live) 5000 else 12000; connection.readTimeout = if (presentationName != null) 90000 else if (live) 6000 else 15000
             connection.instanceFollowRedirects = false
             connection.setRequestProperty("Accept", "application/json")
             connection.setRequestProperty("Origin", BuildConfig.SITE_URL)
@@ -95,7 +135,7 @@ class QuizApi(private val secrets: SecretStore, private val teacher: Boolean) : 
             connection.headerFields.filterKeys { it?.equals("Set-Cookie", true) == true }.values.flatten().forEach { header ->
                 try { HttpCookie.parse(header).filter { it.name.startsWith("qe_") }.forEach { if (it.maxAge == 0L) cookies.remove(it.name) else cookies.put(it.name, it.value) } } catch (_: Exception) { }
             }
-            secrets.set(cookieKey, cookies.toString())
+            if (connection.headerFields.keys.any { it?.equals("Set-Cookie", true) == true }) secrets.set(cookieKey, cookies.toString())
             val stream = if (status in 200..299) connection.inputStream else connection.errorStream
             val raw = stream?.use { String(it.readBytes(), Charsets.UTF_8) } ?: ""
             val result = try { JSONObject(raw) } catch (_: Exception) {

@@ -159,8 +159,8 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
 @Composable private fun QuestionPanel(vm: QuizViewModel, state: RoomSnapshot, revealed: Boolean) {
     val question = state.question ?: return
     var elapsed by remember { mutableStateOf(SystemClock.elapsedRealtime()) }
-    LaunchedEffect(state.status, state.startsAt, vm.receivedAt) { while (!revealed) { elapsed = SystemClock.elapsedRealtime(); delay(200) } }
-    val now = state.serverNow + (elapsed - vm.receivedAt).coerceAtLeast(0)
+    LaunchedEffect(state.status, state.startsAt, revealed) { while (!revealed) { elapsed = SystemClock.elapsedRealtime(); delay(100) } }
+    val now = vm.serverTime(elapsed)
     val countdown = ceil((state.startsAt - now).coerceAtLeast(0) / 1000.0).toInt()
     val seconds = ceil((state.endsAt - now).coerceAtLeast(0) / 1000.0).toInt()
     val ready = countdown == 0

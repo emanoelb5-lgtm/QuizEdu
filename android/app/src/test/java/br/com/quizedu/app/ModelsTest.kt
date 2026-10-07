@@ -5,6 +5,17 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 class ModelsTest {
+    @Test fun roomClocksCompensateTransitAndIgnoreDeviceWallTime() {
+        val quick = LiveClock.sample(100040, 500, 580)
+        val slow = LiveClock.sample(100400, 9000, 9800)
+        assertEquals(quick.now(1580), slow.now(10080))
+        assertEquals(103080L, quick.now(3580))
+        assertEquals(quick, LiveClock.best(quick, LiveClock.sample(101000, 600, 1400)))
+        val old = RoomSnapshot(JSONObject().put("revision", 4).put("serverNow", 200))
+        val current = RoomSnapshot(JSONObject().put("revision", 5).put("serverNow", 100))
+        assertTrue(olderRoom(old, current))
+        assertFalse(olderRoom(current, old))
+    }
     @Test fun editingImportedTextPreservesUnchangedRunStyles() {
         val original = richText("Solo vivo", bold = true)
         val changed = replaceStyledText(original, "Solo vivo e água")
