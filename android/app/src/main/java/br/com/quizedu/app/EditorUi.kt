@@ -20,6 +20,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -133,7 +134,7 @@ private val layouts = listOf("cover" to "Capa", "title" to "Título e texto", "c
             if (draft.revision > 0) TextButton(onClick = { cloudConfirm = true }, enabled = !vm.busy) { Text("Abrir versão da conta") }
         } }
     }
-    if (addSlide) ModalBottomSheet(onDismissRequest = { addSlide = false }) { LazyColumn(contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    if (addSlide) ModalBottomSheet(onDismissRequest = { addSlide = false }) { LazyColumn(Modifier.testTag("slide-layouts"), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         item { Text("Adicionar slide", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold, modifier = Modifier.padding(bottom = 10.dp)) }
         itemsIndexed(layouts) { _, (id, title) -> ListItem(headlineContent = { Text(title) }, leadingContent = { Icon(if (id in listOf("question", "true_false")) Icons.Default.Quiz else Icons.Default.AutoAwesomeMotion, null, tint = EduBlue) }, modifier = Modifier.clickable { addSlide = false; vm.addSlide(id) }) }
     } }

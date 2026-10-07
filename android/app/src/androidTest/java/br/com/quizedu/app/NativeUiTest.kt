@@ -46,7 +46,8 @@ class NativeUiTest {
         compose.onNodeWithText("Nova aula").performClick()
         compose.onNodeWithText("Salvar aula").assertIsDisplayed()
         compose.onNodeWithText("Adicionar slide").performScrollTo().performClick()
-        compose.onNodeWithText("Quiz", useUnmergedTree = true).performScrollTo().performClick()
+        compose.onNodeWithTag("slide-layouts").performScrollToNode(hasText("Quiz"))
+        compose.onAllNodesWithText("Quiz", useUnmergedTree = true).onLast().performClick()
         compose.waitUntil(10000) { vm.slide?.str("kind") == "question" }
         compose.onNodeWithText("Enunciado").performScrollTo().performTextInput("Quanto é 2 + 2?")
         assertEquals("Quanto é 2 + 2?", vm.slide!!.getJSONObject("question").str("text"))
