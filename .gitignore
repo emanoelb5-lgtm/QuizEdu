@@ -1,6 +1,8 @@
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # dependencies
+/public/pdf.worker.min.mjs
+/public/pdf-assets/
 /node_modules
 /.pnp
 .pnp.*

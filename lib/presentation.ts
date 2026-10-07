@@ -4,7 +4,7 @@ export const SLIDE_WIDTH=1000,SLIDE_HEIGHT=562.5,MAX_SLIDES=150,MAX_ELEMENTS=60,
 export const FONTS=["Arial","Georgia","Verdana","Trebuchet MS","Times New Roman","Courier New"];
 export type RichNode={type:string;text?:string;attrs?:Record<string,unknown>;marks?:{type:string;attrs?:Record<string,unknown>}[];content?:RichNode[]};
 export type SlideElement={id:string;type:"text"|"image"|"shape"|"table"|"chart"|"video";x:number;y:number;w:number;h:number;rotation:number;opacity:number;locked:boolean;hidden:boolean;build:number;group?:string;
-  doc?:RichNode;font?:string;fontSize?:number;color?:string;align?:"left"|"center"|"right"|"justify";fill?:string;stroke?:string;strokeWidth?:number;radius?:number;shape?:"rect"|"ellipse"|"line"|"arrow"|"triangle";src?:string;alt?:string;fit?:"cover"|"contain";positionX?:number;positionY?:number;cells?:string[][];header?:boolean;chart?:"bar"|"line"|"pie";labels?:string[];values?:number[];videoId?:string;videoStart?:number};
+  doc?:RichNode;font?:string;fontSize?:number;color?:string;align?:"left"|"center"|"right"|"justify";fill?:string;stroke?:string;strokeWidth?:number;fillOpacity?:number;radius?:number;shape?:"rect"|"ellipse"|"line"|"arrow"|"triangle";src?:string;alt?:string;fit?:"cover"|"contain";positionX?:number;positionY?:number;cells?:string[][];header?:boolean;chart?:"bar"|"line"|"pie";labels?:string[];values?:number[];videoId?:string;videoStart?:number};
 export type SlideBackground={color:string;color2?:string;angle?:number;image?:string;overlay?:number};
 export type LessonSlide={id:string;kind:"content"|"question";title:string;notes:string;background:SlideBackground;transition:"none"|"fade"|"slide";elements:SlideElement[];question?:Question};
 export type SlideDeck={id:string;title:string;subject:string;topic:string;theme:string;slides:LessonSlide[];mode:GameMode;untimed:boolean;showSlideNumbers:boolean};
@@ -85,6 +85,7 @@ export function validateDeck(raw:any,strict=false):SlideDeck {
       const base:SlideElement={id:e.id,type:e.type,x:e.x,y:e.y,w:e.w,h:e.h,rotation:e.rotation,opacity:e.opacity,locked:e.locked,hidden:e.hidden,build:e.build,...(e.group?{group:e.group}:{})};
       for(const key of ["color","fill","stroke"] as const)if(e[key]!==undefined){if(!color(e[key]))fail("Cor de objeto inválida.");base[key]=e[key];}
       if(e.fontSize!==undefined){if(!number(e.fontSize,8,160))fail("Escolha uma fonte de 8 a 160.");base.fontSize=e.fontSize;}
+      if(e.fillOpacity!==undefined){if(!number(e.fillOpacity,0,100))fail("Transparência do preenchimento inválida.");base.fillOpacity=e.fillOpacity;}
       if(e.radius!==undefined){if(!number(e.radius,0,100))fail("Cantos de objeto inválidos.");base.radius=e.radius;}
       if(e.type==="text"){if(!FONTS.includes(e.font)||!["left","center","right","justify"].includes(e.align))fail("Fonte ou alinhamento inválido.");base.doc=validateRichText(e.doc);base.font=e.font;base.align=e.align;}
       if(e.type==="shape"){if(!["rect","ellipse","line","arrow","triangle"].includes(e.shape)||!number(e.strokeWidth,0,20))fail("Forma inválida.");base.shape=e.shape;base.strokeWidth=e.strokeWidth;}

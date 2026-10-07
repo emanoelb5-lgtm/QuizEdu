@@ -4,11 +4,13 @@ import { heartbeat } from "@/lib/server";
 import {deletePresentation,listPresentations,readPresentation,savePresentation} from "@/lib/presentation-server";
 import {approveNative,listNative,nativeInfo,nativeStatus,revokeNative,startNative} from "@/lib/native-server";
 import {androidSigning} from "@/lib/android-signing";
+import {readPresentationImport} from "@/lib/presentation-import-server";
 export const dynamic = "force-dynamic";
 async function handle(request: Request) {
   try {
     const path = new URL(request.url).pathname.slice(5).split("/").filter(Boolean); const method = request.method;
     if(method==="POST"&&path.join("/")==="android/signing")return await androidSigning(request);
+    if(method==="POST"&&path.join("/")==="presentation-import")return await readPresentationImport(request);
     if(path[0]==="native"){
       if(method==="POST"&&path.join("/")==="native/start")return await startNative(request);
       if(method==="POST"&&path.join("/")==="native/status")return await nativeStatus(request);

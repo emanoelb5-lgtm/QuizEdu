@@ -68,6 +68,13 @@ try{
  const limited=new Client();for(let i=0;i<12;i++)await limited.request("/api/native/start",{challenge:await hash(secret()),deviceName:"Android"},201);await limited.request("/api/native/start",{challenge:await hash(secret()),deviceName:"Android"},429);
  const page=await anonymous.request(`/vincular-app?id=${tempStart.id}`);ok(page.includes("QuizEdu")&&page.includes("vincular"));ok(!page.includes(temporaryToken));
  console.log(`✓ Browser-approved device linking, verifier privacy, expiry/revocation, ownership, account migration, CAS edits, native controls, student privacy and restored scores. ${checks} checks so far.`);
+ // The same bounded importer is available to a linked Android via its bearer token.
+ const importHeaders = {"Content-Type":"application/octet-stream",Origin:origin,"X-Presentation-Name":"Aula.json",Authorization:`Bearer ${temporaryToken}`};
+ const rawDeck = JSON.stringify(deck);
+ let importedResponse = await mf.dispatchFetch(origin+"/api/presentation-import",{method:"POST",headers:importHeaders,body:rawDeck});eq(importedResponse.status,200);const importedDeck=await importedResponse.json();eq(importedDeck.deck.title,deck.title);eq(importedDeck.assets,[]);
+ importedResponse = await mf.dispatchFetch(origin+"/api/presentation-import",{method:"POST",headers:{...importHeaders,Origin:"https://other.test"},body:rawDeck});eq(importedResponse.status,403);await importedResponse.arrayBuffer();
+ importedResponse = await mf.dispatchFetch(origin+"/api/presentation-import",{method:"POST",headers:{...importHeaders,Authorization:`Bearer ${secret()}`},body:rawDeck});eq(importedResponse.status,401);await importedResponse.arrayBuffer();
+ importedResponse = await mf.dispatchFetch(origin+"/api/presentation-import",{method:"POST",headers:{...importHeaders,"X-Presentation-Name":"Aula.pptx"},body:"not a presentation"});eq(importedResponse.status,400);await importedResponse.arrayBuffer();
  // Verify the actual compiled Worker against a local JWKS fixture. Every token
  // is genuinely RSA-signed; no live GitHub identity or production key is used.
  const ci=new Client();await ci.request("/api/android/signing",{},401);ci.bearer=jwt();eq(await ci.request("/api/android/signing",{}),testBundle);

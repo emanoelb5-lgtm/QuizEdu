@@ -184,3 +184,13 @@
 .slide-inline-text .tiptap h3,.slide-inline-text .tiptap h4,.slide-inline-text .tiptap h5,.slide-inline-text .tiptap h6{line-height:1.15;margin:0 0 .35em;font-weight:700;letter-spacing:normal}.slide-inline-text .tiptap h3{font-size:1.15em}
 @media(max-width:600px){.presentation-header-actions .btn{font-size:.8125rem}.presentation-header-actions .btn-quiet{display:none}.presentation-header-actions .btn>span{display:none}.presentation-header-actions .btn-outline{min-width:44px}.slide-layer-row>div button{width:38px;height:42px}}
 .slide-question-editor .question-preview,.slide-question-editor .question-help{font-size:.8125rem;line-height:1.6}
+/* Import preview keeps the document visible while the teacher chooses slides. */
+.presentation-import-dialog{width:min(1000px,calc(100vw - 24px));max-width:1000px;max-height:92dvh;overflow-y:auto}
+.presentation-import-drop{display:flex;flex-direction:column;align-items:center;gap:12px;min-height:142px;padding:22px;border:2px dashed #3155ed66;border-radius:16px;background:#f3f6ff;color:#15203d;font-size:16px;width:100%;cursor:pointer}
+.presentation-import-drop span,.presentation-import-summary span{font-size:14px;color:#52617b}.presentation-import-summary{display:flex;flex-direction:column;gap:6px}
+.presentation-import-warnings{padding:14px 18px;border:1px solid #edc26a;border-radius:12px;background:#fff9ea;font-size:14px;line-height:1.5}.presentation-import-warnings ul{padding-left:20px;margin:8px 0 0}
+.presentation-import-selection{display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:14px}.presentation-import-selection button{padding:8px 12px;border:1px solid #cbd4e6;border-radius:8px;background:#fff}.presentation-import-selection span{margin-left:auto}
+.presentation-import-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;max-height:48dvh;overflow-y:auto;padding:3px}
+.presentation-import-card{border:2px solid #dce3ef;border-radius:12px;overflow:hidden;background:#fff;cursor:pointer}.presentation-import-card.selected{border-color:#3155ed;background:#f1f5ff}.presentation-import-card>span{display:flex;align-items:center;gap:9px;padding:10px;font-size:14px}.presentation-import-card b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.presentation-import-footer{position:sticky;bottom:0;display:flex;justify-content:flex-end;gap:10px;background:#fff;padding:14px 0 0}.presentation-selection-tools{flex-wrap:wrap}
+@media(max-width:700px){.presentation-import-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.presentation-import-footer button{flex:1}.presentation-import-dialog{padding:18px}.presentation-header-actions{flex-wrap:wrap}.presentation-import-selection span{margin-left:0;width:100%}}
