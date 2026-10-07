@@ -1,4 +1,19 @@
-import {SlideElement,SLIDE_WIDTH,SLIDE_HEIGHT} from "./presentation";
+import {SlideDeck,SlideElement,RichNode,richTextPlain,validateRichText,SLIDE_WIDTH,SLIDE_HEIGHT} from "./presentation";
+export function applyTextChange(deck:SlideDeck,slideId:string,elementId:string,doc:RichNode):SlideDeck {
+  const slide=deck.slides.find(s=>s.id===slideId),element=slide?.elements.find(e=>e.id===elementId);
+  if(!element||element.type!=="text"||element.locked)return deck;
+  const clean=validateRichText(doc);
+  return {...deck,slides:deck.slides.map(s=>s.id===slideId?{...s,elements:s.elements.map(e=>e.id===elementId?{...e,doc:clean}:e)}:s)};
+}
+export function matchingSlides(deck:SlideDeck,query:string,questionsOnly=false):number[] {
+  const normalize=(text:string)=>text.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("pt-BR");
+  const terms=normalize(query).trim().split(/\s+/).filter(Boolean);
+  return deck.slides.flatMap((s,i)=>{
+    if(questionsOnly&&s.kind!=="question")return [];
+    const content=normalize([String(i+1),s.title,s.question?.text,...(s.question?.options||[]),...s.elements.map(e=>[richTextPlain(e.doc),e.alt,e.cells?.flat().join(" "),e.labels?.join(" ")].filter(Boolean).join(" "))].filter(Boolean).join(" "));
+    return terms.every(term=>content.includes(term))?[i]:[];
+  });
+}
 export function boundedElement(element:SlideElement):SlideElement {const w=Math.max(12,Math.min(SLIDE_WIDTH,element.w)),h=Math.max(8,Math.min(SLIDE_HEIGHT,element.h));return {...element,w,h,x:Math.max(0,Math.min(SLIDE_WIDTH-w,element.x)),y:Math.max(0,Math.min(SLIDE_HEIGHT-h,element.y))};}
 export function moveElements(elements:SlideElement[],ids:string[],dx:number,dy:number,snap=false):SlideElement[] {const items=elements.filter(e=>ids.includes(e.id)&&!e.locked);if(!items.length)return elements;const left=Math.min(...items.map(e=>e.x)),top=Math.min(...items.map(e=>e.y)),right=Math.max(...items.map(e=>e.x+e.w)),bottom=Math.max(...items.map(e=>e.y+e.h));if(snap){dx=Math.round((left+dx)/5)*5-left;dy=Math.round((top+dy)/5)*5-top;}dx=Math.max(-left,Math.min(SLIDE_WIDTH-right,dx));dy=Math.max(-top,Math.min(SLIDE_HEIGHT-bottom,dy));return elements.map(e=>items.includes(e)?{...e,x:e.x+dx,y:e.y+dy}:e);}
 export function resizeElement(e:SlideElement,handle:string,dx:number,dy:number,snap=false):SlideElement {const angle=-e.rotation*Math.PI/180;const px=dx*Math.cos(angle)-dy*Math.sin(angle),py=dx*Math.sin(angle)+dy*Math.cos(angle);let x=e.x,y=e.y,w=e.w,h=e.h;if(handle.includes("e"))w=Math.max(12,Math.min(SLIDE_WIDTH-x,w+px));if(handle.includes("s"))h=Math.max(8,Math.min(SLIDE_HEIGHT-y,h+py));if(handle.includes("w")){x=Math.max(0,Math.min(e.x+e.w-12,e.x+px));w=e.x+e.w-x;}if(handle.includes("n")){y=Math.max(0,Math.min(e.y+e.h-8,e.y+py));h=e.y+e.h-y;}if(snap){w=Math.round(w/5)*5;h=Math.round(h/5)*5;}return boundedElement({...e,x,y,w,h});}
