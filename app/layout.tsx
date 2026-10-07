@@ -3,6 +3,7 @@ import { PlayerAppProvider } from "./ui/player-app";
 import { INSTALL_BOOTSTRAP } from "@/lib/app-install";
 import "./globals.css";
 import "./player-app.css";
+import "./presentation.css";
 
 export const metadata: Metadata = {
   title: "QuizEdu · Sua turma entra no jogo",

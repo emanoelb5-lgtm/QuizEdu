@@ -1,6 +1,8 @@
 import { env } from "cloudflare:workers";
 import { AVATARS, DURATIONS, MAX_POINTS, mediaPath, Question, QUESTION_TEMPLATES, Quiz, quizError, RoomState, scoreFor } from "./quiz";
 import { playerManifest } from "./player-app";
+import {deckQuestions,questionIndexAt,RoomPresentation,SlideDeck,slideSteps,validateDeck} from "./presentation";
+import {movePresentation} from "./presentation-flow";
 
 export class HttpError extends Error { constructor(public status: number, message: string) { super(message); } }
 export const db = () => { if (!env.DB) throw new HttpError(503, "O serviço está indisponível. Tente novamente em alguns instantes."); return env.DB; };
@@ -31,11 +33,12 @@ export async function educator(request: Request, required = true) {
   if (!user && required) throw new HttpError(401, "Entre como educador para continuar."); return user;
 }
 export function publicProfile(user: Educator) { return { id: user.id, name: user.name, permanent: !!user.auth_id }; }
-export async function body(request: Request) {
+export async function body(request: Request,limit=65536) {
   const origin = request.headers.get("Origin"); if (origin && origin !== new URL(request.url).origin) throw new HttpError(403, "Esta ação precisa ser feita no QuizEdu.");
   if (!request.headers.get("Content-Type")?.includes("application/json")) throw new HttpError(415, "Formato de envio inválido.");
-  if (Number(request.headers.get("Content-Length") || 0) > 65536) throw new HttpError(413, "Este quiz ultrapassou o limite de 64 KB.");
-  const raw = await request.text(); if (raw.length > 65536) throw new HttpError(413, "Este quiz ultrapassou o limite de 64 KB.");
+  const largeMessage=limit===65536?"Este quiz ultrapassou o limite de 64 KB.":"Esta aula ultrapassou o limite de 1 MB. Use imagens enviadas e divida o conteúdo em mais de uma aula.";
+  if (Number(request.headers.get("Content-Length") || 0) > limit) throw new HttpError(413, largeMessage);
+  const raw = await request.text(); if (raw.length > limit || (limit>65536&&new TextEncoder().encode(raw).byteLength>limit)) throw new HttpError(413, largeMessage);
   try { const value = JSON.parse(raw); if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error(); return value; } catch { throw new HttpError(400, "Dados de envio inválidos."); }
 }
 export function cleanName(value: unknown, max = 30) { if (typeof value !== "string") throw new HttpError(400, "Digite seu nome."); const name = value.trim().replace(/\s+/g, " ").replace(/[\u0000-\u001f\u007f]/g, ""); if (name.length < 2 || name.length > max) throw new HttpError(400, `Use um nome de 2 a ${max} caracteres.`); return name; }
@@ -64,7 +67,7 @@ export async function dashboard(request: Request) {
     db().prepare("SELECT code, title, status, created_at, expires_at, player_count, question_index FROM rooms WHERE owner = ? ORDER BY created_at DESC LIMIT 100").bind(user.id),
     db().prepare("SELECT id, quiz, updated_at, revision, write_id FROM drafts WHERE owner = ? ORDER BY updated_at DESC LIMIT 100").bind(user.id)
   ]);
-  const active = (row: any) => ['lobby','question','results'].includes(row.status) && row.expires_at > Date.now();
+  const active = (row: any) => ['lobby','slide','question','results'].includes(row.status) && row.expires_at > Date.now();
   return json({ profile: publicProfile(user), identity: identity ? { name: identity.name, email: identity.email } : null, quizzes: q.results.map(quizFromRow), rooms: r.results.filter(active), history: r.results.filter(row => !active(row)).map((row: any) => ({ ...row, status: row.expires_at <= Date.now() && row.status !== "finished" ? "closed" : row.status })), drafts: d.results.map((row: any) => ({ id: row.id, quiz: JSON.parse(row.quiz), updatedAt: row.updated_at, revision: row.revision, writeId: row.write_id })), importAvailable: !!temporary && !!user.auth_id && temporary.id !== user.id, temporaryId:temporary?.id });
 }
 export async function saveQuiz(request: Request) {
@@ -81,16 +84,18 @@ export async function saveQuiz(request: Request) {
   return json({ quiz: { ...quiz, updatedAt: now } });
 }
 export async function deleteQuiz(request: Request, id: string) { const user = (await educator(request))!; await body(request); const results=await db().batch([db().prepare("DELETE FROM shares WHERE quiz_id = ? AND owner = ?").bind(id, user.id),db().prepare("DELETE FROM drafts WHERE id = ? AND owner = ?").bind(id,user.id),db().prepare("DELETE FROM quizzes WHERE id = ? AND owner = ?").bind(id,user.id)]); if(!results[2].meta.changes)throw new HttpError(404,"Quiz não encontrado.");return json({deleted:true}); }
-type RoomRow = { code: string; owner: string; title: string; teacher: string; questions: string; status: RoomState["status"]; question_index: number; starts_at: number | null; ends_at: number | null; expires_at: number; player_count: number; answered_count: number; roster_version: number; mode: "speed" | "accuracy"; untimed: number };
-async function getRoom(code: string) { if (!/^\d{6}$/.test(code)) throw new HttpError(404, "Código de sala inválido."); const room = await db().prepare("SELECT * FROM rooms WHERE code = ?").bind(code).first<RoomRow>(); if (!room) throw new HttpError(404, "Sala não encontrada. Confira o código com o professor."); if (room.expires_at <= Date.now()) room.status = "closed"; return room; }
+type RoomRow = { code: string; owner: string; title: string; teacher: string; questions: string; status: RoomState["status"]; question_index: number; starts_at: number | null; ends_at: number | null; expires_at: number; player_count: number; answered_count: number; roster_version: number; mode: "speed" | "accuracy"; untimed: number;presentation:string|null;presentation_id:string|null;slide_index:number;build_step:number;blackout:number };
+async function getRoom(code: string,content=true) { if (!/^\d{6}$/.test(code)) throw new HttpError(404, "Código de sala inválido."); const room = await db().prepare(content?"SELECT * FROM rooms WHERE code = ?":"SELECT code,owner,title,teacher,status,question_index,starts_at,ends_at,expires_at,player_count,answered_count,roster_version,mode,untimed,presentation_id,slide_index,build_step,blackout FROM rooms WHERE code = ?").bind(code).first<RoomRow>(); if (!room) throw new HttpError(404, "Sala não encontrada. Confira o código com o professor."); if (room.expires_at <= Date.now()) room.status = "closed"; return room; }
 export async function createRoom(request: Request) {
-  const user = (await educator(request))!; const data = await body(request); const quiz = await db().prepare("SELECT * FROM quizzes WHERE id = ? AND owner = ?").bind(String(data.quizId || ""), user.id).first<any>();
+  const user = (await educator(request))!; const data = await body(request);let presentation:SlideDeck|null=null;let quiz:any;
+  if(data.presentationId){const row=await db().prepare("SELECT document FROM presentations WHERE id = ? AND owner = ?").bind(String(data.presentationId),user.id).first<{document:string}>();if(!row)throw new HttpError(404,"Salve a aula antes de abrir a sala.");try{presentation=validateDeck(JSON.parse(row.document),true);}catch(e){throw new HttpError(400,(e as Error).message);}quiz={title:presentation.title,questions:JSON.stringify(deckQuestions(presentation)),mode:presentation.mode,untimed:presentation.untimed?1:0};}
+  else quiz=await db().prepare("SELECT * FROM quizzes WHERE id = ? AND owner = ?").bind(String(data.quizId || ""), user.id).first<any>();
   if (!quiz) throw new HttpError(404, "Salve seu quiz antes de abrir a sala.");
-  const count = await db().prepare("SELECT COUNT(*) n FROM rooms WHERE owner = ? AND status IN ('lobby','question','results') AND expires_at > ?").bind(user.id, Date.now()).first<{ n: number }>();
+  const count = await db().prepare("SELECT COUNT(*) n FROM rooms WHERE owner = ? AND status IN ('lobby','slide','question','results') AND expires_at > ?").bind(user.id, Date.now()).first<{ n: number }>();
   if (count!.n >= 5) throw new HttpError(400, "Você já tem 5 salas abertas. Encerre uma para continuar.");
   for (let retry = 0; retry < 8; retry++) {
     const n = crypto.getRandomValues(new Uint32Array(1))[0]; const code = String(100000 + n % 900000); const now = Date.now();
-    const result = await db().prepare("INSERT OR IGNORE INTO rooms (code, owner, title, teacher, questions, status, question_index, created_at, expires_at, mode, untimed) VALUES (?, ?, ?, ?, ?, 'lobby', -1, ?, ?, ?, ?)").bind(code, user.id, quiz.title, user.name, quiz.questions, now, now + 86400000, quiz.mode, quiz.untimed).run();
+    const result = await db().prepare("INSERT OR IGNORE INTO rooms (code, owner, title, teacher, questions, status, question_index, created_at, expires_at, mode, untimed, presentation, presentation_id) VALUES (?, ?, ?, ?, ?, 'lobby', -1, ?, ?, ?, ?, ?, ?)").bind(code, user.id, quiz.title, user.name, quiz.questions, now, now + 86400000, quiz.mode, quiz.untimed,presentation?JSON.stringify(presentation):null,presentation?.id||null).run();
     if (result.meta.changes) return json({ code }, 201);
   }
   throw new HttpError(503, "Não foi possível abrir a sala. Tente novamente.");
@@ -144,11 +149,11 @@ export async function resumePlayer(request: Request, code: string) {
 export async function joinRoom(request: Request, code: string) {
   const data = await body(request); const room = await getRoom(code); const previous = await playerFor(request, code);
   if (previous && room.status !== "closed") return json({ joined: true, id: previous.id });
-  if (room.status !== "lobby") throw new HttpError(409, room.status === "closed" || room.status === "finished" ? "Esta sala já foi encerrada." : "O quiz já começou. Aguarde o professor abrir outra sala.");
+  if (room.status !== "lobby" && !(room.presentation && room.status === "slide")) throw new HttpError(409, room.status === "closed" || room.status === "finished" ? "Esta sala já foi encerrada." : room.presentation?"Aguarde o professor concluir a pergunta para entrar na aula.":"O quiz já começou. Aguarde o professor abrir outra sala.");
   const name = cleanName(data.name, 24); if (!AVATARS.includes(data.avatar)) throw new HttpError(400, "Escolha um dos avatares.");
   const token = secret(); const id = crypto.randomUUID();
   try {
-    const result = await db().prepare("INSERT INTO players (id, room, secret_hash, name, name_key, avatar, joined_at, last_seen) SELECT ?, r.code, ?, ?, ?, ?, ?, ? FROM rooms r WHERE r.code = ? AND r.status = 'lobby' AND r.expires_at > ? AND (SELECT COUNT(*) FROM players WHERE room = r.code) < 100").bind(id, await hash(token), name, name.toLocaleLowerCase("pt-BR"), data.avatar, Date.now(), Date.now(), code, Date.now()).run();
+    const result = await db().prepare("INSERT INTO players (id, room, secret_hash, name, name_key, avatar, joined_at, last_seen) SELECT ?, r.code, ?, ?, ?, ?, ?, ? FROM rooms r WHERE r.code = ? AND (r.status = 'lobby' OR (r.presentation IS NOT NULL AND r.status = 'slide')) AND r.expires_at > ? AND (SELECT COUNT(*) FROM players WHERE room = r.code) < 100").bind(id, await hash(token), name, name.toLocaleLowerCase("pt-BR"), data.avatar, Date.now(), Date.now(), code, Date.now()).run();
     if (!result.meta.changes) throw new HttpError(409, "A sala está cheia ou o quiz já começou.");
   } catch (e) { if (String(e).includes("UNIQUE")) throw new HttpError(409, "Esse nome já está na sala. Use um apelido ou acrescente seu sobrenome."); throw e; }
   return json({ joined: true, id }, 201, sessionCookie(request, `qe_player_${code}`, token, 86400));
@@ -157,16 +162,18 @@ async function settle(code: string) {
   const now = Date.now(); await db().prepare("UPDATE rooms SET status = 'results' WHERE code = ? AND status = 'question' AND (ends_at <= ? OR (starts_at <= ? AND player_count > 0 AND answered_count >= player_count))").bind(code, now, now).run();
 }
 export async function roomState(request: Request, code: string) {
-  let room = await getRoom(code);
-  if (room.status === "question" && ((room.ends_at !== null && room.ends_at <= Date.now()) || (room.player_count > 0 && room.answered_count >= room.player_count))) { await settle(code); room = await getRoom(code); }
-  const version = `${room.status}:${room.question_index}:${room.roster_version}`;
+  const since=new URL(request.url).searchParams.get("since");let room = await getRoom(code,!since);
+  if (room.status === "question" && ((room.ends_at !== null && room.ends_at <= Date.now()) || (room.player_count > 0 && room.answered_count >= room.player_count))) { await settle(code); room = await getRoom(code,!since); }
+  let version = `${room.status}:${room.question_index}:${room.slide_index}:${room.build_step}:${room.blackout}:${room.roster_version}`;
   if (new URL(request.url).searchParams.get("since") === version) {
     let presence: Record<string,number> | undefined;
     if (new URL(request.url).searchParams.has("presence") && (await educator(request,false))?.id === room.owner) { const rows = await db().prepare("SELECT id, last_seen FROM players WHERE room = ?").bind(code).all<{id:string;last_seen:number}>(); presence = Object.fromEntries(rows.results.map(p => [p.id,p.last_seen])); }
     return json({ pulse: true, version, answeredCount: room.answered_count, serverNow: Date.now(), ...(presence ? {presence} : {}) });
   }
+  if(since){room=await getRoom(code);version=`${room.status}:${room.question_index}:${room.slide_index}:${room.build_step}:${room.blackout}:${room.roster_version}`;}
   const [user, me] = await Promise.all([educator(request, false), playerFor(request, code)]);
-  const questions: Question[] = JSON.parse(room.questions); const q = questions[room.question_index] || null; const reveal = ["results", "finished", "closed"].includes(room.status);
+  const deck:SlideDeck|null=room.presentation?JSON.parse(room.presentation):null;const currentSlide=deck?.slides[room.slide_index]||null;const viewingQuestion=deck&&currentSlide?.kind==="question"?questionIndexAt(deck,room.slide_index):room.question_index;
+  const questions: Question[] = JSON.parse(room.questions); const q = deck&&currentSlide?.kind!=="question"?null:questions[viewingQuestion] || null; const reveal = ["slide","results", "finished", "closed"].includes(room.status);
   const players = await db().prepare(`SELECT p.id, p.name, p.avatar, p.joined_at, p.last_seen,
     COALESCE(SUM(CASE WHEN a.question_index < ? OR (? = 1 AND a.question_index = ?) THEN a.points ELSE 0 END),0) score,
     COALESCE(SUM(CASE WHEN a.question_index < ? OR (? = 1 AND a.question_index = ?) THEN a.correct ELSE 0 END),0) correctCount,
@@ -176,10 +183,11 @@ export async function roomState(request: Request, code: string) {
     MAX(CASE WHEN a.question_index = ? AND ? = 1 THEN a.correct ELSE NULL END) roundCorrect,
     MAX(CASE WHEN a.question_index = ? THEN a.option ELSE NULL END) submittedOption
     FROM players p LEFT JOIN answers a ON a.player = p.id AND a.room = p.room WHERE p.room = ? GROUP BY p.id
-    ORDER BY score DESC, correctCount DESC, ${room.mode === "accuracy" ? "" : "totalMs ASC,"} p.joined_at ASC, p.id ASC`).bind(room.question_index, reveal ? 1 : 0, room.question_index, room.question_index, reveal ? 1 : 0, room.question_index, room.question_index, reveal ? 1 : 0, room.question_index, room.question_index, room.question_index, reveal ? 1 : 0, room.question_index, reveal ? 1 : 0, room.question_index, code).all<any>();
+    ORDER BY score DESC, correctCount DESC, ${room.mode === "accuracy" ? "" : "totalMs ASC,"} p.joined_at ASC, p.id ASC`).bind(room.question_index, reveal ? 1 : 0, room.question_index, room.question_index, reveal ? 1 : 0, room.question_index, room.question_index, reveal ? 1 : 0, room.question_index, viewingQuestion, viewingQuestion, reveal ? 1 : 0, viewingQuestion, reveal ? 1 : 0, viewingQuestion, code).all<any>();
   const roster = players.results.map((p: any, i: number) => ({ id: p.id, name: p.name, avatar: p.avatar, score: p.score, correctCount: p.correctCount, totalMs: p.totalMs, position: i + 1, answered: !!p.answered, roundPoints: p.roundPoints, roundCorrect: p.roundCorrect === null ? null : !!p.roundCorrect, ...(user?.id === room.owner ? {lastSeen:p.last_seen} : {}) }));
   const own = me ? players.results.find(p => p.id === me.id) : null; const ownPublic = me ? roster.find(p => p.id === me.id) : null;
   const state: RoomState = { code, title: room.title, teacher: room.teacher, status: room.status, index: room.question_index, total: questions.length, startsAt: room.starts_at, endsAt: room.ends_at, serverNow: Date.now(), question: q ? { id: q.id, text: q.text, options: q.options, seconds: q.seconds, image: q.image, imageAlt: q.imageAlt, optionImages: q.optionImages } : null, correct: reveal && q ? q.correct : null, explanation: reveal && q ? q.explanation : null, players: roster, answeredCount: room.answered_count, isHost: user?.id === room.owner, me: ownPublic ? { ...ownPublic, option: own?.submittedOption ?? null } : null, expiresAt: room.expires_at, version, mode: room.mode || "speed", untimed: !!room.untimed, ...(user?.id === room.owner ? {presence:Object.fromEntries(players.results.map(p => [p.id,p.last_seen]))} : {}) };
+  if(deck){const {question:ignoredQuestion,notes,...publicSlide}=currentSlide||{};const p:RoomPresentation={id:deck.id,index:room.slide_index,total:deck.slides.length,step:room.build_step,steps:slideSteps(currentSlide),blackout:!!room.blackout,slide:currentSlide?{...publicSlide,...(state.isHost?{notes}:{})} as RoomPresentation["slide"]:null,questionIndex:viewingQuestion,review:currentSlide?.kind==="question"&&room.status==="slide",theme:deck.theme,showSlideNumbers:deck.showSlideNumbers};if(state.isHost)p.outline=deck.slides.map((s,i)=>({id:s.id,title:s.title||`Slide ${i+1}`,kind:s.kind,questionIndex:questionIndexAt(deck,i)}));state.presentation=p;}
   return json(state);
 }
 export async function answer(request: Request, code: string) {
@@ -212,6 +220,9 @@ export async function controlRoom(request: Request, code: string) {
     await db().prepare("DELETE FROM players WHERE id = ? AND room = ? AND EXISTS(SELECT 1 FROM rooms WHERE code = ? AND status = 'lobby')").bind(String(data.playerId), code, code).run(); return roomState(request, code);
   }
   if (data.index !== room.question_index || data.status !== room.status) throw new HttpError(409, "A sala já mudou. Aguarde a atualização da tela.");
+  if(room.presentation){if(data.slideIndex!==room.slide_index||data.step!==room.build_step)throw new HttpError(409,"O slide já mudou. Aguarde a atualização da tela.");const deck:SlideDeck=JSON.parse(room.presentation);let next:ReturnType<typeof movePresentation>;try{next=movePresentation(deck,{status:room.status,questionIndex:room.question_index,slideIndex:room.slide_index,step:room.build_step,blackout:!!room.blackout},data.action,data.targetSlide,data.blackout);}catch(e){throw new HttpError(409,(e as Error).message);}const startsAt=next.newRound?Date.now()+3000:null;const endsAt=next.newRound&&!room.untimed?startsAt!+JSON.parse(room.questions)[next.questionIndex].seconds*1000:null;
+    const result=await db().prepare("UPDATE rooms SET status = ?, question_index = ?, slide_index = ?, build_step = ?, blackout = ?, starts_at = ?, ends_at = ?, answered_count = CASE WHEN ? = 1 THEN 0 ELSE answered_count END WHERE code = ? AND owner = ? AND status = ? AND question_index = ? AND slide_index = ? AND build_step = ? AND blackout = ? AND expires_at > ?").bind(next.status,next.questionIndex,next.slideIndex,next.step,next.blackout?1:0,startsAt,endsAt,next.newRound?1:0,code,user.id,room.status,room.question_index,room.slide_index,room.build_step,room.blackout,Date.now()).run();if(!result.meta.changes)throw new HttpError(409,"Outra tela avançou a aula. Aguarde a atualização.");return roomState(request,code);
+  }
   let status: RoomState["status"] = room.status; let index = room.question_index; let startsAt = room.starts_at; let endsAt = room.ends_at;
   const questions: Question[] = JSON.parse(room.questions);
   if (data.action === "start" && room.status === "lobby") {
@@ -226,5 +237,5 @@ export async function controlRoom(request: Request, code: string) {
 }
 export async function heartbeat(request:Request,code:string) {
   await body(request); const player=await playerFor(request,code); if(!player)throw new HttpError(401,"Entre na sala antes de testar a conexão.");
-  const now=Date.now(); await db().prepare("UPDATE players SET last_seen = ? WHERE id = ? AND room = ? AND last_seen < ? AND EXISTS (SELECT 1 FROM rooms WHERE code = ? AND expires_at > ? AND status IN ('lobby','question','results'))").bind(now,player.id,code,now-12000,code,now).run(); return json({serverNow:Date.now(),connected:true});
+  const now=Date.now(); await db().prepare("UPDATE players SET last_seen = ? WHERE id = ? AND room = ? AND last_seen < ? AND EXISTS (SELECT 1 FROM rooms WHERE code = ? AND expires_at > ? AND status IN ('lobby','slide','question','results'))").bind(now,player.id,code,now-12000,code,now).run(); return json({serverNow:Date.now(),connected:true});
 }

@@ -16,11 +16,12 @@ export type Draft = { id: string; quiz: Quiz; updatedAt: number; revision: numbe
 export type BankQuestion = { id: string; question: Question; subject: string; topic: string; updatedAt: number };
 export type Player = { id: string; name: string; avatar: string; score: number; correctCount: number; totalMs: number; position: number; answered: boolean; roundPoints: number; roundCorrect: boolean | null; lastSeen?: number };
 export type RoomState = {
-  code: string; title: string; teacher: string; status: "lobby" | "question" | "results" | "finished" | "closed";
+  code: string; title: string; teacher: string; status: "lobby" | "slide" | "question" | "results" | "finished" | "closed";
   index: number; total: number; startsAt: number | null; endsAt: number | null; serverNow: number;
   question: Omit<Question, "correct" | "explanation"> | null; correct: number | null; explanation: string | null;
   players: Player[]; answeredCount: number; isHost: boolean; me: (Player & { option: number | null }) | null; expiresAt: number; version: string;
   mode: GameMode; untimed: boolean; presence?: Record<string, number>;
+  presentation?: import("./presentation").RoomPresentation;
 };
 export type ReportPlayer = { id: string; name: string; avatar: string; score: number; correctCount: number; answeredCount: number; position: number; answers: ({ option: number; correct: boolean; points: number; elapsedMs: number } | null)[] };
 export type LessonReport = { code: string; title: string; teacher: string; createdAt: number; status: string; mode: GameMode; untimed: boolean; total: number; completed: number; accuracy: number; players: ReportPlayer[]; questions: { question: Question; answered: number; correct: number; accuracy: number; choices: number[] }[] };

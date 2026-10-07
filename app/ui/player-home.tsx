@@ -24,7 +24,7 @@ export function PlayerHome() {
         const room=await api<RoomState>(`/api/rooms/${candidate}`);
         if(!alive)return;
         if(room.status==="closed"){try{leaveActiveRoom(localStorage,candidate);}catch{}setActive(null);setError("A sala anterior foi encerrada. Entre com o código da próxima atividade.");}
-        else if(room.me || room.status==="lobby"){try{saveActiveRoom(localStorage,room);}catch{}window.location.replace(`/participar/${candidate}`);return;}
+        else if(room.me || room.status==="lobby" || (room.presentation&&room.status==="slide")){try{saveActiveRoom(localStorage,room);}catch{}window.location.replace(`/participar/${candidate}`);return;}
         else{setCode(candidate);setError("Para retomar seu participante, abra o QuizEdu no navegador em que você entrou na sala.");}
       }catch(reason){if(!alive)return;const failure=reason as ApiError;setError(failure.status===0||failure.status>=500?"Sem conexão no momento. Sua sala continua guardada; tente retomá-la quando a internet voltar.":failure.message);if(failure.status===404||failure.status===409){try{leaveActiveRoom(localStorage,candidate);}catch{}setActive(null);}}
       if(alive)setRestoring(false);
@@ -34,7 +34,7 @@ export function PlayerHome() {
   async function enter(value:string){
     const parsed=roomCode(value,window.location.origin);if(!parsed){setError("Digite os 6 números da sala.");return;}
     setBusy(true);setError("");
-    try{const room=await api<RoomState>(`/api/rooms/${parsed}`);if(room.status==="closed")throw new Error("Esta sala foi encerrada. Peça ao professor um novo código.");if(!room.me&&room.status!=="lobby")throw new Error("Esta partida já começou. Aguarde o professor abrir outra sala.");try{saveActiveRoom(localStorage,room);}catch{}window.location.assign(`/participar/${parsed}`);}catch(reason){setError((reason as Error).message);setBusy(false);}
+    try{const room=await api<RoomState>(`/api/rooms/${parsed}`);if(room.status==="closed")throw new Error("Esta sala foi encerrada. Peça ao professor um novo código.");if(!room.me&&room.status!=="lobby"&&!(room.presentation&&room.status==="slide"))throw new Error("Esta partida já começou. Aguarde o professor abrir outra sala.");try{saveActiveRoom(localStorage,room);}catch{}window.location.assign(`/participar/${parsed}`);}catch(reason){setError((reason as Error).message);setBusy(false);}
   }
   function forget(){try{leaveActiveRoom(localStorage);}catch{}setActive(null);setError("");}
   return <div className="player-shell"><header className="player-topbar"><Brand href="/jogar"/><a className="player-teacher-link" href="/">Sou educador</a></header>

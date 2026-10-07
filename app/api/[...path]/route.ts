@@ -1,6 +1,7 @@
 import { answer, appManifest, body, controlRoom, createRoom, dashboard, deleteQuiz, HttpError, joinRoom, json, profile, resumePlayer, roomState, saveQuiz } from "@/lib/server";
 import { copySharedQuiz, deleteDraft, deleteQuestion, linkAccount, listQuestions, logout, readImage, reportCsv, reportData, saveDraft, saveQuestion, sharedQuiz, shareQuiz, unshareQuiz, uploadImage } from "@/lib/library-server";
 import { heartbeat } from "@/lib/server";
+import {deletePresentation,listPresentations,readPresentation,savePresentation} from "@/lib/presentation-server";
 export const dynamic = "force-dynamic";
 async function handle(request: Request) {
   try {
@@ -8,6 +9,12 @@ async function handle(request: Request) {
     if (method === "GET" && path.join("/") === "ping") return json({serverNow:Date.now()});
     if (method === "GET" && path.join("/") === "app-manifest") return await appManifest(request);
     if (method === "GET" && path[0] === "dashboard" && path.length === 1) return await dashboard(request);
+    if (path[0] === "presentations") {
+      if (method === "GET" && path.length === 1) return await listPresentations(request);
+      if (method === "GET" && path.length === 2) return await readPresentation(request,path[1]);
+      if (method === "POST" && path.length === 1) return await savePresentation(request);
+      if (method === "DELETE" && path.length === 2) return await deletePresentation(request,path[1]);
+    }
     if (method === "POST" && path[0] === "profile" && path.length === 1) return await profile(request);
     if (method === "POST" && path.join("/") === "account/link") return await linkAccount(request);
     if (method === "POST" && path.join("/") === "logout") return await logout(request);

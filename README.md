@@ -1,6 +1,6 @@
 # QuizEdu
 
-Site de quiz ao vivo para educadores, em português, com uma tela para o professor e outra para cada participante.
+Plataforma gratuita para educadores, em português, com quizzes ao vivo e aulas completas de slides com perguntas intercaladas. Uma tela para o professor, um telão e outra tela para cada participante.
 
 **Abrir o site:** https://quizedu-emanuel.emanuelb5.chatgpt.site
 
@@ -17,6 +17,23 @@ Site de quiz ao vivo para educadores, em português, com uma tela para o profess
 9. Ao final, o primeiro e o segundo lugares recebem destaque. Abra **Ver relatório da aula** ou a aba **Minhas aulas** para consultar os resultados, baixar CSV ou imprimir/salvar PDF.
 
 O exemplo **Brasil e natureza** contém cinco perguntas que podem ser adaptadas. O editor permite ordenar, duplicar e excluir perguntas, exportar JSON e importar uma cópia exportada.
+
+## Aulas com slides
+
+No painel inicial, abra **Aulas com slides** e **Nova aula**. O exemplo **Solo vivo, turma em ação** oferece oito slides de Agroecologia com duas perguntas intercaladas.
+
+- **Criação nativa:** tela 16:9 com 11 modelos e oito temas. Insira e formate textos com fontes, cores, títulos, listas, links e alinhamento; adicione imagens com recorte, formas, tabelas editáveis, gráficos de colunas/linha/pizza e vídeos do YouTube iniciados por clique.
+- **Edição visual:** arraste e redimensione objetos, altere rotação/opacidade, use seleção múltipla, agrupamento, alinhamento, distribuição, grade, guias, camadas, bloqueio, ocultação e entradas progressivas. Duplo clique abre a formatação de texto. Ctrl/Cmd Z desfaz; Shift Z refaz; C/V copia e cola objetos; D duplica. Setas movem a seleção, Shift + setas move dez unidades. Page Up/Down troca de slide. No celular, a tela mantém o slide acima e os painéis abaixo.
+- **Sequência:** arraste as miniaturas ou use setas para ordenar. Insira perguntas de múltipla escolha, verdadeiro/falso, sim/não ou imagem depois do slide atual. Reaproveite seu banco, um quiz pronto ou a importação e o fluxo de IA já existentes. As perguntas têm uma única resposta correta e exigem gabarito para abrir a sala.
+- **Salvamento:** automático, na conta ou no acesso temporário, com revisões para evitar que uma tela sobrescreva outra. Uma cópia no aparelho protege alterações durante falhas de conexão. Conflitos oferecem guardar outra cópia ou abrir a versão da conta. Notas do professor pertencem à aula e não são enviadas aos alunos.
+- **Apresentação:** a prévia permite ensaiar sem abrir uma partida. **Abrir sala** usa o mesmo QR code, nomes, avatares e app persistente dos alunos. **Iniciar aula** começa no primeiro slide. Setas/Space avançam, B pausa o telão entre perguntas e F alterna tela inteira. Uma nova pergunta inicia a rodada nos celulares. O ranking lateral segue acumulado até o pódio final, usando as mesmas regras de pontuação. As notas ficam no painel do professor; **Abrir telão em outra janela** projeta só a apresentação e o ranking. O ponteiro acompanha o telão em outra janela do mesmo navegador quando BroadcastChannel está disponível.
+- **Retomada e revisão:** todos os aparelhos acompanham o slide atual. Novos alunos podem entrar no intervalo de conteúdo; perguntas em andamento preservam a lista da rodada. Perguntas concluídas podem ser revistas, sem nova tentativa e sem repetir pontos. A ordem das perguntas inéditas é preservada. Salas guardam uma cópia da aula: editar ou excluir a apresentação original não muda aulas já abertas nem seus relatórios.
+- **Arquivos:** **Arquivo** baixa a aula QuizEdu em JSON, insere slides de uma cópia JSON, exporta PowerPoint com textos/formas/tabelas/gráficos editáveis e notas, ou abre impressão com um slide por página para salvar PDF pelo navegador. PowerPoint e PDF são cópias estáticas: as rodadas, o ranking e as entradas progressivas acontecem dentro do QuizEdu. Vídeos são links no PowerPoint. Não há importação de PPTX nesta versão.
+- **Limites de preparação:** até 150 slides, 60 objetos por slide, 50 perguntas, 5.000 caracteres de notas por slide e 1 MB no documento JSON, sem os arquivos de imagem, que ficam no armazenamento de mídia. Até 200 aulas em conta permanente ou 50 em acesso temporário. A lista usa apenas metadados, sem carregar os documentos completos. Os limites existentes de sala continuam: 100 participantes, cinco salas abertas por educador e validade de 24 horas.
+
+### QuizEdu padrão e futuro Pro
+
+O QuizEdu padrão mantém gratuitamente as funções de quiz já existentes. A criação e apresentação de aulas com slides estão **liberadas no gratuito agora**, conforme a decisão do proprietário. A proposta de **QuizEdu Pro a R$19 por mês** está registrada para uma etapa futura. Esta versão não configura pagamentos, assinatura, cobrança automática, limite artificial de acesso ao editor ou retirada de recursos existentes.
 
 ## App do aluno e retomada da sala
 

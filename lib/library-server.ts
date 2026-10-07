@@ -18,7 +18,7 @@ export async function linkAccount(request: Request) {
   if (temporary && temporary.id !== permanent.id) {
     // A single D1 transaction preserves ownership of all the existing work.
     await db().batch([
-      ...["quizzes","rooms","drafts","question_bank","uploads","shares"].map(table => db().prepare(`UPDATE ${table} SET owner = ? WHERE owner = ?`).bind(permanent.id,temporary.id)),
+      ...["quizzes","rooms","drafts","question_bank","uploads","shares","presentations"].map(table => db().prepare(`UPDATE ${table} SET owner = ? WHERE owner = ?`).bind(permanent.id,temporary.id)),
       db().prepare("UPDATE educators SET expires_at = ?, secret_hash = ? WHERE id = ? AND auth_id IS NULL").bind(Date.now(),await hash(secret()),temporary.id)
     ]);
   }
@@ -111,7 +111,7 @@ export async function reportData(request:Request,code:string):Promise<LessonRepo
   let room=await db().prepare("SELECT * FROM rooms WHERE code = ? AND owner = ?").bind(code,user.id).first<any>(); if(!room) throw new HttpError(404,"Relatório não encontrado neste acesso.");
   if(room.status==="question" && room.ends_at!==null && room.ends_at<=Date.now()) {await db().prepare("UPDATE rooms SET status = 'results' WHERE code = ? AND status = 'question' AND ends_at <= ?").bind(code,Date.now()).run(); room=await db().prepare("SELECT * FROM rooms WHERE code = ? AND owner = ?").bind(code,user.id).first<any>();}
   const status=room.expires_at<=Date.now()&&room.status!=="finished"?"closed":room.status;
-  const allQuestions:Question[]=JSON.parse(room.questions); const completed=Math.min(allQuestions.length,Math.max(0,room.question_index+(["results","finished","closed"].includes(status)?1:0)));
+  const allQuestions:Question[]=JSON.parse(room.questions); const completed=Math.min(allQuestions.length,Math.max(0,room.question_index+(["slide","results","finished","closed"].includes(status)?1:0)));
   const [roster,answers]=await db().batch([db().prepare("SELECT id,name,avatar,joined_at FROM players WHERE room = ? ORDER BY joined_at, id").bind(code),db().prepare("SELECT player,question_index,option,correct,points,elapsed_ms FROM answers WHERE room = ? AND question_index < ? ORDER BY question_index").bind(code,completed)]);
   const byPlayer=new Map<string,Map<number,any>>(); for(const a of answers.results as any[]){if(!byPlayer.has(a.player))byPlayer.set(a.player,new Map()); byPlayer.get(a.player)!.set(a.question_index,a);}
   const players:ReportPlayer[]=roster.results.map((p:any)=>{const rows=byPlayer.get(p.id); const list=Array.from({length:completed},(_,i)=>{const a=rows?.get(i); return a?{option:a.option,correct:!!a.correct,points:a.points,elapsedMs:a.elapsed_ms}:null;}); return {id:p.id,name:p.name,avatar:p.avatar,score:list.reduce((s,a)=>s+(a?.points||0),0),correctCount:list.filter(a=>a?.correct).length,answeredCount:list.filter(Boolean).length,position:0,answers:list};});
