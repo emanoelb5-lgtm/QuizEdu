@@ -43,10 +43,10 @@ try{
  await other.request(`/api/presentations/${deck.id}`,undefined,404);await phone.request("/api/presentations",{deck,revision:0,writeId:crypto.randomUUID()},409);
  const retry=await phone.request("/api/presentations",{deck,revision:0,writeId});eq(retry.presentation.revision,1);
  const room=await phone.request("/api/rooms",{presentationId:deck.id},201),route=`/api/rooms/${room.code}`;
- await student.request(`${route}/join`,{name:"Luana",avatar:"🦁"},201);
+ await student.request(`${route}/join`,{name:"Luana",avatar:"adventurer-24"},201);
  let state=await phone.request(route);ok(state.isHost);const control=(action)=>phone.request(`${route}/control`,{action,index:state.index,status:state.status,slideIndex:state.presentation.index,step:state.presentation.step});
  state=await control("start");eq(state.status,"slide");eq(state.presentation.slide.notes,"ANOTAÇÃO PRIVADA");
- let publicState=await student.request(route);eq(publicState.me.name,"Luana");ok(!JSON.stringify(publicState).includes("ANOTAÇÃO PRIVADA"));ok(!publicState.presentation.outline);ok(!publicState.isHost);
+ let publicState=await student.request(route);eq(publicState.me.name,"Luana");eq(publicState.me.avatar,"adventurer-24");ok(!JSON.stringify(publicState).includes("ANOTAÇÃO PRIVADA"));ok(!publicState.presentation.outline);ok(!publicState.isHost);
  const old=state;state=await control("next");eq(state.status,"question");await phone.request(`${route}/control`,{action:"next",index:old.index,status:old.status,slideIndex:old.presentation.index,step:old.presentation.step},409);
  publicState=await student.request(route);eq(publicState.correct,null);ok(!("correct" in publicState.question));ok(!JSON.stringify(publicState).includes("RESPOSTA PRIVADA"));
  await other.request(`${route}/control`,{action:"end_round",index:state.index,status:state.status,slideIndex:state.presentation.index,step:state.presentation.step},403);

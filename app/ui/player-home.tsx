@@ -6,6 +6,7 @@ import type { RoomState } from "@/lib/quiz";
 import { api, ApiError, Brand, Loading } from "./shared";
 import { AppInstallCard, usePlayerManifest } from "./player-app";
 import { QrScanner } from "./qr-scanner";
+import { ActionDock } from "./action-dock";
 
 export function PlayerHome() {
   const [code,setCode]=useState("");const [busy,setBusy]=useState(false);const [restoring,setRestoring]=useState(true);const [error,setError]=useState("");const [active,setActive]=useState<ActiveRoom|null>(null);const [scanner,setScanner]=useState(false);
@@ -37,13 +38,14 @@ export function PlayerHome() {
     try{const room=await api<RoomState>(`/api/rooms/${parsed}`);if(room.status==="closed")throw new Error("Esta sala foi encerrada. Peça ao professor um novo código.");if(!room.me&&room.status!=="lobby"&&!(room.presentation&&room.status==="slide"))throw new Error("Esta partida já começou. Aguarde o professor abrir outra sala.");try{saveActiveRoom(localStorage,room);}catch{}window.location.assign(`/participar/${parsed}`);}catch(reason){setError((reason as Error).message);setBusy(false);}
   }
   function forget(){try{leaveActiveRoom(localStorage);}catch{}setActive(null);setError("");}
-  return <div className="player-shell"><header className="player-topbar"><Brand href="/jogar"/><a className="player-teacher-link" href="/">Sou educador</a></header>
+  return <div className={`player-shell ${restoring?"":"has-action-dock"}`}><header className="player-topbar"><Brand href="/jogar"/><a className="player-teacher-link" href="/">Sou educador</a></header>
     {restoring?<Loading label="Retomando sua sala…"/>:<main className="player-home"><span className="badge badge-blue">QUIZEDU NO CELULAR</span><h1>Entre no jogo<span>!</span></h1><p>Use o código ou o QR code do professor.</p>
       {active&&<aside className="player-resume-card"><DoorOpen size={24}/><div><b>{active.title}</b><span>Sala {active.code}</span></div><button className="btn btn-primary" disabled={busy} onClick={()=>enter(active.code)}>Retomar</button><button className="btn btn-quiet" onClick={forget}>Sair dessa sala</button></aside>}
-      <form className="form-stack player-code-form" onSubmit={event=>{event.preventDefault();void enter(code);}}><label htmlFor="app-room-code">Código da sala</label><input className="code-input" id="app-room-code" inputMode="numeric" autoComplete="off" pattern="[0-9]{6}" maxLength={6} placeholder="000000" value={code} onChange={event=>setCode(event.target.value.replace(/\D/g,"").slice(0,6))} required/><button className="btn btn-primary" disabled={busy||code.length!==6}>{busy?<Loader2 size={19} className="spin"/>:<DoorOpen size={19}/>}Entrar na sala</button></form>
-      <div className="player-entry-divider"><span>ou</span></div><button className="btn btn-outline player-scan-button" disabled={busy} onClick={()=>{setError("");setScanner(true);}}><QrCode size={21}/>Ler QR code</button>
+      <form id="player-code-form" className="form-stack player-code-form" onSubmit={event=>{event.preventDefault();void enter(code);}}><label htmlFor="app-room-code">Código da sala</label><input className="code-input" id="app-room-code" inputMode="numeric" autoComplete="off" pattern="[0-9]{6}" maxLength={6} placeholder="000000" value={code} onChange={event=>setCode(event.target.value.replace(/\D/g,"").slice(0,6))} required/></form>
+
       {error&&<p className="form-error player-home-error" role="alert">{error}</p>}<AppInstallCard/>
     </main>}
+    {!restoring&&<ActionDock className="player-home-action-dock"><button type="submit" form="player-code-form" className="btn btn-primary" disabled={busy||code.length!==6}>{busy?<Loader2 size={19} className="spin"/>:<DoorOpen size={19}/>}Entrar na sala</button><button className="btn btn-outline" disabled={busy} onClick={()=>{setError("");setScanner(true);}}><QrCode size={21}/>Ler QR code</button></ActionDock>}
     <QrScanner open={scanner} onClose={()=>setScanner(false)} onCode={value=>{setScanner(false);setCode(value);void enter(value);}}/>
   </div>;
 }

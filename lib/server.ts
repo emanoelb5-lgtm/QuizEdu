@@ -1,5 +1,6 @@
+import { AVATARS } from "./avatars";
 import { env } from "cloudflare:workers";
-import { AVATARS, DURATIONS, MAX_POINTS, mediaPath, Question, QUESTION_TEMPLATES, Quiz, quizError, RoomState, scoreFor } from "./quiz";
+import { DURATIONS, MAX_POINTS, mediaPath, Question, QUESTION_TEMPLATES, Quiz, quizError, RoomState, scoreFor } from "./quiz";
 import { playerManifest } from "./player-app";
 import {deckQuestions,questionIndexAt,RoomPresentation,SlideDeck,slideSteps,validateDeck} from "./presentation";
 import {movePresentation} from "./presentation-flow";

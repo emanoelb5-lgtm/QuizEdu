@@ -1,0 +1,146 @@
+[
+  {
+    "id": "adventurer-01",
+    "name": "Alex",
+    "seed": "QuizEdu-Dani",
+    "background": "e8defb"
+  },
+  {
+    "id": "adventurer-02",
+    "name": "Bia",
+    "seed": "QuizEdu-Bia",
+    "background": "fce9ad"
+  },
+  {
+    "id": "adventurer-03",
+    "name": "Cris",
+    "seed": "QuizEdu-Cris",
+    "background": "d5f4e5"
+  },
+  {
+    "id": "adventurer-04",
+    "name": "Dani",
+    "seed": "QuizEdu-Alex",
+    "background": "dde8ff"
+  },
+  {
+    "id": "adventurer-05",
+    "name": "Eli",
+    "seed": "QuizEdu-Eli",
+    "background": "ffdce1"
+  },
+  {
+    "id": "adventurer-06",
+    "name": "Fran",
+    "seed": "QuizEdu-Fran",
+    "background": "cff1f2"
+  },
+  {
+    "id": "adventurer-07",
+    "name": "Gabi",
+    "seed": "QuizEdu-Gabi",
+    "background": "dde8ff"
+  },
+  {
+    "id": "adventurer-08",
+    "name": "Hugo",
+    "seed": "QuizEdu-Hugo",
+    "background": "fce9ad"
+  },
+  {
+    "id": "adventurer-09",
+    "name": "Iara",
+    "seed": "QuizEdu-Iara",
+    "background": "d5f4e5"
+  },
+  {
+    "id": "adventurer-10",
+    "name": "Jô",
+    "seed": "QuizEdu-Jô",
+    "background": "e8defb"
+  },
+  {
+    "id": "adventurer-11",
+    "name": "Kai",
+    "seed": "QuizEdu-Kai",
+    "background": "ffdce1"
+  },
+  {
+    "id": "adventurer-12",
+    "name": "Lia",
+    "seed": "QuizEdu-Lia",
+    "background": "cff1f2"
+  },
+  {
+    "id": "adventurer-13",
+    "name": "Mika",
+    "seed": "QuizEdu-Mika",
+    "background": "dde8ff"
+  },
+  {
+    "id": "adventurer-14",
+    "name": "Nico",
+    "seed": "QuizEdu-Nico",
+    "background": "fce9ad"
+  },
+  {
+    "id": "adventurer-15",
+    "name": "Olí",
+    "seed": "QuizEdu-Olí",
+    "background": "d5f4e5"
+  },
+  {
+    "id": "adventurer-16",
+    "name": "Pati",
+    "seed": "QuizEdu-Pati",
+    "background": "e8defb"
+  },
+  {
+    "id": "adventurer-17",
+    "name": "Ravi",
+    "seed": "QuizEdu-Ravi",
+    "background": "ffdce1"
+  },
+  {
+    "id": "adventurer-18",
+    "name": "Sam",
+    "seed": "QuizEdu-Sam",
+    "background": "cff1f2"
+  },
+  {
+    "id": "adventurer-19",
+    "name": "Téo",
+    "seed": "QuizEdu-Téo",
+    "background": "dde8ff"
+  },
+  {
+    "id": "adventurer-20",
+    "name": "Val",
+    "seed": "QuizEdu-Val",
+    "background": "fce9ad"
+  },
+  {
+    "id": "adventurer-21",
+    "name": "Yuri",
+    "seed": "QuizEdu-Yuri",
+    "background": "d5f4e5"
+  },
+  {
+    "id": "adventurer-22",
+    "name": "Zazá",
+    "seed": "QuizEdu-Zazá",
+    "background": "e8defb"
+  },
+  {
+    "id": "adventurer-23",
+    "name": "João",
+    "seed": "QuizEdu-João",
+    "background": "ffdce1"
+  },
+  {
+    "id": "adventurer-24",
+    "name": "Luz",
+    "seed": "QuizEdu-Luz",
+    "background": "cff1f2"
+  }
+]

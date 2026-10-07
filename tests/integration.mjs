@@ -48,7 +48,8 @@ try {
   let state = await host.request(`/api/rooms/${code}`); eq(state.status, "lobby"); check(state.isHost, "Host is authorized."); eq(state.question, null);
   await host.request(`/api/rooms/${code}/control`, { action: "start", status: "lobby", index: -1 }, 400);
   const alice = new Client(), bob = new Client(), carol = new Client(), duplicate = new Client(), kicked = new Client();
-  await alice.request(`/api/rooms/${code}/join`, { name: "Alice", avatar: "🦊" }, 201);
+  await alice.request(`/api/rooms/${code}/join`, { name: "Alice", avatar: "adventurer-01" }, 201);
+  eq((await alice.request(`/api/rooms/${code}`)).me.avatar, "adventurer-01", "Illustrated avatar IDs survive the real join and room protocol.");
   await bob.request(`/api/rooms/${code}/join`, { name: "Bob", avatar: "🐼" }, 201);
   await carol.request(`/api/rooms/${code}/join`, { name: "Carol", avatar: "🐸" }, 201);
   await duplicate.request(`/api/rooms/${code}/join`, { name: "ALICE", avatar: "🐝" }, 409);
