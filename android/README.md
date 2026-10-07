@@ -4,7 +4,7 @@ Cliente **nativo**, sem WebView, em Kotlin e Jetpack Compose. Compartilha salas,
 
 ## Instalar
 
-Baixe `QuizEdu-Android-1.1.1.apk` na [última versão do GitHub Releases](https://github.com/emanoelb5-lgtm/QuizEdu/releases/latest), abra o arquivo no Android e permita a instalação pelo navegador ou gerenciador de arquivos quando solicitado. Requer Android 7.0 ou superior. No app, escolha **Aluno** para entrar por código/QR code ou **Professor** para vincular a conta, editar aulas e controlar a apresentação no computador.
+Baixe `QuizEdu-Android-1.2.0.apk` na [última versão do GitHub Releases](https://github.com/emanoelb5-lgtm/QuizEdu/releases/latest), abra o arquivo no Android e permita a instalação pelo navegador ou gerenciador de arquivos quando solicitado. Requer Android 7.0 ou superior. No app, escolha **Aluno** para entrar por código/QR code ou **Professor** para vincular a conta, editar aulas e controlar a apresentação no computador.
 
 ## Compilar no GitHub
 

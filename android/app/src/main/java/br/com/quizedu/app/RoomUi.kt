@@ -3,12 +3,18 @@ package br.com.quizedu.app
 import android.graphics.Bitmap
 import android.os.SystemClock
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
+import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -19,8 +25,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,18 +65,18 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
     }
     if (!vm.roomTeacher && state.me == null && state.status != "finished") { JoinScreen(vm, state); return }
     val context = LocalContext.current
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
+    Column(Modifier.fillMaxSize()) {
+    LazyColumn(Modifier.weight(1f).fillMaxWidth().testTag("room-content"), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
         item { Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Column(Modifier.weight(1f)) { Text(state.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis); Text("Sala ${state.code} · ${state.raw.str("teacher")}", color = EduMuted, fontSize = 13.sp) }
-            if (!vm.roomTeacher) state.me?.let { Text(it.str("avatar"), fontSize = 32.sp) }
+            if (!vm.roomTeacher) state.me?.let { PlayerAvatar(it.str("avatar"), 40.dp) }
         } }
         if (!vm.connected) item { InfoCard("Reconectando à sala. Sua participação e seus pontos foram preservados. As respostas precisam de conexão para serem enviadas.", true) }
-        if (vm.roomTeacher) item { TeacherControls(vm, state, onClose = { closeConfirm = true }) }
         when (state.status) {
             "lobby" -> {
                 if (vm.roomTeacher) item { LobbyInvite(state.code) }
                 else item { Surface(color = EduNavy, shape = RoundedCornerShape(24.dp)) { Column(Modifier.fillMaxWidth().padding(25.dp), verticalArrangement = Arrangement.spacedBy(13.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(state.me?.str("avatar") ?: "🦊", fontSize = 60.sp)
+                    PlayerAvatar(state.me?.str("avatar") ?: avatarOptions.first().id, 88.dp)
                     Text("Você está na sala!", fontSize = 25.sp, fontWeight = FontWeight.Bold, color = Color.White)
                     Text("${state.me?.str("name")}, aguarde o professor iniciar a aula.", color = Color(0xFFD6DEEF))
                 } } }
@@ -107,23 +119,48 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
             }
         }
         if (vm.roomTeacher) item { TextButton(onClick = { openWeb(context, "/sala/${state.code}/tela") }) { Icon(Icons.Default.OpenInBrowser, null); Spacer(Modifier.width(8.dp)); Text("Abrir tela da apresentação no navegador") } }
-        if (state.status == "finished") item { Button(onClick = vm::leaveRoom, modifier = Modifier.fillMaxWidth()) { Text(if (vm.roomTeacher) "Voltar às minhas aulas" else "Entrar em outra sala") } }
+    }
+    if (vm.roomTeacher && state.status != "finished") TeacherControls(vm, state, onClose = { closeConfirm = true })
+    if (state.status == "finished") Surface(shadowElevation = 8.dp) { Button(onClick = vm::leaveRoom, modifier = Modifier.fillMaxWidth().padding(18.dp).heightIn(min = 52.dp)) { Text(if (vm.roomTeacher) "Voltar às minhas aulas" else "Entrar em outra sala") } }
     }
     if (closeConfirm) AlertDialog(onDismissRequest = { closeConfirm = false }, title = { Text("Encerrar a sala?") }, text = { Text("Os alunos deixam de responder. O relatório da aula permanece disponível na conta do professor.") }, confirmButton = { TextButton(onClick = { closeConfirm = false; vm.control("close") }) { Text("Encerrar sala") } }, dismissButton = { TextButton(onClick = { closeConfirm = false }) { Text("Continuar aula") } })
 }
 @Composable private fun JoinScreen(vm: QuizViewModel, state: RoomSnapshot) {
     var name by rememberSaveable(state.code) { mutableStateOf(vm.repository.preferences.getString("student_name", "") ?: "") }
-    var avatar by rememberSaveable(state.code) { mutableStateOf(vm.repository.preferences.getString("student_avatar", "🦊") ?: "🦊") }
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(22.dp), verticalArrangement = Arrangement.spacedBy(20.dp)) {
-        item { Heading("Você chegou!", "${state.title} · Sala ${state.code}") }
-        item { OutlinedTextField(name, { name = it.take(24) }, label = { Text("Como você quer aparecer?") }, singleLine = true, keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words), modifier = Modifier.fillMaxWidth()) }
-        item { Text("Escolha seu avatar", fontWeight = FontWeight.Bold) }
-        item { Column(verticalArrangement = Arrangement.spacedBy(8.dp)) { avatars.chunked(4).forEach { row -> Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) { row.forEach { item ->
-            FilledTonalButton(onClick = { avatar = item }, colors = ButtonDefaults.filledTonalButtonColors(containerColor = if (avatar == item) Color(0xFFDDE4FF) else Color.White), modifier = Modifier.weight(1f).height(63.dp), contentPadding = PaddingValues(4.dp)) { Text(item, fontSize = 28.sp) }
-        } } } } }
-        item { Button(onClick = { vm.join(name.trim(), avatar) }, enabled = !vm.busy && vm.connected && name.trim().length >= 2, modifier = Modifier.fillMaxWidth().height(54.dp)) { Text("Entrar e participar", fontWeight = FontWeight.Bold) } }
-        if (state.status in listOf("question", "results")) item { InfoCard("A turma está respondendo. Quem já entrou pode retomar com o mesmo aparelho. Em uma aula com slides, novos participantes podem entrar quando o professor passar para um slide de conteúdo.") }
-        item { TextButton(onClick = vm::leaveRoom) { Text("Usar outro código") } }
+    var avatar by rememberSaveable(state.code) { mutableStateOf(avatarOption(vm.repository.preferences.getString("student_avatar", "") ?: "").id) }
+    val keyboard = LocalSoftwareKeyboardController.current
+    val context = LocalContext.current
+    val canJoin = state.status == "lobby" || (state.presentation != null && state.status == "slide")
+    Column(Modifier.fillMaxSize().imePadding()) {
+        LazyColumn(Modifier.weight(1f).fillMaxWidth(), contentPadding = PaddingValues(22.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
+            item { Heading("Você chegou!", "${state.title} · Sala ${state.code}") }
+            item { OutlinedTextField(name, { name = it.take(24) }, label = { Text("Como você quer aparecer?") }, singleLine = true,
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Done), keyboardActions = KeyboardActions(onDone = { keyboard?.hide() }), modifier = Modifier.fillMaxWidth()) }
+            item { Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { Text("Escolha seu avatar", fontWeight = FontWeight.Bold); Text("Arraste para ver mais", color = EduMuted, fontSize = 12.sp) } }
+            item { LazyRow(Modifier.fillMaxWidth().selectableGroup().testTag("avatar-carousel"), horizontalArrangement = Arrangement.spacedBy(10.dp), contentPadding = PaddingValues(vertical = 4.dp)) {
+                items(avatarOptions, key = { it.id }) { option ->
+                    val selected = avatar == option.id
+                    val shape = RoundedCornerShape(20.dp)
+                    Surface(color = if (selected) Color(0xFFEAF0FF) else Color.White, shape = shape,
+                        modifier = Modifier.width(94.dp).border(2.dp, if (selected) EduBlue else Color(0xFFDCE3EF), shape)
+                            .selectable(selected = selected, role = Role.RadioButton, onClick = { avatar = option.id })
+                            .semantics { contentDescription = "Avatar ${option.name}" }.testTag("avatar-${option.id}")) {
+                        Column(Modifier.padding(8.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(7.dp)) {
+                            Box { PlayerAvatar(option.id, 74.dp); if (selected) Icon(Icons.Default.CheckCircle, "Selecionado", tint = EduBlue, modifier = Modifier.align(Alignment.TopEnd).size(23.dp)) }
+                            Text(option.name, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+                        }
+                    }
+                }
+            } }
+            item { Text("${avatarOption(avatar).name} selecionado", color = EduMuted, fontSize = 14.sp) }
+            item { TextButton(onClick = { openWeb(context, "https://www.dicebear.com/styles/adventurer/") }, contentPadding = PaddingValues(0.dp)) { Text("Adventurer · Lisa Wischofsky / DiceBear · CC BY 4.0", fontSize = 12.sp) } }
+            if (!canJoin) item { InfoCard("A turma está respondendo. Em uma apresentação, aguarde o professor passar para um slide de conteúdo para entrar.") }
+            item { TextButton(onClick = vm::leaveRoom) { Text("Usar outro código") } }
+        }
+        Surface(color = Color.White, shadowElevation = 8.dp, modifier = Modifier.fillMaxWidth()) {
+            Button(onClick = { keyboard?.hide(); vm.join(name.trim(), avatar) }, enabled = canJoin && !vm.busy && vm.connected && name.trim().length >= 2,
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 22.dp, vertical = 14.dp).heightIn(min = 54.dp).testTag("student-join-action")) { Text("Entrar e participar", fontWeight = FontWeight.Bold) }
+        }
     }
 }
 @Composable private fun LobbyInvite(code: String) {
@@ -140,21 +177,24 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
     } }
 }
 @Composable private fun TeacherControls(vm: QuizViewModel, state: RoomSnapshot, onClose: () -> Unit) {
-    OutlinedCard { Column(Modifier.fillMaxWidth().padding(15.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Text("Controle do professor", color = EduBlue, fontWeight = FontWeight.Bold)
-        val enabled = !vm.busy && vm.connected && state.isHost
-        if (state.status == "lobby") Button(onClick = { vm.control("start") }, enabled = enabled, modifier = Modifier.fillMaxWidth().height(52.dp)) { Icon(Icons.Default.PlayArrow, null); Spacer(Modifier.width(8.dp)); Text("Iniciar aula") }
-        else if (state.status != "finished") {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                if (state.presentation != null) OutlinedButton(onClick = { vm.control("previous") }, enabled = enabled && state.presentation!!.optInt("index") > 0 && state.status != "question", modifier = Modifier.weight(1f)) { Icon(Icons.Default.SkipPrevious, null); Text("Anterior") }
-                Button(onClick = { vm.control(if (state.status == "question") "end_round" else "next") }, enabled = enabled, modifier = Modifier.weight(1f)) {
-                    Text(if (state.status == "question") "Revelar resultado" else "Próximo"); Spacer(Modifier.width(5.dp)); Icon(Icons.Default.SkipNext, null)
+    val enabled = !vm.busy && vm.connected && state.isHost
+    Surface(color = Color.White, shadowElevation = 8.dp, modifier = Modifier.fillMaxWidth().testTag("teacher-controls")) {
+        Column(Modifier.padding(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            if (state.status == "lobby") {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) { Text("${state.players.size} participantes", color = EduMuted, fontSize = 14.sp); Text("Sala ${state.code}", color = EduBlue, fontWeight = FontWeight.Bold, fontSize = 14.sp) }
+                Button(onClick = { vm.control("start") }, enabled = enabled && (state.players.isNotEmpty() || state.presentation != null), modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).testTag("teacher-primary-action")) { Icon(Icons.Default.PlayArrow, null); Spacer(Modifier.width(8.dp)); Text(if (state.presentation != null) "Iniciar apresentação" else "Iniciar quiz") }
+            } else {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (state.presentation != null) OutlinedButton(onClick = { vm.control("previous") }, enabled = enabled && (state.presentation!!.optInt("index") > 0 || state.presentation!!.optInt("step") > 0) && state.status != "question", modifier = Modifier.weight(1f).heightIn(min = 52.dp)) { Icon(Icons.Default.SkipPrevious, null); Text("Anterior") }
+                    Button(onClick = { vm.control(if (state.status == "question") "end_round" else "next") }, enabled = enabled, modifier = Modifier.weight(1f).heightIn(min = 52.dp).testTag("teacher-primary-action")) { Text(if (state.status == "question") "Revelar resultado" else "Próximo"); Spacer(Modifier.width(5.dp)); Icon(Icons.Default.SkipNext, null) }
                 }
             }
-            if (state.presentation != null) OutlinedButton(onClick = { vm.control("blackout") }, enabled = enabled && state.status in listOf("slide", "results"), modifier = Modifier.fillMaxWidth()) { Icon(if (state.presentation!!.optBoolean("blackout")) Icons.Default.Visibility else Icons.Default.VisibilityOff, null); Spacer(Modifier.width(8.dp)); Text(if (state.presentation!!.optBoolean("blackout")) "Mostrar apresentação" else "Escurecer tela do computador") }
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
+                if (state.presentation != null && state.status != "lobby") TextButton(onClick = { vm.control("blackout") }, enabled = enabled && state.status in listOf("slide", "results")) { Icon(if (state.presentation!!.optBoolean("blackout")) Icons.Default.Visibility else Icons.Default.VisibilityOff, null); Spacer(Modifier.width(6.dp)); Text(if (state.presentation!!.optBoolean("blackout")) "Mostrar telão" else "Pausar telão", fontSize = 13.sp) }
+                TextButton(onClick = onClose, enabled = enabled) { Text("Encerrar sala", fontSize = 13.sp) }
+            }
         }
-        if (state.status != "finished") TextButton(onClick = onClose, enabled = enabled) { Text("Encerrar sala") }
-    } }
+    }
 }
 @Composable private fun QuestionPanel(vm: QuizViewModel, state: RoomSnapshot, revealed: Boolean) {
     val question = state.question ?: return
@@ -194,7 +234,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
     Surface(color = if (player.str("id") == me) Color(0xFFEAF0FF) else Color.White, shape = RoundedCornerShape(15.dp)) {
         Row(Modifier.fillMaxWidth().padding(15.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(11.dp)) {
             if (showScore) Text("${player.optInt("position")}º", fontWeight = FontWeight.Bold, color = EduMuted)
-            Text(player.str("avatar"), fontSize = 27.sp)
+            PlayerAvatar(player.str("avatar"), 38.dp)
             Column(Modifier.weight(1f)) { Text(player.str("name"), fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis); if (player.str("id") == me) Text("Você", style = MaterialTheme.typography.labelSmall, color = EduBlue) }
             if (showScore) Text(points(player.optInt("score")), fontWeight = FontWeight.ExtraBold, color = EduBlue)
             onRemove?.let { IconButton(onClick = it) { Icon(Icons.Default.PersonRemove, "Remover participante") } }
@@ -206,7 +246,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
         players.take(2).forEachIndexed { index, player -> Surface(color = if (index == 0) EduNavy else Color(0xFFEAF0FF), shape = RoundedCornerShape(22.dp), modifier = Modifier.weight(1f)) {
             Column(Modifier.padding(18.dp).heightIn(min = if (index == 0) 220.dp else 185.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Icon(Icons.Default.EmojiEvents, null, tint = if (index == 0) EduLime else EduBlue)
-                Text(player.str("avatar"), fontSize = if (index == 0) 48.sp else 38.sp)
+                PlayerAvatar(player.str("avatar"), if (index == 0) 78.dp else 64.dp)
                 Text("${index + 1}º lugar", color = if (index == 0) EduLime else EduBlue, fontWeight = FontWeight.Bold)
                 Text(player.str("name"), color = if (index == 0) Color.White else EduNavy, fontWeight = FontWeight.Bold, maxLines = 2)
                 Text("${points(player.optInt("score"))} pts", color = if (index == 0) Color.White else EduBlue)

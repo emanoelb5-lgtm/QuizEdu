@@ -3,6 +3,16 @@ package br.com.quizedu.app
 import android.app.Application
 import android.content.Context
 import androidx.compose.ui.test.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.sizeIn
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.core.graphics.drawable.toBitmap
+import coil.ImageLoader
+import coil.request.ImageRequest
+import coil.request.SuccessResult
+import coil.decode.SvgDecoder
+import kotlinx.coroutines.runBlocking
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.platform.app.InstrumentationRegistry
 import org.json.JSONArray
@@ -26,7 +36,7 @@ class NativeUiTest {
         repository = QuizRepository(app, client, client)
         repository.profile = JSONObject().put("id", "11111111-1111-4111-8111-111111111111").put("name", "Professora Clara").put("permanent", true)
         vm = QuizViewModel(app, repository)
-        compose.setContent { QuizEduTheme { QuizEduApp(vm) } }
+        compose.setContent { QuizEduTheme { Box(Modifier.sizeIn(maxWidth = 360.dp, maxHeight = 560.dp)) { QuizEduApp(vm) } } }
     }
     @Test fun liveSignalsAdvanceTheRoomAndOldSnapshotsCannotRollItBack() {
         val now = System.currentTimeMillis()
@@ -65,12 +75,58 @@ class NativeUiTest {
         compose.waitUntil(10000) { vm.room != null }
         compose.onNodeWithText("Você chegou!").assertIsDisplayed()
         compose.onNodeWithText("Como você quer aparecer?").performTextInput("Luana")
-        compose.onNodeWithText("🦁").performClick()
-        compose.onNodeWithText("Entrar e participar").performScrollTo().performClick()
+        compose.onNodeWithTag("student-join-action").assertIsDisplayed()
+        compose.onNodeWithText("Como você quer aparecer?").performImeAction()
+        compose.onNodeWithContentDescription("Avatar Bia").performClick()
+        compose.onNodeWithText("Entrar e participar").assertIsDisplayed().performClick()
         compose.waitUntil(10000) { vm.room?.me != null }
         compose.onNodeWithText("Você está na sala!").performScrollTo().assertIsDisplayed()
-        assertEquals("Luana", vm.room!!.me!!.str("name")); assertEquals("🦁", vm.room!!.me!!.str("avatar"))
+        assertEquals("Luana", vm.room!!.me!!.str("name")); assertEquals("adventurer-02", vm.room!!.me!!.str("avatar"))
         assertEquals("123456", repository.preferences.getString("student_room", ""))
+    }
+    @Test fun illustratedAssetsDecodeLocallyAndLegacyChoicesStillResolve() = runBlocking {
+        val loader = ImageLoader(app)
+        try {
+            assertEquals("adventurer-04", avatarOption("🦁").id)
+            assertEquals(24, avatarOptions.size)
+            for (avatar in avatarOptions) {
+                val result = loader.execute(ImageRequest.Builder(app).data("file:///android_asset/avatars/${avatar.id}.svg")
+                    .decoderFactory(SvgDecoder.Factory()).size(128).build())
+                assertTrue("${avatar.id} must decode without network access", result is SuccessResult)
+                val bitmap = (result as SuccessResult).drawable.toBitmap(128, 128)
+                val pixels = IntArray(128 * 128); bitmap.getPixels(pixels, 0, 128, 0, 0, 128, 128)
+                assertTrue("${avatar.id} must contain visible illustration paths", pixels.toSet().size > 20)
+            }
+        } finally { loader.shutdown() }
+    }
+    @Test fun avatarCarouselCanReachTheLastCharacterAndJoinStaysVisible() {
+        compose.runOnIdle { vm.openRoom("123456", false) }
+        compose.waitUntil(10000) { vm.room != null }
+        compose.onNodeWithContentDescription("Avatar Luz").assertDoesNotExist()
+        compose.onNodeWithTag("avatar-carousel").performTouchInput { swipeLeft() }
+        compose.onNodeWithTag("avatar-carousel").performScrollToNode(hasContentDescription("Avatar Luz"))
+        compose.onNodeWithContentDescription("Avatar Luz").assertIsDisplayed().performClick()
+        compose.onNodeWithText("Luz selecionado").assertExists()
+        compose.onNodeWithTag("student-join-action").assertIsDisplayed()
+    }
+    @Test fun teacherStartAndNextStayVisibleBesideLongParticipantLists() {
+        val players = JSONArray((1..100).map { JSONObject().put("id", "player-$it").put("name", "Aluno $it").put("avatar", avatarOptions[(it - 1) % 24].id).put("position", it).put("score", 0) })
+        val initial = JSONObject().put("code", "123456").put("title", "Aula com a turma toda").put("teacher", "Clara").put("status", "lobby").put("index", -1).put("total", 1).put("isHost", true)
+            .put("serverNow", System.currentTimeMillis()).put("version", "lobby:1").put("revision", 1).put("players", players)
+        client.transition(initial)
+        compose.runOnIdle { vm.openRoom("123456", true) }
+        compose.waitUntil(10000) { vm.room?.version == "lobby:1" }
+        compose.onNodeWithText("Iniciar quiz").assertIsDisplayed()
+        compose.onNodeWithTag("room-content").performScrollToNode(hasText("Aluno 100"))
+        compose.onNodeWithText("Iniciar quiz").assertIsDisplayed().assertIsEnabled()
+        client.transition(initial.copy().put("presentation", JSONObject().put("index", 0).put("step", 0).put("total", 2)).put("version", "lobby:2").put("revision", 2))
+        compose.waitUntil(10000) { vm.room?.version == "lobby:2" }
+        compose.onNodeWithText("Iniciar apresentação").assertIsDisplayed()
+        client.transition(initial.copy().put("status", "results").put("index", 0).put("version", "results:3").put("revision", 3))
+        compose.waitUntil(10000) { vm.room?.version == "results:3" }
+        compose.onNodeWithText("Próximo").assertIsDisplayed()
+        compose.onNodeWithTag("room-content").performScrollToNode(hasText("Aluno 100"))
+        compose.onNodeWithText("Próximo").assertIsDisplayed()
     }
     @Test fun teacherCreatesAndEditsARealNativeQuizSlide() {
         compose.onNodeWithText("Sou professor").performClick()

@@ -79,7 +79,7 @@ fun openWeb(context: Context, path: String) {
             if (vm.busy) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         }
     }) { padding ->
-        Box(Modifier.fillMaxSize().padding(padding)) {
+        Box(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding)) {
             when (vm.screen) {
                 AppScreen.Home -> if (vm.teacher) TeacherHome(vm) else StudentHome(vm)
                 AppScreen.Editor -> EditorScreen(vm)
@@ -109,11 +109,12 @@ fun openWeb(context: Context, path: String) {
 @Composable fun StudentHome(vm: QuizViewModel) {
     var code by rememberSaveable { mutableStateOf("") }
     val scanner = rememberLauncherForActivityResult(ScanContract()) { result -> result.contents?.let(vm::acceptLink) }
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(22.dp), verticalArrangement = Arrangement.spacedBy(22.dp)) {
+    Column(Modifier.fillMaxSize().imePadding()) {
+    LazyColumn(Modifier.weight(1f).fillMaxWidth(), contentPadding = PaddingValues(22.dp), verticalArrangement = Arrangement.spacedBy(22.dp)) {
         item { Surface(color = EduNavy, shape = RoundedCornerShape(28.dp), modifier = Modifier.fillMaxWidth()) {
             Column(Modifier.padding(26.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
-                Text("A TURMA TODA JOGA JUNTO", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = EduLime, letterSpacing = 1.2.sp)
-                Text("Pronto para\na próxima ideia?", color = Color.White, fontSize = 33.sp, lineHeight = 38.sp, fontWeight = FontWeight.ExtraBold)
+                Text("QUIZEDU NO CELULAR", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = EduLime, letterSpacing = 1.2.sp)
+                Text("Entre na sala", color = Color.White, fontSize = 28.sp, lineHeight = 34.sp, fontWeight = FontWeight.ExtraBold)
                 Text("Entre na sala, escolha seu avatar e participe da aula.", color = Color(0xFFCDD7EF), lineHeight = 23.sp)
             }
         } }
@@ -121,16 +122,21 @@ fun openWeb(context: Context, path: String) {
             Text("Qual é o código da sala?", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
             OutlinedTextField(value = code, onValueChange = { code = it.filter(Char::isDigit).take(6) }, singleLine = true,
                 label = { Text("Código de 6 números") }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number), modifier = Modifier.fillMaxWidth(), textStyle = MaterialTheme.typography.headlineMedium)
-            Button(onClick = { vm.acceptLink(code) }, enabled = code.length == 6, modifier = Modifier.fillMaxWidth().height(54.dp)) { Text("Entrar na sala", fontWeight = FontWeight.Bold) }
-            OutlinedButton(onClick = { scanner.launch(ScanOptions().setDesiredBarcodeFormats(ScanOptions.QR_CODE).setPrompt("Leia o QR code da sala QuizEdu").setBeepEnabled(false).setOrientationLocked(false)) }, modifier = Modifier.fillMaxWidth().height(54.dp)) {
-                Icon(Icons.Default.QrCodeScanner, null); Spacer(Modifier.width(10.dp)); Text("Ler QR code")
-            }
         } }
         val previous = vm.repository.preferences.getString("student_room", "") ?: ""
         if (previous.matches(Regex("[0-9]{6}"))) item { OutlinedCard(onClick = { vm.openRoom(previous, false) }) {
             Row(Modifier.padding(18.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Default.Restore, null, tint = EduBlue); Spacer(Modifier.width(12.dp)); Column { Text("Retomar minha sala", fontWeight = FontWeight.Bold); Text("Código $previous", color = EduMuted) } }
         } }
         item { InfoCard("Ao reabrir o aplicativo, sua sala, seu nome e sua pontuação são retomados neste aparelho.") }
+    }
+    Surface(color = Color.White, shadowElevation = 8.dp, modifier = Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(horizontal = 22.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Button(onClick = { vm.acceptLink(code) }, enabled = code.length == 6, modifier = Modifier.fillMaxWidth().height(54.dp)) { Text("Entrar na sala", fontWeight = FontWeight.Bold) }
+            OutlinedButton(onClick = { scanner.launch(ScanOptions().setDesiredBarcodeFormats(ScanOptions.QR_CODE).setPrompt("Leia o QR code da sala QuizEdu").setBeepEnabled(false).setOrientationLocked(false)) }, modifier = Modifier.fillMaxWidth().height(54.dp)) {
+                Icon(Icons.Default.QrCodeScanner, null); Spacer(Modifier.width(10.dp)); Text("Ler QR code")
+            }
+        }
+    }
     }
 }
 @Composable fun TeacherHome(vm: QuizViewModel) {

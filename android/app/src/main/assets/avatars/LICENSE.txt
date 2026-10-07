@@ -1,0 +1,13 @@
+QuizEdu illustrated avatars
+
+Adventurer by Lisa Wischofsky, remixed by DiceBear.
+Source: https://www.dicebear.com/styles/adventurer/
+Original: https://www.figma.com/community/file/1184595184137881796
+License: Creative Commons Attribution 4.0 International (CC BY 4.0)
+https://creativecommons.org/licenses/by/4.0/
+
+Generated from the official DiceBear 10.x Adventurer API on 2026-10-07.
+Deterministic seeds and pastel backgrounds are recorded in sources.json.
+QuizEdu adds SVG 1.1 xlink aliases to use references for Android compatibility.
+All illustration paths and embedded attribution are retained.
+Assets are bundled locally; displaying them does not contact DiceBear.

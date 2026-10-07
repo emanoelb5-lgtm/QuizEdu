@@ -1,10 +1,9 @@
-QuizEdu Android 1.1.1 — sincronização das salas e cronômetros.
+QuizEdu Android 1.2.0 — avatares ilustrados e controles sempre visíveis.
 
-- Slides, perguntas e resultados passam a receber notificações contínuas, com reconexão automática e atualização rápida de reserva.
-- Removidas as esperas de 1,6 a 4 segundos entre consultas normais da sala.
-- Cronômetro alinhado ao servidor usando relógio monotônico e amostras curtas de trânsito da conexão. A data configurada no aparelho não altera o tempo da rodada.
-- Atualizações antigas não substituem um estado mais recente. A sincronização é retomada ao voltar para o aplicativo.
-- Verificação de presença separada da atualização de slides; o professor não é mais tratado como participante aluno nessa verificação.
-- As regras de pontuação permanecem no servidor. Conexões instáveis ainda podem afetar o envio das respostas; a atualização não elimina a latência da internet.
+- 24 personagens Adventurer, de Lisa Wischofsky / DiceBear (CC BY 4.0), incluídos no aplicativo para carregar sem serviço externo.
+- Escolha do avatar em carrossel horizontal: deslize para explorar e toque para selecionar.
+- Botão de entrar fixo na tela, também com o teclado aberto.
+- Iniciar quiz ou apresentação, avançar e revelar resultado permanecem na tela enquanto você consulta o QR code, os participantes ou o ranking.
+- Os avatares ilustrados aparecem na espera, nos participantes, no ranking e no pódio. Salas e preferências de versões anteriores continuam compatíveis.
 
-Inclui a importação e as melhorias do editor da versão 1.1.0. Instale sobre a versão anterior: mesmo pacote e certificado. Android 7 ou superior. Compilação, testes no emulador, assinatura e publicação pelo GitHub Actions.
+Inclui as melhorias de sincronização, importação e edição das versões anteriores. Instale sobre o app atual: mesmo pacote e certificado. Android 7 ou superior.

@@ -10,7 +10,6 @@ import kotlin.math.max
 
 const val SLIDE_W = 1000f
 const val SLIDE_H = 562.5f
-val avatars = listOf("🦊", "🐼", "🐸", "🦁", "🐯", "🐨", "🐧", "🦉", "🐝", "🦋", "🐢", "🐙")
 val durations = listOf(10, 15, 20, 30, 45, 60, 90, 120)
 fun uid(): String = UUID.randomUUID().toString()
 fun JSONObject.copy(): JSONObject = JSONObject(toString())
