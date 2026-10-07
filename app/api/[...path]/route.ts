@@ -1,4 +1,4 @@
-import { answer, appManifest, body, controlRoom, createRoom, dashboard, deleteQuiz, HttpError, joinRoom, json, profile, resumePlayer, roomState, saveQuiz } from "@/lib/server";
+import { answer, appManifest, body, controlRoom, createRoom, dashboard, deleteQuiz, HttpError, joinRoom, json, profile, resumePlayer, roomState, roomEvents, saveQuiz } from "@/lib/server";
 import { copySharedQuiz, deleteDraft, deleteQuestion, linkAccount, listQuestions, logout, readImage, reportCsv, reportData, saveDraft, saveQuestion, sharedQuiz, shareQuiz, unshareQuiz, uploadImage } from "@/lib/library-server";
 import { heartbeat } from "@/lib/server";
 import {deletePresentation,listPresentations,readPresentation,savePresentation} from "@/lib/presentation-server";
@@ -54,6 +54,7 @@ async function handle(request: Request) {
     }
     if (method === "POST" && path[0] === "rooms" && path.length === 1) return await createRoom(request);
     if (path[0] === "rooms" && path.length >= 2) {
+      if (method === "GET" && path.length === 3 && path[2] === "events") return await roomEvents(request, path[1]);
       if (method === "GET" && path.length === 2) return await roomState(request, path[1]);
       if (method === "POST" && path.length === 3) {
         if (path[2] === "join") return await joinRoom(request, path[1]);

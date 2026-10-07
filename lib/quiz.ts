@@ -17,7 +17,7 @@ export type BankQuestion = { id: string; question: Question; subject: string; to
 export type Player = { id: string; name: string; avatar: string; score: number; correctCount: number; totalMs: number; position: number; answered: boolean; roundPoints: number; roundCorrect: boolean | null; lastSeen?: number };
 export type RoomState = {
   code: string; title: string; teacher: string; status: "lobby" | "slide" | "question" | "results" | "finished" | "closed";
-  index: number; total: number; startsAt: number | null; endsAt: number | null; serverNow: number;
+  index: number; total: number; startsAt: number | null; endsAt: number | null; serverNow: number; revision?: number; clock?: import("./live-clock").LiveClock;
   question: Omit<Question, "correct" | "explanation"> | null; correct: number | null; explanation: string | null;
   players: Player[]; answeredCount: number; isHost: boolean; me: (Player & { option: number | null }) | null; expiresAt: number; version: string;
   mode: GameMode; untimed: boolean; presence?: Record<string, number>;

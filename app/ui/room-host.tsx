@@ -14,7 +14,7 @@ import { LETTERS, RoomState } from "@/lib/quiz";
 
 export function RoomHost({code,projection=false}:{code:string;projection?:boolean}) {
   const {state,error,refresh,apply}=useRoom(code);const [qr,setQr]=useState("");const [link,setLink]=useState("");const [busy,setBusy]=useState(false);const [confirm,setConfirm]=useState<"close"|"end_round"|null>(null);const preferences=useGamePreferences();const phase=useRef("");
-  const seconds=useClock(state?.serverNow||0,state?.endsAt||null);const countdown=useClock(state?.serverNow||0,state?.startsAt||null);
+  const seconds=useClock(state?.serverNow||0,state?.endsAt||null,state?.clock);const countdown=useClock(state?.serverNow||0,state?.startsAt||null,state?.clock);
   useEffect(()=>{const url=`${window.location.origin}/participar/${code}`;setLink(url);QRCode.toDataURL(url,{width:320,margin:3,errorCorrectionLevel:"M",color:{dark:"#172554",light:"#ffffff"}}).then(setQr).catch(()=>toast.error("Não foi possível gerar o QR code. Use o código da sala."));},[code]);
   useEffect(()=>{if(!state)return;const key=`${state.status}:${state.index}`;if(phase.current&&phase.current!==key&&["question","results","finished"].includes(state.status))preferences.tone(state.status==="finished");phase.current=key;},[state?.status,state?.index]);
   async function action(action:string,playerId?:string){if(!state)return;setBusy(true);try{const next=await api<RoomState>(`/api/rooms/${code}/control`,{action,index:state.index,status:state.status,playerId,...(state.presentation?{slideIndex:state.presentation.index,step:state.presentation.step}:{})});apply(next);}catch(e){toast.error((e as Error).message);void refresh().catch(()=>{});}finally{setBusy(false);setConfirm(null);}}

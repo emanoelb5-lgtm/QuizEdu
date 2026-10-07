@@ -3,6 +3,7 @@ import { AVATARS, DURATIONS, MAX_POINTS, mediaPath, Question, QUESTION_TEMPLATES
 import { playerManifest } from "./player-app";
 import {deckQuestions,questionIndexAt,RoomPresentation,SlideDeck,slideSteps,validateDeck} from "./presentation";
 import {movePresentation} from "./presentation-flow";
+import {roomEventStream,roomVersion} from "./room-events";
 
 export class HttpError extends Error { constructor(public status: number, message: string) { super(message); } }
 export const db = () => { if (!env.DB) throw new HttpError(503, "O serviço está indisponível. Tente novamente em alguns instantes."); return env.DB; };
@@ -166,18 +167,22 @@ export async function joinRoom(request: Request, code: string) {
   return json({ joined: true, id }, 201, sessionCookie(request, `qe_player_${code}`, token, 86400));
 }
 async function settle(code: string) {
-  const now = Date.now(); await db().prepare("UPDATE rooms SET status = 'results' WHERE code = ? AND status = 'question' AND (ends_at <= ? OR (starts_at <= ? AND player_count > 0 AND answered_count >= player_count))").bind(code, now, now).run();
+  const now = Date.now(); await db().prepare("UPDATE rooms SET status = 'results', roster_version = roster_version + 1 WHERE code = ? AND status = 'question' AND (ends_at <= ? OR (starts_at <= ? AND player_count > 0 AND answered_count >= player_count))").bind(code, now, now).run();
+}
+export async function roomEvents(request: Request, code: string) {
+  await getRoom(code, false);
+  return roomEventStream(request, db(), code);
 }
 export async function roomState(request: Request, code: string) {
   const since=new URL(request.url).searchParams.get("since");let room = await getRoom(code,!since);
   if (room.status === "question" && ((room.ends_at !== null && room.ends_at <= Date.now()) || (room.player_count > 0 && room.answered_count >= room.player_count))) { await settle(code); room = await getRoom(code,!since); }
-  let version = `${room.status}:${room.question_index}:${room.slide_index}:${room.build_step}:${room.blackout}:${room.roster_version}`;
+  let version = roomVersion(room);
   if (new URL(request.url).searchParams.get("since") === version) {
     let presence: Record<string,number> | undefined;
     if (new URL(request.url).searchParams.has("presence") && (await educator(request,false))?.id === room.owner) { const rows = await db().prepare("SELECT id, last_seen FROM players WHERE room = ?").bind(code).all<{id:string;last_seen:number}>(); presence = Object.fromEntries(rows.results.map(p => [p.id,p.last_seen])); }
-    return json({ pulse: true, version, answeredCount: room.answered_count, serverNow: Date.now(), ...(presence ? {presence} : {}) });
+    return json({ pulse: true, version, revision: room.roster_version, answeredCount: room.answered_count, serverNow: Date.now(), ...(presence ? {presence} : {}) });
   }
-  if(since){room=await getRoom(code);version=`${room.status}:${room.question_index}:${room.slide_index}:${room.build_step}:${room.blackout}:${room.roster_version}`;}
+  if(since){room=await getRoom(code);version=roomVersion(room);}
   const [user, me] = await Promise.all([educator(request, false), playerFor(request, code)]);
   const deck:SlideDeck|null=room.presentation?JSON.parse(room.presentation):null;const currentSlide=deck?.slides[room.slide_index]||null;const viewingQuestion=deck&&currentSlide?.kind==="question"?questionIndexAt(deck,room.slide_index):room.question_index;
   const questions: Question[] = JSON.parse(room.questions); const q = deck&&currentSlide?.kind!=="question"?null:questions[viewingQuestion] || null; const reveal = ["slide","results", "finished", "closed"].includes(room.status);
@@ -193,7 +198,7 @@ export async function roomState(request: Request, code: string) {
     ORDER BY score DESC, correctCount DESC, ${room.mode === "accuracy" ? "" : "totalMs ASC,"} p.joined_at ASC, p.id ASC`).bind(room.question_index, reveal ? 1 : 0, room.question_index, room.question_index, reveal ? 1 : 0, room.question_index, room.question_index, reveal ? 1 : 0, room.question_index, viewingQuestion, viewingQuestion, reveal ? 1 : 0, viewingQuestion, reveal ? 1 : 0, viewingQuestion, code).all<any>();
   const roster = players.results.map((p: any, i: number) => ({ id: p.id, name: p.name, avatar: p.avatar, score: p.score, correctCount: p.correctCount, totalMs: p.totalMs, position: i + 1, answered: !!p.answered, roundPoints: p.roundPoints, roundCorrect: p.roundCorrect === null ? null : !!p.roundCorrect, ...(user?.id === room.owner ? {lastSeen:p.last_seen} : {}) }));
   const own = me ? players.results.find(p => p.id === me.id) : null; const ownPublic = me ? roster.find(p => p.id === me.id) : null;
-  const state: RoomState = { code, title: room.title, teacher: room.teacher, status: room.status, index: room.question_index, total: questions.length, startsAt: room.starts_at, endsAt: room.ends_at, serverNow: Date.now(), question: q ? { id: q.id, text: q.text, options: q.options, seconds: q.seconds, image: q.image, imageAlt: q.imageAlt, optionImages: q.optionImages } : null, correct: reveal && q ? q.correct : null, explanation: reveal && q ? q.explanation : null, players: roster, answeredCount: room.answered_count, isHost: user?.id === room.owner, me: ownPublic ? { ...ownPublic, option: own?.submittedOption ?? null } : null, expiresAt: room.expires_at, version, mode: room.mode || "speed", untimed: !!room.untimed, ...(user?.id === room.owner ? {presence:Object.fromEntries(players.results.map(p => [p.id,p.last_seen]))} : {}) };
+  const state: RoomState = { code, title: room.title, teacher: room.teacher, status: room.status, index: room.question_index, total: questions.length, startsAt: room.starts_at, endsAt: room.ends_at, serverNow: Date.now(), revision: room.roster_version, question: q ? { id: q.id, text: q.text, options: q.options, seconds: q.seconds, image: q.image, imageAlt: q.imageAlt, optionImages: q.optionImages } : null, correct: reveal && q ? q.correct : null, explanation: reveal && q ? q.explanation : null, players: roster, answeredCount: room.answered_count, isHost: user?.id === room.owner, me: ownPublic ? { ...ownPublic, option: own?.submittedOption ?? null } : null, expiresAt: room.expires_at, version, mode: room.mode || "speed", untimed: !!room.untimed, ...(user?.id === room.owner ? {presence:Object.fromEntries(players.results.map(p => [p.id,p.last_seen]))} : {}) };
   if(deck){const {question:ignoredQuestion,notes,...publicSlide}=currentSlide||{};const p:RoomPresentation={id:deck.id,index:room.slide_index,total:deck.slides.length,step:room.build_step,steps:slideSteps(currentSlide),blackout:!!room.blackout,slide:currentSlide?{...publicSlide,...(state.isHost?{notes}:{})} as RoomPresentation["slide"]:null,questionIndex:viewingQuestion,review:currentSlide?.kind==="question"&&room.status==="slide",theme:deck.theme,showSlideNumbers:deck.showSlideNumbers};if(state.isHost)p.outline=deck.slides.map((s,i)=>({id:s.id,title:s.title||`Slide ${i+1}`,kind:s.kind,questionIndex:questionIndexAt(deck,i)}));state.presentation=p;}
   return json(state);
 }
@@ -228,7 +233,7 @@ export async function controlRoom(request: Request, code: string) {
   }
   if (data.index !== room.question_index || data.status !== room.status) throw new HttpError(409, "A sala já mudou. Aguarde a atualização da tela.");
   if(room.presentation){if(data.slideIndex!==room.slide_index||data.step!==room.build_step)throw new HttpError(409,"O slide já mudou. Aguarde a atualização da tela.");const deck:SlideDeck=JSON.parse(room.presentation);let next:ReturnType<typeof movePresentation>;try{next=movePresentation(deck,{status:room.status,questionIndex:room.question_index,slideIndex:room.slide_index,step:room.build_step,blackout:!!room.blackout},data.action,data.targetSlide,data.blackout);}catch(e){throw new HttpError(409,(e as Error).message);}const startsAt=next.newRound?Date.now()+3000:null;const endsAt=next.newRound&&!room.untimed?startsAt!+JSON.parse(room.questions)[next.questionIndex].seconds*1000:null;
-    const result=await db().prepare("UPDATE rooms SET status = ?, question_index = ?, slide_index = ?, build_step = ?, blackout = ?, starts_at = ?, ends_at = ?, answered_count = CASE WHEN ? = 1 THEN 0 ELSE answered_count END WHERE code = ? AND owner = ? AND status = ? AND question_index = ? AND slide_index = ? AND build_step = ? AND blackout = ? AND expires_at > ?").bind(next.status,next.questionIndex,next.slideIndex,next.step,next.blackout?1:0,startsAt,endsAt,next.newRound?1:0,code,user.id,room.status,room.question_index,room.slide_index,room.build_step,room.blackout,Date.now()).run();if(!result.meta.changes)throw new HttpError(409,"Outra tela avançou a aula. Aguarde a atualização.");return roomState(request,code);
+    const result=await db().prepare("UPDATE rooms SET roster_version = roster_version + 1, status = ?, question_index = ?, slide_index = ?, build_step = ?, blackout = ?, starts_at = ?, ends_at = ?, answered_count = CASE WHEN ? = 1 THEN 0 ELSE answered_count END WHERE code = ? AND owner = ? AND status = ? AND question_index = ? AND slide_index = ? AND build_step = ? AND blackout = ? AND expires_at > ?").bind(next.status,next.questionIndex,next.slideIndex,next.step,next.blackout?1:0,startsAt,endsAt,next.newRound?1:0,code,user.id,room.status,room.question_index,room.slide_index,room.build_step,room.blackout,Date.now()).run();if(!result.meta.changes)throw new HttpError(409,"Outra tela avançou a aula. Aguarde a atualização.");return roomState(request,code);
   }
   let status: RoomState["status"] = room.status; let index = room.question_index; let startsAt = room.starts_at; let endsAt = room.ends_at;
   const questions: Question[] = JSON.parse(room.questions);
@@ -239,7 +244,7 @@ export async function controlRoom(request: Request, code: string) {
   else if (data.action === "close") status = "closed";
   else throw new HttpError(409, "Esta ação não está disponível nesta etapa.");
   if (status === "question") { startsAt = Date.now() + 3000; endsAt = room.untimed ? null : startsAt + questions[index].seconds * 1000; }
-  const result = await db().prepare("UPDATE rooms SET status = ?, question_index = ?, starts_at = ?, ends_at = ?, answered_count = CASE WHEN ? = 'question' THEN 0 ELSE answered_count END WHERE code = ? AND owner = ? AND status = ? AND question_index = ? AND expires_at > ?").bind(status, index, startsAt, endsAt, status, code, user.id, room.status, room.question_index, Date.now()).run();
+  const result = await db().prepare("UPDATE rooms SET roster_version = roster_version + 1, status = ?, question_index = ?, starts_at = ?, ends_at = ?, answered_count = CASE WHEN ? = 'question' THEN 0 ELSE answered_count END WHERE code = ? AND owner = ? AND status = ? AND question_index = ? AND expires_at > ?").bind(status, index, startsAt, endsAt, status, code, user.id, room.status, room.question_index, Date.now()).run();
   if (!result.meta.changes) throw new HttpError(409, "A sala já mudou. Aguarde a atualização da tela."); return roomState(request, code);
 }
 export async function heartbeat(request:Request,code:string) {
