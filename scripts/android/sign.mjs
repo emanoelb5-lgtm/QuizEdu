@@ -13,7 +13,14 @@ const oidcResponse = await fetch(oidcUrl, {headers: {Authorization: "Bearer " + 
 if (!oidcResponse.ok) throw new Error("GitHub OIDC authentication failed: " + oidcResponse.status);
 const {value: jwt} = await oidcResponse.json(); mask(jwt);
 const response = await fetch(audience, {method:"POST", headers:{Authorization:"Bearer " + jwt}});
-if (!response.ok) throw new Error("QuizEdu signing service rejected this build: " + response.status);
+if (!response.ok) {
+  // Diagnose only public identity metadata. The JWT and signing material stay masked.
+  const claims = JSON.parse(Buffer.from(jwt.split(".")[1], "base64url").toString("utf8"));
+  const fields = ["iss", "aud", "sub", "repository", "repository_id", "repository_owner_id", "ref", "ref_type", "event_name", "workflow_ref", "job_workflow_ref", "runner_environment", "iat", "nbf", "exp"];
+  console.error("Identidade pública do build:", JSON.stringify(Object.fromEntries(fields.filter(key => claims[key] !== undefined).map(key => [key, claims[key]]))));
+  let error; try { error = (await response.json()).error; } catch {}
+  throw new Error("QuizEdu signing service rejected this build: " + response.status + (typeof error === "string" ? " — " + error.slice(0, 200) : ""));
+}
 const bundle = await response.json();
 for (const key of ["keystore", "storePassword", "keyPassword"]) {
   if (typeof bundle[key] !== "string" || !bundle[key]) throw new Error("Incomplete private signing bundle.");
