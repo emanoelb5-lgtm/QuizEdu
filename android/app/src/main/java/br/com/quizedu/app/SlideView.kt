@@ -97,7 +97,7 @@ fun annotatedRichText(doc: JSONObject?, scale: Float, baseSize: Float): Annotate
 }
 
 @Composable fun SlideView(slide: JSONObject, modifier: Modifier = Modifier, step: Int = Int.MAX_VALUE,
-    selected: String? = null, editable: Boolean = false, onSelect: (String?) -> Unit = {}, onDrag: (String, Float, Float) -> Unit = { _, _, _ -> }) {
+    selected: String? = null, editable: Boolean = false, onSelect: (String?) -> Unit = {}, onDrag: (String, Float, Float) -> Unit = { _, _, _ -> }, onResize: (String, Float, Float) -> Unit = { _, _, _ -> }, selectedIds: Set<String> = emptySet(), imageOverrides: Map<String, ByteArray> = emptyMap()) {
     val density = LocalDensity.current
     val background = slide.optJSONObject("background") ?: JSONObject()
     BoxWithConstraints(modifier.aspectRatio(16f / 9f).clip(RoundedCornerShape(10.dp)).background(hexColor(background.str("color", "#ffffff")))) {
@@ -109,7 +109,7 @@ fun annotatedRichText(doc: JSONObject?, scale: Float, baseSize: Float): Annotate
             Box(Modifier.fillMaxSize().background(Brush.linearGradient(listOf(hexColor(background.str("color")), hexColor(background.str("color2"))),
                 start = Offset.Zero, end = Offset((cos(angle).toFloat() + 1f) * maxWidth.value * density.density / 2, (sin(angle).toFloat() + 1f) * maxHeight.value * density.density / 2))))
         }
-        mediaUrl(background.str("image"))?.let { AsyncImage(it, "Fundo do slide", contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize()) }
+        (imageOverrides[background.str("image")] ?: mediaUrl(background.str("image")))?.let { AsyncImage(it, "Fundo do slide", contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize()) }
         val overlay = background.optDouble("overlay", 0.0).toFloat().coerceIn(0f, 90f) / 100f
         if (overlay > 0f) Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = overlay)))
         if (editable) Box(Modifier.fillMaxSize().clickable { onSelect(null) })
@@ -135,14 +135,15 @@ fun annotatedRichText(doc: JSONObject?, scale: Float, baseSize: Float): Annotate
                 if (!e.optBoolean("locked")) elementModifier = elementModifier.pointerInput(id, pixelScale) {
                     detectDragGestures(onDragStart = { onSelect(id) }) { change, amount -> change.consume(); onDrag(id, amount.x / pixelScale, amount.y / pixelScale) }
                 }
-                if (selected == id) elementModifier = elementModifier.border(2.dp, EduBlue)
+                if (selected == id || id in selectedIds) elementModifier = elementModifier.border(2.dp, EduBlue)
             }
-            Box(elementModifier.clip(RoundedCornerShape((e.optDouble("radius", 0.0).toFloat() * scale).dp))) { SlideObject(e, textScale, scale, editable) }
+            Box(elementModifier.clip(RoundedCornerShape((e.optDouble("radius", 0.0).toFloat() * scale).dp))) { SlideObject(e, textScale, scale, editable, imageOverrides) }
+            if (editable && selected == id && !e.optBoolean("locked")) Box(Modifier.offset(((e.optDouble("x") + e.optDouble("w")).toFloat() * scale - 16).dp, ((e.optDouble("y") + e.optDouble("h")).toFloat() * scale - 16).dp).size(32.dp).pointerInput(id, pixelScale) { detectDragGestures { change, amount -> change.consume(); onResize(id, amount.x / pixelScale, amount.y / pixelScale) } }, contentAlignment = Alignment.Center) { Box(Modifier.size(14.dp).background(EduBlue, RoundedCornerShape(3.dp)).border(2.dp, Color.White, RoundedCornerShape(3.dp))) }
         }
     }
 }
 
-@Composable private fun SlideObject(e: JSONObject, textScale: Float, scale: Float, editable: Boolean) {
+@Composable private fun SlideObject(e: JSONObject, textScale: Float, scale: Float, editable: Boolean, imageOverrides: Map<String, ByteArray>) {
     val context = LocalContext.current
     when (e.str("type")) {
         "text" -> {
@@ -150,7 +151,7 @@ fun annotatedRichText(doc: JSONObject?, scale: Float, baseSize: Float): Annotate
             Text(annotatedRichText(e.optJSONObject("doc"), textScale, size), fontSize = (size * textScale).sp, lineHeight = (size * textScale * 1.2f).sp,
                 fontFamily = family(e.str("font")), color = hexColor(e.str("color")), textAlign = when (e.str("align")) { "center" -> TextAlign.Center; "right" -> TextAlign.Right; "justify" -> TextAlign.Justify; else -> TextAlign.Left }, modifier = Modifier.fillMaxSize(), overflow = TextOverflow.Clip)
         }
-        "image" -> if (mediaUrl(e.str("src")) != null) AsyncImage(mediaUrl(e.str("src")), e.str("alt", "Imagem do slide"), modifier = Modifier.fillMaxSize(),
+        "image" -> if (imageOverrides[e.str("src")] != null || mediaUrl(e.str("src")) != null) AsyncImage(imageOverrides[e.str("src")] ?: mediaUrl(e.str("src")), e.str("alt", "Imagem do slide"), modifier = Modifier.fillMaxSize(),
             contentScale = if (e.str("fit") == "contain") ContentScale.Fit else ContentScale.Crop,
             alignment = BiasAlignment((e.optDouble("positionX", 50.0).toFloat() - 50f) / 50f, (e.optDouble("positionY", 50.0).toFloat() - 50f) / 50f))
         else Box(Modifier.fillMaxSize().background(Color(0xFFEAF0FF)), contentAlignment = Alignment.Center) { Icon(Icons.Default.Image, "Imagem ainda não adicionada", tint = EduMuted, modifier = Modifier.size((70 * scale).dp)) }

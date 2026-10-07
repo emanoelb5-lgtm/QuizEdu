@@ -10,6 +10,8 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
@@ -30,6 +32,19 @@ class QuizViewModel(application: Application, val repository: QuizRepository) : 
     var editor by mutableStateOf<LessonDraft?>(null); private set
     var slideIndex by mutableStateOf(0); private set
     var selectedElement by mutableStateOf<String?>(null); private set
+    var selection by mutableStateOf<Set<String>>(emptySet()); private set
+    var importError by mutableStateOf<String?>(null); private set
+    var pendingImport by mutableStateOf<PresentationImport?>(null); private set
+    var canUndo by mutableStateOf(false); private set
+    var canRedo by mutableStateOf(false); private set
+    var canPaste by mutableStateOf(false); private set
+    private val undoHistory = mutableListOf<String>()
+    private val redoHistory = mutableListOf<String>()
+    private var historyTime = 0L
+    private var historyKey = ""
+    private var clipboard = emptyList<JSONObject>()
+    private val importedImages = mutableMapOf<String, String>()
+    private fun clearHistory() { undoHistory.clear(); redoHistory.clear(); canUndo = false; canRedo = false; selection = emptySet(); historyKey = "" }
     var room by mutableStateOf<RoomSnapshot?>(null); private set
     var currentCode by mutableStateOf(""); private set
     var roomTeacher by mutableStateOf(false); private set
@@ -54,7 +69,7 @@ class QuizViewModel(application: Application, val repository: QuizRepository) : 
         viewModelScope.launch {
             busy = true
             try { work() }
-            catch (e: Exception) { message = e.message ?: "Não foi possível concluir. Sua edição foi preservada." }
+            catch (e: Exception) { message = e.message ?: "Não foi possível concluir. Sua edição foi preservada."; if (pendingImport != null) importError = message }
             finally { busy = false }
         }
     }
@@ -143,28 +158,69 @@ class QuizViewModel(application: Application, val repository: QuizRepository) : 
     }
     fun newLesson() {
         if (busy || profile == null) return
+        clearHistory()
         val draft = LessonDraft(newDeck(), 0, true); repository.store(draft)
         editor = draft; slideIndex = 0; selectedElement = null; screen = AppScreen.Editor
     }
     fun editLesson(id: String) = perform {
+        clearHistory()
         editor = repository.load(id); slideIndex = 0; selectedElement = null; screen = AppScreen.Editor
     }
-    fun closeEditor() { if (busy) return; editor = null; home() }
+    fun closeEditor() { if (busy) return; clearHistory(); editor = null; home() }
     fun selectSlide(index: Int) {
         if (busy) return
-        slideIndex = index.coerceIn(0, (editor?.deck?.arr("slides")?.length() ?: 1) - 1); selectedElement = null
+        slideIndex = index.coerceIn(0, (editor?.deck?.arr("slides")?.length() ?: 1) - 1); selectedElement = null; selection = emptySet(); historyKey = ""
     }
-    fun selectElement(id: String?) { selectedElement = id }
-    fun changeDeck(change: (JSONObject) -> Unit) {
+    fun selectElement(id: String?) { selectedElement = id; val group = slide?.arr("elements")?.objects()?.find { it.str("id") == id }?.str("group")
+        selection = if (id == null) emptySet() else if (!group.isNullOrBlank()) slide!!.arr("elements").objects().filter { it.str("group") == group }.map { it.str("id") }.toSet() else setOf(id) }
+    fun toggleElement(id: String) { selection = if (id in selection) selection - id else selection + id; selectedElement = selection.firstOrNull() }
+    fun changeDeck(mergeKey: String = "", change: (JSONObject) -> Unit) {
         if (busy) return
         val old = editor ?: return; val deck = old.deck.copy(); change(deck)
+        if (old.deck.toString() == deck.toString()) return
+        val now = SystemClock.elapsedRealtime()
+        if (mergeKey.isBlank() || mergeKey != historyKey || now - historyTime > 800) {
+            undoHistory.add(old.deck.toString()); while (undoHistory.size > 30 || (undoHistory.size > 1 && undoHistory.sumOf { it.length } > 8 * 1024 * 1024)) undoHistory.removeAt(0)
+        }
+        historyKey = mergeKey; historyTime = now; redoHistory.clear(); canUndo = undoHistory.isNotEmpty(); canRedo = false
         editor = old.copy(deck = deck, dirty = true); repository.store(editor!!)
     }
-    fun changeSlide(change: (JSONObject) -> Unit) = changeDeck { change(it.arr("slides").getJSONObject(slideIndex)) }
-    fun changeElement(id: String, allowLocked: Boolean = false, change: (JSONObject) -> JSONObject) = changeSlide { slide ->
+    fun changeSlide(change: (JSONObject) -> Unit) = changeDeck("slide:$slideIndex") { change(it.arr("slides").getJSONObject(slideIndex)) }
+    fun changeElement(id: String, allowLocked: Boolean = false, change: (JSONObject) -> JSONObject) = changeDeck("element:$slideIndex:$id") { deck ->
+        val slide = deck.arr("slides").getJSONObject(slideIndex)
         slide.put("elements", jsonArray(slide.arr("elements").objects().map { e -> if (e.str("id") == id && (allowLocked || !e.optBoolean("locked"))) change(e) else e }))
     }
-    fun moveElement(id: String, dx: Float, dy: Float) = changeElement(id) { e -> boundedGeometry(e, e.optDouble("x").toFloat() + dx, e.optDouble("y").toFloat() + dy) }
+    fun moveElement(id: String, dx: Float, dy: Float) = changeDeck("drag:$slideIndex:${selection.sorted()}") { deck ->
+        val slide = deck.arr("slides").getJSONObject(slideIndex); val objects = slide.arr("elements").objects(); val chosen = objects.filter { it.str("id") in (if (id in selection) selection else setOf(id)) && !it.optBoolean("locked") }
+        if (chosen.isNotEmpty()) { val x = dx.coerceIn(-chosen.minOf { it.optDouble("x").toFloat() }, SLIDE_W - chosen.maxOf { (it.optDouble("x") + it.optDouble("w")).toFloat() }); val y = dy.coerceIn(-chosen.minOf { it.optDouble("y").toFloat() }, SLIDE_H - chosen.maxOf { (it.optDouble("y") + it.optDouble("h")).toFloat() }); chosen.forEach { it.put("x", it.optDouble("x") + x).put("y", it.optDouble("y") + y) } }
+    }
+    fun resizeElement(id: String, dx: Float, dy: Float) = changeElement(id) { boundedGeometry(it, it.optDouble("x").toFloat(), it.optDouble("y").toFloat(), it.optDouble("w").toFloat() + dx, it.optDouble("h").toFloat() + dy) }
+    fun undo() { if (busy || undoHistory.isEmpty()) return; val old = editor ?: return; redoHistory.add(old.deck.toString()); editor = old.copy(deck = JSONObject(undoHistory.removeAt(undoHistory.lastIndex)), dirty = true); repository.store(editor!!); canUndo = undoHistory.isNotEmpty(); canRedo = true; selectedElement = null; selection = emptySet(); slideIndex = slideIndex.coerceAtMost(editor!!.deck.arr("slides").length() - 1); historyKey = "" }
+    fun redo() { if (busy || redoHistory.isEmpty()) return; val old = editor ?: return; undoHistory.add(old.deck.toString()); editor = old.copy(deck = JSONObject(redoHistory.removeAt(redoHistory.lastIndex)), dirty = true); repository.store(editor!!); canUndo = true; canRedo = redoHistory.isNotEmpty(); selectedElement = null; selection = emptySet(); slideIndex = slideIndex.coerceAtMost(editor!!.deck.arr("slides").length() - 1); historyKey = "" }
+    fun copyObjects() { clipboard = slide?.arr("elements")?.objects()?.filter { it.str("id") in selection }?.map { it.copy() } ?: emptyList(); canPaste = clipboard.isNotEmpty(); if (canPaste) notify("Objetos copiados. Escolha um slide e toque em colar.") }
+    fun pasteObjects() { if (busy || clipboard.isEmpty() || slide?.str("kind") == "question") return; if (slide!!.arr("elements").length() + clipboard.size > 60) { notify("Use até 60 objetos por slide."); return }; val groups = mutableMapOf<String, String>(); val copies = clipboard.map { e -> boundedGeometry(e, e.optDouble("x").toFloat() + 16, e.optDouble("y").toFloat() + 16).put("id", uid()).put("locked", false).also { if (e.has("group")) it.put("group", groups.getOrPut(e.str("group")) { uid() }) } }; changeDeck { deck -> copies.forEach { deck.arr("slides").getJSONObject(slideIndex).arr("elements").put(it) } }; selection = copies.map { it.str("id") }.toSet(); selectedElement = selection.firstOrNull() }
+    fun groupSelection() { if (selection.size < 2) return; val group = uid(); changeDeck { deck -> deck.arr("slides").getJSONObject(slideIndex).arr("elements").objects().filter { it.str("id") in selection && !it.optBoolean("locked") }.forEach { it.put("group", group) } } }
+    fun ungroupSelection() = changeDeck { deck -> deck.arr("slides").getJSONObject(slideIndex).arr("elements").objects().filter { it.str("id") in selection && !it.optBoolean("locked") }.forEach { it.remove("group") } }
+    fun alignSelection(axis: String) = changeDeck { deck ->
+        val items = deck.arr("slides").getJSONObject(slideIndex).arr("elements").objects().filter { it.str("id") in selection && !it.optBoolean("locked") }; if (items.isNotEmpty()) {
+            val many = items.size > 1; val left = if (many) items.minOf { it.optDouble("x") } else 0.0; val right = if (many) items.maxOf { it.optDouble("x") + it.optDouble("w") } else SLIDE_W.toDouble(); val top = if (many) items.minOf { it.optDouble("y") } else 0.0; val bottom = if (many) items.maxOf { it.optDouble("y") + it.optDouble("h") } else SLIDE_H.toDouble()
+            items.forEach { e -> when (axis) { "left" -> e.put("x", left); "center" -> e.put("x", (left + right - e.optDouble("w")) / 2); "right" -> e.put("x", right - e.optDouble("w")); "top" -> e.put("y", top); "middle" -> e.put("y", (top + bottom - e.optDouble("h")) / 2); "bottom" -> e.put("y", bottom - e.optDouble("h")) } }
+        }
+    }
+    fun prepareImport(uri: Uri) = perform { importError = null; pendingImport = readPresentation(repository.context, repository.teacherApi, uri); importedImages.clear() }
+    fun cancelImport() { if (!busy) { pendingImport = null; importedImages.clear() } }
+    fun acceptImport(indices: Set<Int>) = perform {
+        val source = pendingImport ?: return@perform; val selected = source.deck.arr("slides").objects().filterIndexed { index, _ -> index in indices }.map(::duplicateSlide)
+        if (selected.isEmpty()) throw IOException("Selecione pelo menos um slide.")
+        val existing = editor?.deck; if ((existing?.arr("slides")?.length() ?: 0) + selected.size > 150) throw IOException("A aula pode ter até 150 slides.")
+        if ((existing?.arr("slides")?.objects()?.count { it.str("kind") == "question" } ?: 0) + selected.count { it.str("kind") == "question" } > 50) throw IOException("Use até 50 perguntas na aula.")
+        val used = selected.flatMap { s -> listOf(s.optJSONObject("background")?.str("image") ?: "") + s.arr("elements").objects().map { it.str("src") } }.toSet()
+        for (asset in source.assets.filter { "/api/media/${it.str("id")}" in used }) if (!importedImages.containsKey(asset.str("id"))) importedImages[asset.str("id")] = repository.uploadImportImage(asset)
+        selected.forEach { s -> s.optJSONObject("background")?.let { bg -> importedImages[bg.str("image").removePrefix("/api/media/")]?.let { bg.put("image", it) } }; s.arr("elements").objects().forEach { e -> importedImages[e.str("src").removePrefix("/api/media/")]?.let { e.put("src", it) } } }
+        if (existing == null) { clearHistory(); editor = LessonDraft(source.deck.copy().put("id", uid()).put("slides", jsonArray(selected)), 0, true); slideIndex = 0 }
+        else { val old = editor!!; undoHistory.add(old.deck.toString()); val deck = existing.copy(); val slides = deck.arr("slides").objects().toMutableList(); slides.addAll(slideIndex + 1, selected); deck.put("slides", jsonArray(slides)); editor = old.copy(deck = deck, dirty = true); slideIndex++; canUndo = true; redoHistory.clear(); canRedo = false }
+        repository.store(editor!!); selectedElement = null; selection = emptySet(); pendingImport = null; importedImages.clear(); screen = AppScreen.Editor; notify("${selected.size} slides importados. Salve para sincronizar com a conta.")
+    }
     fun addElement(type: String) {
         if ((slide?.arr("elements")?.length() ?: 0) >= 60) { notify("Este slide já tem 60 objetos."); return }
         val e = newElement(type, editor?.deck?.str("theme") ?: "azul")
@@ -197,12 +253,14 @@ class QuizViewModel(application: Application, val repository: QuizRepository) : 
     }
     fun copyLesson() {
         val old = editor ?: return
+        clearHistory()
         editor = LessonDraft(duplicateDeck(old.deck), 0, true); repository.store(editor!!); notify("Cópia criada neste aparelho. Salve para sincronizar com a conta.")
     }
     fun loadCloudVersion() = perform {
         val id = editor?.id ?: return@perform
         val current = repository.teacherApi.request("/api/presentations/$id").getJSONObject("presentation")
         editor = LessonDraft(current.getJSONObject("deck"), current.getInt("revision")); repository.store(editor!!)
+        clearHistory()
         slideIndex = slideIndex.coerceAtMost(editor!!.deck.arr("slides").length() - 1); selectedElement = null; notify("Versão da conta aberta.")
     }
     fun saveLesson() = perform { syncEditor(); notify("Aula salva na sua conta.") }

@@ -27,6 +27,22 @@ class NativeUiTest {
         vm = QuizViewModel(app, repository)
         compose.setContent { QuizEduTheme { QuizEduApp(vm) } }
     }
+    @Test fun editorUndoesAndRedoesObjectsAndKeepsClipboardAcrossSlides() {
+        compose.runOnIdle { vm.mode(true) }
+        compose.waitUntil(10000) { !vm.busy }
+        compose.runOnIdle {
+            vm.newLesson(); val before = vm.slide!!.arr("elements").length()
+            vm.addElement("shape"); assertEquals(before + 1, vm.slide!!.arr("elements").length())
+            vm.undo(); assertEquals(before, vm.slide!!.arr("elements").length())
+            vm.redo(); assertEquals(before + 1, vm.slide!!.arr("elements").length())
+            val id = vm.slide!!.arr("elements").objects().last().str("id")
+            vm.selectElement(id); vm.copyObjects(); vm.addSlide("blank"); vm.pasteObjects()
+            assertEquals(1, vm.slide!!.arr("elements").length())
+            assertNotEquals(id, vm.slide!!.arr("elements").objects().first().str("id"))
+            vm.resizeElement(vm.selectedElement!!, 25f, 30f)
+            assertEquals(265.0, vm.slide!!.arr("elements").objects().first().optDouble("w"), .01)
+        }
+    }
     @Test fun studentEntersWithNameAndAvatarWithoutAnAccount() {
         compose.onNodeWithText("Código de 6 números").performTextInput("123456")
         compose.onNodeWithText("Entrar na sala").performClick()

@@ -51,6 +51,7 @@ fun openWeb(context: Context, path: String) {
     try { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) } catch (_: Exception) { }
 }
 @Composable fun QuizEduApp(vm: QuizViewModel) {
+    if (vm.pendingImport != null) PresentationImportPreview(vm)
     val snack = remember { SnackbarHostState() }
     val lifecycle = LocalLifecycleOwner.current
     var exitConfirm by remember { mutableStateOf(false) }
@@ -175,6 +176,7 @@ fun openWeb(context: Context, path: String) {
                     }
                 }
             } }
+            item { ImportPresentationButton(vm, Modifier.fillMaxWidth()) }
             if (vm.libraryOffline) item { InfoCard("Modo offline: edite os rascunhos e salve na conta quando a conexão voltar. As salas ao vivo precisam de internet.", true) }
             if (vm.profile?.optBoolean("permanent") != true) item { TextButton(onClick = vm::startPairing) { Icon(Icons.Default.CloudDone, null); Spacer(Modifier.width(8.dp)); Text("Vincular para guardar minhas aulas") } }
             if (vm.activeRooms.isNotEmpty()) {

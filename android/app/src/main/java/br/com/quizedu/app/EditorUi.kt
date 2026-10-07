@@ -68,6 +68,22 @@ private val layouts = listOf("cover" to "Capa", "title" to "Título e texto", "c
                 Button(onClick = vm::presentLesson, enabled = !vm.busy, modifier = Modifier.weight(1f)) { Icon(Icons.Default.PresentToAll, null); Spacer(Modifier.width(7.dp)); Text("Apresentar") }
             }
         } }
+        item { Column(Modifier.padding(horizontal = 18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                IconButton(onClick = vm::undo, enabled = vm.canUndo && !vm.busy) { Icon(Icons.Default.Undo, "Desfazer") }
+                IconButton(onClick = vm::redo, enabled = vm.canRedo && !vm.busy) { Icon(Icons.Default.Redo, "Refazer") }
+                IconButton(onClick = vm::copyObjects, enabled = vm.selection.isNotEmpty() && !vm.busy) { Icon(Icons.Default.ContentCopy, "Copiar objetos") }
+                IconButton(onClick = vm::pasteObjects, enabled = vm.canPaste && !vm.busy && slide.str("kind") != "question") { Icon(Icons.Default.ContentPaste, "Colar objetos") }
+                Text("${vm.selection.size} selecionados", color = EduMuted, style = MaterialTheme.typography.labelSmall)
+            }
+            ImportPresentationButton(vm, Modifier.fillMaxWidth())
+            if (vm.selection.size > 1) {
+                Row { TextButton(onClick = vm::groupSelection) { Text("Agrupar") }; TextButton(onClick = vm::ungroupSelection) { Text("Desagrupar") } }
+                LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+                    listOf("left" to "Esquerda", "center" to "Centro", "right" to "Direita", "top" to "Topo", "middle" to "Meio", "bottom" to "Base").forEach { (axis, label) -> item { OutlinedButton(onClick = { vm.alignSelection(axis) }) { Text(label) } } }
+                }
+            }
+        } }
         item { LazyRow(contentPadding = PaddingValues(horizontal = 18.dp), horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             itemsIndexed(draft.deck.arr("slides").objects(), key = { _, s -> s.str("id") }) { index, s ->
                 Column(Modifier.width(132.dp).border(if (index == vm.slideIndex) 2.dp else 1.dp, if (index == vm.slideIndex) EduBlue else MaterialTheme.colorScheme.outline, RoundedCornerShape(10.dp)).clickable { vm.selectSlide(index) }.padding(5.dp)) {
@@ -78,7 +94,7 @@ private val layouts = listOf("cover" to "Capa", "title" to "Título e texto", "c
             item { OutlinedButton(onClick = { addSlide = true }, enabled = !vm.busy, modifier = Modifier.height(100.dp)) { Column(horizontalAlignment = Alignment.CenterHorizontally) { Icon(Icons.Default.Add, null); Text("Adicionar slide") } } }
         } }
         item { Column(Modifier.padding(horizontal = 18.dp), verticalArrangement = Arrangement.spacedBy(9.dp)) {
-            SlideView(slide, Modifier.fillMaxWidth(), selected = vm.selectedElement, editable = !vm.busy && slide.str("kind") != "question", onSelect = vm::selectElement, onDrag = vm::moveElement)
+            SlideView(slide, Modifier.fillMaxWidth(), selected = vm.selectedElement, editable = !vm.busy && slide.str("kind") != "question", onSelect = vm::selectElement, onDrag = vm::moveElement, onResize = vm::resizeElement, selectedIds = vm.selection)
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text("Slide ${vm.slideIndex + 1} de ${draft.deck.arr("slides").length()}", color = EduMuted, modifier = Modifier.weight(1f), style = MaterialTheme.typography.labelMedium)
                 if (slide.str("kind") != "question") TextButton(onClick = { addObject = true }, enabled = !vm.busy) { Icon(Icons.Default.Add, null); Text("Objeto") }
@@ -92,7 +108,7 @@ private val layouts = listOf("cover" to "Capa", "title" to "Título e texto", "c
                     }
                 }
             }
-            if (slide.str("kind") != "question") Text("Toque em um objeto para editar. Arraste para posicionar.", style = MaterialTheme.typography.bodySmall, color = EduMuted)
+            if (slide.str("kind") != "question") Text("Toque para editar. Arraste para mover e use a alça para redimensionar. Selecione vários objetos pela lista abaixo.", style = MaterialTheme.typography.bodySmall, color = EduMuted)
         } }
         if (slide.str("kind") == "question") item { EditorCard { QuestionInspector(vm, slide.getJSONObject("question"), onImage = { chooseImage(question = true) }) } }
         else {
@@ -102,6 +118,7 @@ private val layouts = listOf("cover" to "Capa", "title" to "Título e texto", "c
                 Text("Objetos do slide", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 slide.arr("elements").objects().asReversed().forEach { e ->
                     Row(Modifier.fillMaxWidth().clickable { vm.selectElement(e.str("id")) }, verticalAlignment = Alignment.CenterVertically) {
+                        Checkbox(e.str("id") in vm.selection, onCheckedChange = { vm.toggleElement(e.str("id")) }, enabled = !vm.busy)
                         Icon(when (e.str("type")) { "image" -> Icons.Default.Image; "shape" -> Icons.Default.Square; "chart" -> Icons.Default.BarChart; "table" -> Icons.Default.TableChart; "video" -> Icons.Default.PlayCircle; else -> Icons.Default.Title }, null, tint = if (e.str("id") == vm.selectedElement) EduBlue else EduMuted)
                         Spacer(Modifier.width(10.dp))
                         Text(when (e.str("type")) { "text" -> plainText(e.optJSONObject("doc")).ifBlank { "Texto" }; "image" -> e.str("alt").ifBlank { "Imagem" }; "shape" -> "Forma"; "table" -> "Tabela"; "chart" -> "Gráfico"; else -> "Vídeo" }, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
@@ -182,7 +199,7 @@ private val layouts = listOf("cover" to "Capa", "title" to "Título e texto", "c
 @Composable fun ColorField(label: String, current: String, onChange: (String) -> Unit) {
     var text by remember(current) { mutableStateOf(current) }
     val valid = text.matches(Regex("#[a-fA-F0-9]{3}(?:[a-fA-F0-9]{3})?"))
-    OutlinedTextField(text, { text = it.take(7); if (it.matches(Regex("#[a-fA-F0-9]{3}(?:[a-fA-F0-9]{3})?"))) onChange(it) }, label = { Text(label) }, singleLine = true, isError = !valid,
+    OutlinedTextField(text, { text = it.take(7); if (it.matches(Regex("#[a-fA-F0-9]{3}(?:[a-fA-F0-9]{3})?"))) onChange(if (it.length == 4) "#" + it.drop(1).map { char -> "$char$char" }.joinToString("") else it) }, label = { Text(label) }, singleLine = true, isError = !valid,
         leadingIcon = { Box(Modifier.size(22.dp).border(1.dp, EduMuted, RoundedCornerShape(5.dp)).then(Modifier).padding(2.dp)) { Surface(color = hexColor(current), modifier = Modifier.fillMaxSize()) {} } }, modifier = Modifier.fillMaxWidth())
 }
 @Composable fun NumberSlider(label: String, value: Float, range: ClosedFloatingPointRange<Float>, onChange: (Float) -> Unit) {
@@ -193,7 +210,9 @@ private val layouts = listOf("cover" to "Capa", "title" to "Título e texto", "c
     OutlinedTextField(input, { input = it.take(10); it.replace(',', '.').toFloatOrNull()?.takeIf(Float::isFinite)?.let(onChange) }, singleLine = true, label = { Text(label) }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal), modifier = modifier)
 }
 @Composable private fun ObjectInspector(vm: QuizViewModel, e: JSONObject, onImage: () -> Unit) {
-    val id = e.str("id"); val locked = e.optBoolean("locked")
+    val id = e.str("id")
+    var expandedText by remember(id) { mutableStateOf(false) }
+    if (expandedText) ExpandedTextEditor(e, onClose = { expandedText = false }, onSave = { doc -> vm.changeElement(id) { it.put("doc", doc) } }); val locked = e.optBoolean("locked")
     fun update(change: (JSONObject) -> Unit) { vm.changeElement(id) { change(it); it } }
     Text("Editar ${when (e.str("type")) { "text" -> "texto"; "image" -> "imagem"; "shape" -> "forma"; "table" -> "tabela"; "chart" -> "gráfico"; else -> "vídeo" }}", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
     if (locked) {
@@ -206,11 +225,12 @@ private val layouts = listOf("cover" to "Capa", "title" to "Título e texto", "c
             val plain = plainText(e.optJSONObject("doc"))
             val bold = e.optJSONObject("doc")?.toString()?.contains("\"type\":\"bold\"") == true
             val italic = e.optJSONObject("doc")?.toString()?.contains("\"type\":\"italic\"") == true
-            OutlinedTextField(plain, { value -> update { it.put("doc", richText(value.take(16000), bold, italic)) } }, label = { Text("Conteúdo do texto") }, minLines = 3, maxLines = 9, modifier = Modifier.fillMaxWidth(), enabled = !vm.busy)
+            OutlinedTextField(plain, { value -> update { it.put("doc", replaceStyledText(it.optJSONObject("doc"), value.take(16000))) } }, label = { Text("Conteúdo do texto") }, minLines = 3, maxLines = 9, modifier = Modifier.fillMaxWidth(), enabled = !vm.busy)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                FilterChip(bold, { update { it.put("doc", richText(plain, !bold, italic)) } }, label = { Text("Negrito", fontWeight = FontWeight.Bold) })
-                FilterChip(italic, { update { it.put("doc", richText(plain, bold, !italic)) } }, label = { Text("Itálico") })
+                FilterChip(bold, { update { it.put("doc", formatStyledText(it.optJSONObject("doc"), 0, 0, "bold")) } }, label = { Text("Negrito", fontWeight = FontWeight.Bold) })
+                FilterChip(italic, { update { it.put("doc", formatStyledText(it.optJSONObject("doc"), 0, 0, "italic")) } }, label = { Text("Itálico") })
             }
+            OutlinedButton(onClick = { expandedText = true }) { Text("Ampliar e formatar trechos") }
             ChoiceField("Fonte", e.str("font"), listOf("Arial", "Georgia", "Verdana", "Trebuchet MS", "Times New Roman", "Courier New").map { it to it }) { value -> update { it.put("font", value) } }
             NumberSlider("Tamanho da fonte", e.optDouble("fontSize", 30.0).toFloat(), 8f..160f) { value -> update { it.put("fontSize", value.roundToInt()) } }
             ColorField("Cor do texto", e.str("color")) { color -> update { it.put("color", color) } }

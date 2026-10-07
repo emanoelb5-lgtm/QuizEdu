@@ -5,6 +5,20 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 class ModelsTest {
+    @Test fun editingImportedTextPreservesUnchangedRunStyles() {
+        val original = richText("Solo vivo", bold = true)
+        val changed = replaceStyledText(original, "Solo vivo e água")
+        assertEquals("Solo vivo e água", plainText(changed))
+        assertTrue(changed.toString().contains("bold"))
+        val colored = formatStyledText(changed, 0, 4, "textStyle", JSONObject().put("color", "#ff0000"))
+        assertEquals("Solo vivo e água", plainText(colored))
+        assertEquals("#ff0000", colored.arr("content").getJSONObject(0).arr("content").getJSONObject(0).arr("marks").objects().first { it.str("type") == "textStyle" }.getJSONObject("attrs").str("color"))
+        val last = colored.arr("content").getJSONObject(0).arr("content").objects().last()
+        assertFalse(last.arr("marks").objects().any { it.str("type") == "textStyle" })
+        val removed = replaceStyledText(colored, "Solo")
+        assertEquals("Solo", plainText(removed))
+        assertTrue(removed.toString().contains("#ff0000"))
+    }
     @Test fun roomLinksRejectImpersonationAndAcceptSharedClassroomCodes() {
         assertEquals("123456", roomCode(" 123456 "))
         assertEquals("123456", roomCode(BuildConfig.SITE_URL + "/participar/123456"))

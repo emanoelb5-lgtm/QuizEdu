@@ -62,6 +62,8 @@ interface QuizClient {
     fun clear()
     suspend fun request(path: String, data: JSONObject? = null, method: String = if (data == null) "GET" else "POST"): JSONObject
     suspend fun image(bytes: ByteArray): JSONObject
+    suspend fun presentation(bytes: ByteArray, name: String): JSONObject = throw IOException("Importação indisponível neste acesso.")
+    suspend fun importImage(bytes: ByteArray, mime: String): JSONObject = image(bytes)
 }
 class QuizApi(private val secrets: SecretStore, private val teacher: Boolean) : QuizClient {
     private val cookieKey = if (teacher) "teacher_cookies" else "student_cookies"
@@ -69,16 +71,19 @@ class QuizApi(private val secrets: SecretStore, private val teacher: Boolean) : 
     override suspend fun request(path: String, data: JSONObject?, method: String): JSONObject =
         exchange(path, method, data?.toString()?.toByteArray(), "application/json")
     override suspend fun image(bytes: ByteArray): JSONObject = exchange("/api/media", "POST", bytes, "image/jpeg")
-    private suspend fun exchange(path: String, method: String, bytes: ByteArray?, contentType: String): JSONObject = withContext(Dispatchers.IO) {
+    override suspend fun importImage(bytes: ByteArray, mime: String): JSONObject = exchange("/api/media", "POST", bytes, mime)
+    override suspend fun presentation(bytes: ByteArray, name: String): JSONObject = exchange("/api/presentation-import", "POST", bytes, "application/octet-stream", java.net.URLEncoder.encode(name, "UTF-8").replace("+", "%20"))
+    private suspend fun exchange(path: String, method: String, bytes: ByteArray?, contentType: String, presentationName: String? = null): JSONObject = withContext(Dispatchers.IO) {
         require(path.startsWith("/api/") && !path.contains("..") && !path.contains("\\"))
         val connection = URL(BuildConfig.SITE_URL + path).openConnection() as HttpURLConnection
         try {
             connection.requestMethod = method
-            connection.connectTimeout = 12000; connection.readTimeout = 15000
+            connection.connectTimeout = 12000; connection.readTimeout = if (presentationName != null) 90000 else 15000
             connection.instanceFollowRedirects = false
             connection.setRequestProperty("Accept", "application/json")
             connection.setRequestProperty("Origin", BuildConfig.SITE_URL)
             connection.setRequestProperty("User-Agent", "QuizEdu-Android/${BuildConfig.VERSION_NAME}")
+            if (presentationName != null) connection.setRequestProperty("X-Presentation-Name", presentationName)
             val cookies = try { JSONObject(secrets.get(cookieKey).ifEmpty { "{}" }) } catch (_: Exception) { JSONObject() }
             if (cookies.length() > 0) connection.setRequestProperty("Cookie", cookies.keys().asSequence().joinToString("; ") { "$it=${cookies.str(it)}" })
             if (teacher) secrets.get("teacher_token").takeIf { it.isNotEmpty() }?.let { connection.setRequestProperty("Authorization", "Bearer $it") }
@@ -172,5 +177,27 @@ class QuizRepository(val context: Context, teacherClient: QuizClient? = null, st
         original.recycle()
         if (output.size() > 1048576) throw IOException("Escolha uma imagem menor.")
         teacherApi.image(output.toByteArray()).str("url")
+    }
+    suspend fun uploadImportImage(asset: JSONObject): String = withContext(Dispatchers.IO) {
+        val data = Base64.decode(asset.str("data"), Base64.NO_WRAP)
+        val bounds = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeByteArray(data, 0, data.size, bounds)
+        if (bounds.outWidth <= 0 || bounds.outHeight <= 0) throw IOException("Uma imagem importada não pôde ser aberta.")
+        var sample = 1; while (max(bounds.outWidth, bounds.outHeight) / sample > 1800) sample *= 2
+        val original = BitmapFactory.decodeByteArray(data, 0, data.size, BitmapFactory.Options().apply { inSampleSize = sample }) ?: throw IOException("Imagem importada inválida.")
+        val ratio = minOf(1f, 1600f / max(original.width, original.height))
+        val scaled = Bitmap.createScaledBitmap(original, (original.width * ratio).roundToInt().coerceAtLeast(1), (original.height * ratio).roundToInt().coerceAtLeast(1), true)
+        val output = ByteArrayOutputStream(); var mime = "image/png"
+        try {
+            scaled.compress(Bitmap.CompressFormat.PNG, 100, output)
+            if (output.size() > 1000000) {
+                mime = "image/jpeg"; val flat = Bitmap.createBitmap(scaled.width, scaled.height, Bitmap.Config.ARGB_8888)
+                try { Canvas(flat).apply { drawColor(Color.WHITE); drawBitmap(scaled, 0f, 0f, null) }; var quality = 85
+                    do { output.reset(); flat.compress(Bitmap.CompressFormat.JPEG, quality, output); quality -= 20 } while (output.size() > 1000000 && quality >= 25)
+                } finally { flat.recycle() }
+            }
+            if (output.size() > 1048576) throw IOException("Uma imagem é muito grande. Reduza-a no arquivo original.")
+            teacherApi.importImage(output.toByteArray(), mime).str("url")
+        } finally { if (scaled !== original) scaled.recycle(); original.recycle() }
     }
 }

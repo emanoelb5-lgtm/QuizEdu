@@ -1,13 +1,14 @@
-Aplicativo nativo em Kotlin e Jetpack Compose, conectado ao mesmo QuizEdu do computador.
+QuizEdu Android 1.1.0 — importar apresentações e editar com mais controle.
 
-- Alunos: código ou QR code, nome e avatar, respostas, cronômetro, resultados e placar cumulativo. Retoma a participação ao reabrir no mesmo aparelho.
-- Professores: vínculo com a conta pelo navegador, biblioteca de aulas e quizzes, editor de slides e perguntas, envio de imagens, rascunhos no aparelho e salvamento na conta com proteção contra conflitos.
-- Apresentação: abrir sala, convidar a turma, iniciar, avançar etapas e slides, voltar, revelar resultados, escurecer a tela e acompanhar ranking e anotações privadas.
-- Controle de aparelhos: revogar acesso de dispositivos vinculados.
-- Slides: textos, formas, imagens, tabelas, gráficos e vídeos do YouTube, temas, ordem, duplicação, camadas, bloqueio, visibilidade, posição, tamanho, rotação e etapas de aparição.
+- Importar PPTX, PPSX, POTX, ODP, OTP, PPT, PPS, POT, PDF e aulas QuizEdu em JSON, com prévia e seleção dos slides antes de inserir.
+- PowerPoint moderno: textos, imagens, formas, tabelas, gráficos simples e notas editáveis. Fontes, efeitos e objetos especiais podem precisar de ajustes; o editor informa as limitações encontradas.
+- PPT antigo: recuperação dos textos por slide. Imagens, layout, notas e animações não são preservados; prefira salvar como PPTX para maior fidelidade.
+- PDF: páginas visuais em 16:9, com espaço para adicionar textos, objetos e perguntas. O conteúdo original das páginas não se torna editável.
+- Editor: desfazer/refazer, copiar e colar objetos entre slides, seleção múltipla, agrupamento e alinhamento, alça de redimensionamento pelo toque e editor ampliado com formatação de trechos e links.
+- O texto mantém os estilos dos trechos que não foram alterados. Importações com falha preservam a aula e permitem tentar novamente.
 
-Android 7.0 ou superior. O computador continua sendo a tela principal da apresentação. Salas ao vivo e sincronização precisam de internet; rascunhos de aulas já abertas podem ser editados sem conexão. Vídeos abrem no YouTube no Android.
+Aulas importadas podem receber perguntas ao vivo. Salve a aula para acessá-la no computador com a mesma conta. Arquivos até 15 MB, com até 150 slides e 12 MB de imagens extraídas; continuam os limites de 60 objetos por slide, 50 perguntas, 1 MB de documento e 200 imagens/50 MB por conta.
 
-Para instalar, baixe o APK abaixo, abra no Android e permita a instalação pelo navegador/gerenciador de arquivos quando o sistema pedir. As versões usam o mesmo certificado, permitindo atualizações sem desinstalar o aplicativo. Não é necessário contratar o QuizEdu Pro.
+Android 7 ou superior. Importar PowerPoint/LibreOffice, guardar imagens, sincronizar e participar de salas exige internet. O computador continua sendo a tela principal da apresentação. Vídeos abrem no YouTube no Android.
 
-Compilação, testes de interface, assinatura e publicação executados pelo GitHub Actions. O arquivo SHA256SUMS.txt permite conferir a integridade do download.
+Instale sobre a versão anterior: mesmo pacote e certificado. Compilação, testes no emulador, assinatura e publicação pelo GitHub Actions.
