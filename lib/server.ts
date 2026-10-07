@@ -1,5 +1,6 @@
 import { env } from "cloudflare:workers";
 import { AVATARS, DURATIONS, MAX_POINTS, mediaPath, Question, QUESTION_TEMPLATES, Quiz, quizError, RoomState, scoreFor } from "./quiz";
+import { playerManifest } from "./player-app";
 
 export class HttpError extends Error { constructor(public status: number, message: string) { super(message); } }
 export const db = () => { if (!env.DB) throw new HttpError(503, "O serviço está indisponível. Tente novamente em alguns instantes."); return env.DB; };
@@ -94,7 +95,52 @@ export async function createRoom(request: Request) {
   }
   throw new HttpError(503, "Não foi possível abrir a sala. Tente novamente.");
 }
-export async function playerFor(request: Request, code: string) { const token = cookieValue(request, `qe_player_${code}`); if (!/^[a-f0-9]{64}$/.test(token)) return null; return db().prepare("SELECT id, name, avatar FROM players WHERE room = ? AND secret_hash = ?").bind(code, await hash(token)).first<{ id: string; name: string; avatar: string }>(); }
+type PlayerIdentity = { id: string; name: string; avatar: string };
+async function ticketKey(secretHash: string) {
+  return crypto.subtle.importKey("raw",new TextEncoder().encode(secretHash),{name:"HMAC",hash:"SHA-256"},false,["sign","verify"]);
+}
+function ticketMessage(code: string, id: string, expires: number) { return new TextEncoder().encode(`QuizEdu:player-install:v1:${code}:${id}:${expires}`); }
+async function verifyPlayerTicket(code: string, ticket: string): Promise<PlayerIdentity | null> {
+  const parts = ticket.split(".");
+  if (parts.length !== 3 || !/^[a-f0-9-]{36}$/.test(parts[0]) || !/^\d{13}$/.test(parts[1]) || !/^[a-f0-9]{64}$/.test(parts[2])) return null;
+  const [id, rawExpires, signature] = parts; const expires = Number(rawExpires);
+  if (expires <= Date.now()) return null;
+  const row = await db().prepare("SELECT p.id,p.name,p.avatar,p.secret_hash,r.expires_at FROM players p JOIN rooms r ON r.code = p.room WHERE p.room = ? AND p.id = ?").bind(code,id).first<PlayerIdentity & {secret_hash:string;expires_at:number}>();
+  if (!row || row.expires_at !== expires) return null;
+  const bytes = Uint8Array.from(signature.match(/../g)!,value=>parseInt(value,16));
+  if (!await crypto.subtle.verify("HMAC",await ticketKey(row.secret_hash),bytes,ticketMessage(code,id,expires))) return null;
+  return {id:row.id,name:row.name,avatar:row.avatar};
+}
+export async function playerFor(request: Request, code: string): Promise<PlayerIdentity | null> {
+  const token = cookieValue(request, `qe_player_${code}`);
+  if (/^[a-f0-9]{64}$/.test(token)) {
+    const player = await db().prepare("SELECT id, name, avatar FROM players WHERE room = ? AND secret_hash = ?").bind(code,await hash(token)).first<PlayerIdentity>();
+    if (player) return player;
+  }
+  return verifyPlayerTicket(code,cookieValue(request,`qe_resume_${code}`));
+}
+export async function appManifest(request: Request) {
+  const code = new URL(request.url).searchParams.get("sala") || ""; let ticket: string | undefined;
+  if (/^\d{6}$/.test(code)) {
+    const me = await playerFor(request,code);
+    if (me) {
+      const row = await db().prepare("SELECT p.secret_hash,r.expires_at FROM players p JOIN rooms r ON r.code = p.room WHERE p.room = ? AND p.id = ?").bind(code,me.id).first<{secret_hash:string;expires_at:number}>();
+      if (row && row.expires_at > Date.now()) {
+        const signature = await crypto.subtle.sign("HMAC",await ticketKey(row.secret_hash),ticketMessage(code,me.id,row.expires_at));
+        ticket = `${me.id}.${row.expires_at}.${Array.from(new Uint8Array(signature),b=>b.toString(16).padStart(2,"0")).join("")}`;
+      }
+    }
+  }
+  return new Response(JSON.stringify(playerManifest(code,ticket)),{headers:{"Content-Type":"application/manifest+json","Cache-Control":"private, no-store","Vary":"Cookie","Referrer-Policy":"no-referrer"}});
+}
+export async function resumePlayer(request: Request, code: string) {
+  const data = await body(request); const room = await getRoom(code);
+  if (room.status === "closed") throw new HttpError(409,"Esta sala já foi encerrada.");
+  if (typeof data.ticket !== "string" || data.ticket.length > 160) throw new HttpError(400,"Não foi possível retomar este acesso.");
+  const me = await verifyPlayerTicket(code,data.ticket);
+  if (!me) throw new HttpError(401,"Este acesso não pode ser retomado. Abra a sala no navegador em que você entrou.");
+  return json({resumed:true,id:me.id},200,sessionCookie(request,`qe_resume_${code}`,data.ticket,Math.max(1,Math.floor((room.expires_at-Date.now())/1000))));
+}
 export async function joinRoom(request: Request, code: string) {
   const data = await body(request); const room = await getRoom(code); const previous = await playerFor(request, code);
   if (previous && room.status !== "closed") return json({ joined: true, id: previous.id });

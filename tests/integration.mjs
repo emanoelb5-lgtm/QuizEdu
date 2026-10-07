@@ -136,6 +136,26 @@ try {
   const fairReport = await host.request(`/api/reports/${fairRoom.code}`);
   for (const p of fairReport.players) eq(p.score,fair.players.find(player=>player.id===p.id).score,"Saved reports match the final scoreboard.");
   console.log("✓ Late first correct answer, one fixed 30% penalty, question resets and matching cumulative reports.");
+  // Install handoff restores the same anonymous student in a fresh app session.
+  const appHome = await anonymous.request("/jogar");check(appHome.includes("Retomando sua sala") && appHome.includes("app-manifest"),"The student app entry and manifest render.");
+  const anonymousManifest = await anonymous.request(`/api/app-manifest?sala=${code}`);eq(anonymousManifest.id,"/jogar");eq(anonymousManifest.start_url,`/jogar?sala=${code}`);eq(anonymousManifest.display,"standalone");
+  const teacherManifest = await host.request(`/api/app-manifest?sala=${code}`);eq(teacherManifest.start_url,anonymousManifest.start_url,"An educator cannot mint a participant's install access.");
+  const ownManifestResponse = await mf.dispatchFetch(origin+`/api/app-manifest?sala=${code}`,{headers:{cookie:[...alice.cookies].map(([k,v])=>`${k}=${v}`).join("; ")}});
+  eq(ownManifestResponse.headers.get("cache-control"),"private, no-store");check(ownManifestResponse.headers.get("vary").split(",").some(value=>value.trim().toLowerCase()==="cookie"));check(ownManifestResponse.headers.get("content-type").includes("application/manifest+json"));
+  const ownManifest = await ownManifestResponse.json();const installUrl = new URL(ownManifest.start_url,origin);const ticket = new URLSearchParams(installUrl.hash.slice(1)).get("retomar");check(ticket && !installUrl.searchParams.has("retomar"),"Install access stays in the fragment, outside server URL logs.");
+  const app = new Client();const beforeInstall = await alice.request(`/api/rooms/${code}`);
+  await app.request(`/api/rooms/${code}/resume`,{ticket});check(app.cookies.has(`qe_resume_${code}`));
+  const resumed = await app.request(`/api/rooms/${code}`);eq(resumed.me.id,beforeInstall.me.id);eq(resumed.me.name,beforeInstall.me.name);eq(resumed.me.avatar,beforeInstall.me.avatar);eq(resumed.me.score,beforeInstall.me.score);eq(resumed.players.length,beforeInstall.players.length,"Installing never adds another student.");
+  await app.request(`/api/rooms/${code}/resume`,{ticket});eq((await app.request(`/api/rooms/${code}`)).me.id,resumed.me.id,"App handoff is idempotent.");
+  eq((await alice.request(`/api/rooms/${code}`)).me.id,resumed.me.id,"The original browser keeps the same participant after installation.");
+  await app.request(`/api/reports/${code}`,undefined,401);await app.request(`/api/rooms/${code}/control`,{action:"close",status:"finished",index:2},401);
+  const invalidApp = new Client();await invalidApp.request(`/api/rooms/${code}/resume`,{ticket:ticket.slice(0,-1)+(ticket.endsWith("0")?"1":"0")},401);
+  await invalidApp.request(`/api/rooms/${fairRoom.code}/resume`,{ticket},401);
+  const expiredTicket = ticket.split(".");expiredTicket[1]=String(Date.now()-1000);await invalidApp.request(`/api/rooms/${code}/resume`,{ticket:expiredTicket.join(".")},401);
+  await invalidApp.request(`/api/rooms/${code}/resume`,{ticket:"x".repeat(200)},400);
+  const crossResume = await mf.dispatchFetch(origin+`/api/rooms/${code}/resume`,{method:"POST",headers:{Origin:"https://other.test","content-type":"application/json"},body:JSON.stringify({ticket})});eq(crossResume.status,403);
+  await database.prepare("UPDATE rooms SET expires_at = ? WHERE code = ?").bind(Date.now()-1,code).run();await invalidApp.request(`/api/rooms/${code}/resume`,{ticket},409);
+  console.log("✓ Install handoff, same participant and score, private manifests, expiry, signature checks and educator isolation.");
   // Room snapshots survive quiz edits/deletion, and capacity is enforced atomically.
   const capacity = await host.request("/api/rooms", { quizId: quiz.id }, 201);
   const crowd = Array.from({ length: 101 }, () => new Client());

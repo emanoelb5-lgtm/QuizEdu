@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { CircleHelp, Loader2, WifiOff } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 export class ApiError extends Error { constructor(message:string,public status:number){super(message);} }
-export function Brand({ dark = false }: { dark?: boolean }) { return <a href="/" className={`brand ${dark ? "brand-light" : ""}`} aria-label="QuizEdu, início"><span className="brand-mark"><CircleHelp size={24} strokeWidth={2.5} /></span><span>Quiz<span className="brand-edu">Edu</span></span></a>; }
+export function Brand({ dark = false, href = "/" }: { dark?: boolean; href?: string }) { return <a href={href} className={`brand ${dark ? "brand-light" : ""}`} aria-label="QuizEdu, início"><span className="brand-mark"><CircleHelp size={24} strokeWidth={2.5} /></span><span>Quiz<span className="brand-edu">Edu</span></span></a>; }
 export function Notifications() { return <Toaster theme="light" position="bottom-center" richColors />; }
 export async function api<T = any>(path: string, body?: unknown, method?: string): Promise<T> {
   const controller = new AbortController(); const timeout = setTimeout(()=>controller.abort(),12000);

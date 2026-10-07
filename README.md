@@ -18,6 +18,16 @@ Site de quiz ao vivo para educadores, em português, com uma tela para o profess
 
 O exemplo **Brasil e natureza** contém cinco perguntas que podem ser adaptadas. O editor permite ordenar, duplicar e excluir perguntas, exportar JSON e importar uma cópia exportada.
 
+## App do aluno e retomada da sala
+
+- Ao abrir o QR code da sala, o aluno encontra **Instalar QuizEdu**. O app usa o mesmo site e não exige loja nem conta. Quando o navegador oferece instalação nativa, o botão a abre; caso contrário, mostra o caminho **Instalar aplicativo / Adicionar à tela inicial**. No iPhone, use o menu Compartilhar e **Adicionar à Tela de Início**; se necessário, abra no Safari.
+- O ícone abre **[o acesso dos alunos](https://quizedu-emanuel.emanuelb5.chatgpt.site/jogar)** e retoma a última sala neste aparelho. Nome, avatar, respostas confirmadas e pontos continuam no servidor. A sala permanece válida por 24 horas; encerrar a sala impede novas respostas.
+- **Sair da sala** desativa a retomada automática e abre a entrada por código ou câmera. Sair não exclui o participante nem seus pontos; voltar pelo mesmo aparelho/navegador mantém o acesso, mesmo depois de iniciar o quiz.
+- **Ler QR code** pede permissão de câmera, lê apenas códigos de salas deste site e encerra a câmera ao fechar a janela, trocar de página ou colocar o app em segundo plano. As imagens são processadas no aparelho, sem envio ao servidor; também há entrada por seis números.
+- A instalação preserva a sala inicial e permite retomar o participante quando o navegador e o app usam sessões separadas. O vínculo é assinado, limitado ao aluno e à validade da sala; não concede acesso de educador. O endereço de instalação usa um fragmento removido ao abrir, e o manifesto pessoal não é guardado em cache.
+- Sem internet, aparece uma tela de reconexão com acesso à sala guardada. O quiz ao vivo precisa de conexão: respostas, cronômetro, placar, páginas pessoais e autenticação não são guardados pelo service worker. Apenas a tela de reconexão e arquivos públicos do app entram no cache.
+- Limpar os dados do navegador/app remove a lembrança local e pode remover o acesso temporário do aluno. Instalar não impede que o próprio usuário apague esses dados.
+
 ## Preparar perguntas com menos trabalho
 
 - **Adicionar em lote:** cole uma lista de perguntas com alternativas e gabarito, ou importe CSV, Excel (.xlsx) e texto (.txt). Confira a seleção antes de adicionar. Os arquivos são lidos no aparelho; as perguntas selecionadas passam a fazer parte do rascunho.
