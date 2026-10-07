@@ -4,6 +4,10 @@ Plataforma gratuita para educadores, em português, com quizzes ao vivo e aulas 
 
 **Abrir o site:** https://quizedu-emanuel.emanuelb5.chatgpt.site
 
+**Aplicativo Android:** [baixar o APK no GitHub Releases](https://github.com/emanoelb5-lgtm/QuizEdu/releases/latest). Cliente nativo em Kotlin para alunos e professores, com leitura de QR code, retomada da sala, editor de slides, biblioteca sincronizada e controle da apresentação do computador. Requer Android 7.0 ou superior. Salas ao vivo precisam de internet; rascunhos de aulas já abertas podem ser editados no aparelho sem conexão.
+
+O [GitHub Actions](.github/workflows/android.yml) compila, testa no emulador, assina e publica as versões do app. Código e instruções de desenvolvimento estão em [android/README.md](android/README.md).
+
 ## Como usar
 
 1. Use **Continuar com ChatGPT** para guardar suas atividades em uma conta permanente, acessível em outros aparelhos. Também é possível começar com um nome e um acesso temporário. Os alunos não precisam de conta.

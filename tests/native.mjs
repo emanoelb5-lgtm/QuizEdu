@@ -72,6 +72,7 @@ try{
  // is genuinely RSA-signed; no live GitHub identity or production key is used.
  const ci=new Client();await ci.request("/api/android/signing",{},401);ci.bearer=jwt();eq(await ci.request("/api/android/signing",{}),testBundle);
  ci.bearer=jwt({...claims,sub:"repo:emanoelb5-lgtm@305669201/QuizEdu@1407486285:ref:refs/heads/main"});eq((await ci.request("/api/android/signing",{})).keyAlias,"quizedu");
+ ci.bearer=jwt({...claims,sub:"repo:emanoelb5-lgtm@305669201/QuizEdu@1407486285:ref:refs/heads/main",job_workflow_ref:claims.workflow_ref});eq((await ci.request("/api/android/signing",{})).certificateSha256,testBundle.certificateSha256,"GitHub ordinary-job workflow claims must match the same trusted workflow.");
  for(const change of [{repository_id:"1"},{repository_owner_id:"1"},{repository:"other/QuizEdu"},{ref:"refs/heads/other"},{ref_type:"tag"},{event_name:"pull_request"},{runner_environment:"self-hosted"},{workflow_ref:"emanoelb5-lgtm/QuizEdu/.github/workflows/other.yml@refs/heads/main"},{job_workflow_ref:"other/reusable"},{aud:origin},{iss:"https://evil.test"},{sub:"repo:other/QuizEdu:ref:refs/heads/main"},{exp:now-1},{exp:now+10000},{iat:now-1000},{nbf:now+100}]){ci.bearer=jwt({...claims,...change});await ci.request("/api/android/signing",{},403);}
  ci.bearer=jwt(claims,{alg:"none",typ:"JWT",kid:jwk.kid});await ci.request("/api/android/signing",{},403);
  const forged=generateKeyPairSync("rsa",{modulusLength:2048});ci.bearer=jwt(claims,undefined,forged.privateKey);await ci.request("/api/android/signing",{},401);

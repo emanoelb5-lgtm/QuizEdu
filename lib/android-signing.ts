@@ -7,9 +7,12 @@ import {HttpError,json} from "./server";
 const issuer="https://token.actions.githubusercontent.com";
 export const signingAudience="https://quizedu-emanuel.emanuelb5.chatgpt.site/api/android/signing";
 const repository="emanoelb5-lgtm/QuizEdu",repositoryId="1407486285",ownerId="305669201";
+const workflow=`${repository}/.github/workflows/android.yml@refs/heads/main`;
 export function trustedSigningClaims(c:Record<string,unknown>,now=Math.floor(Date.now()/1000)){
  const subjects=[`repo:${repository}:ref:refs/heads/main`,`repo:emanoelb5-lgtm@${ownerId}/QuizEdu@${repositoryId}:ref:refs/heads/main`];
- return c.iss===issuer&&c.aud===signingAudience&&typeof c.sub==="string"&&subjects.includes(c.sub)&&c.repository===repository&&c.repository_id===repositoryId&&c.repository_owner_id===ownerId&&c.ref==="refs/heads/main"&&c.ref_type==="branch"&&["push","workflow_dispatch"].includes(String(c.event_name))&&c.workflow_ref===`${repository}/.github/workflows/android.yml@refs/heads/main`&&c.runner_environment==="github-hosted"&&c.job_workflow_ref===undefined&&typeof c.exp==="number"&&c.exp>now&&c.exp<=now+900&&typeof c.iat==="number"&&c.iat<=now+30&&c.iat>=now-600&&typeof c.nbf==="number"&&c.nbf<=now+30;
+ // GitHub now includes job_workflow_ref for ordinary jobs too. If present it
+ // must identify this same trusted workflow; other reusable workflows fail.
+ return c.iss===issuer&&c.aud===signingAudience&&typeof c.sub==="string"&&subjects.includes(c.sub)&&c.repository===repository&&c.repository_id===repositoryId&&c.repository_owner_id===ownerId&&c.ref==="refs/heads/main"&&c.ref_type==="branch"&&["push","workflow_dispatch"].includes(String(c.event_name))&&c.workflow_ref===workflow&&c.runner_environment==="github-hosted"&&(c.job_workflow_ref===undefined||c.job_workflow_ref===workflow)&&typeof c.exp==="number"&&c.exp>now&&c.exp<=now+900&&typeof c.iat==="number"&&c.iat<=now+30&&c.iat>=now-600&&typeof c.nbf==="number"&&c.nbf<=now+30;
 }
 function decode(value:string){return Uint8Array.from(atob(value.replace(/-/g,"+").replace(/_/g,"/")),c=>c.charCodeAt(0));}
 let jwks:{expires:number;keys:(JsonWebKey&{kid?:string;use?:string;alg?:string})[]}|undefined;

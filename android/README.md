@@ -2,6 +2,10 @@
 
 Cliente **nativo**, sem WebView, em Kotlin e Jetpack Compose. Compartilha salas, pontuação, biblioteca, imagens e apresentações com o site. A autorização da conta acontece no navegador do usuário e concede uma sessão revogável ao aparelho; o app não recebe a senha do ChatGPT.
 
+## Instalar
+
+Baixe `QuizEdu-Android-1.0.0.apk` na [última versão do GitHub Releases](https://github.com/emanoelb5-lgtm/QuizEdu/releases/latest), abra o arquivo no Android e permita a instalação pelo navegador ou gerenciador de arquivos quando solicitado. Requer Android 7.0 ou superior. No app, escolha **Aluno** para entrar por código/QR code ou **Professor** para vincular a conta, editar aulas e controlar a apresentação no computador.
+
 ## Compilar no GitHub
 
 O workflow [.github/workflows/android.yml](../.github/workflows/android.yml) roda em pushes de alterações Android para main e pode ser iniciado em **Actions → QuizEdu Android → Run workflow**. Executa testes JVM, lint, testes de interface em emulador Android 15, compila o APK de distribuição, verifica o certificado e publica no GitHub Releases. Pull requests só compilam/testam.
@@ -18,6 +22,7 @@ Para compilar localmente com Android Studio, abra esta pasta e sincronize o Grad
 - Aprovação exige a conta do navegador e proteção de origem. Android nunca envia cabeçalhos de identidade da hospedagem.
 - O certificado de distribuição fica em um segredo de runtime da hospedagem. Actions obtém a assinatura por OIDC; o servidor valida assinatura RSA do GitHub, emissor, audiência, IDs imutáveis do repositório/dono, branch main, workflow exato, evento e validade. Nenhuma chave privada entra no repositório, release, cache ou artifact. O runner mascara as credenciais e apaga o arquivo ao final.
 - A assinatura depende do segredo ANDROID_SIGNING_BUNDLE do mesmo site. Preserve esse segredo para manter atualizações compatíveis. O bundle nunca deve ser publicado em logs ou artifacts.
+- As identidades antigas e atuais do GitHub são aceitas. Quando `job_workflow_ref` está presente, precisa apontar para este mesmo workflow em main; outro workflow, repositório ou branch é recusado.
 
 ## Estado e edição
 
