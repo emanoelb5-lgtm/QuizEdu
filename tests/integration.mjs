@@ -138,6 +138,7 @@ try {
   console.log("✓ Late first correct answer, one fixed 30% penalty, question resets and matching cumulative reports.");
   // Install handoff restores the same anonymous student in a fresh app session.
   const appHome = await anonymous.request("/jogar");check(appHome.includes("Retomando sua sala") && appHome.includes("app-manifest"),"The student app entry and manifest render.");
+  check(appHome.includes('id="qe-install-bootstrap"') && appHome.includes("beforeinstallprompt") && appHome.indexOf('id="qe-install-bootstrap"') < appHome.indexOf("<body"),"The production page captures the native install event in the head, before hydration.");
   const anonymousManifest = await anonymous.request(`/api/app-manifest?sala=${code}`);eq(anonymousManifest.id,"/jogar");eq(anonymousManifest.start_url,`/jogar?sala=${code}`);eq(anonymousManifest.display,"standalone");
   const teacherManifest = await host.request(`/api/app-manifest?sala=${code}`);eq(teacherManifest.start_url,anonymousManifest.start_url,"An educator cannot mint a participant's install access.");
   const ownManifestResponse = await mf.dispatchFetch(origin+`/api/app-manifest?sala=${code}`,{headers:{cookie:[...alice.cookies].map(([k,v])=>`${k}=${v}`).join("; ")}});

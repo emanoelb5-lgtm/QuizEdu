@@ -10,6 +10,13 @@
 .player-install-card b{display:block;font-size:1rem;line-height:1.4}
 .player-install-card p{font-size:.875rem;color:#65708a;line-height:1.5;margin:5px 0 11px}
 .player-install-card .btn{padding:10px 14px;font-size:.875rem;min-height:42px}
+.player-install-card .btn:disabled{opacity:.7;cursor:wait;box-shadow:none;transform:none}
+.player-install-card .install-status{margin:9px 0 0}
+.player-install-card .install-status:empty{display:none}
+.player-install-card .install-help{padding:6px 0;min-height:36px;margin-top:5px;text-align:left;background:transparent;color:#3155ed;white-space:normal}
+.install-spinner{animation:install-spin 1s linear infinite;flex-shrink:0}
+@keyframes install-spin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.install-spinner{animation:none}}
 .install-dialog{max-width:460px!important}
 .install-steps{list-style:decimal;padding-left:22px;display:grid;gap:15px;margin:10px 0;font-size:1rem;line-height:1.6}
 .install-steps li{padding-left:4px}

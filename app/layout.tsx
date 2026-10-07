@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { PlayerAppProvider } from "./ui/player-app";
+import { INSTALL_BOOTSTRAP } from "@/lib/app-install";
 import "./globals.css";
 import "./player-app.css";
 
@@ -24,6 +25,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR">
+      <head><script id="qe-install-bootstrap" dangerouslySetInnerHTML={{__html:INSTALL_BOOTSTRAP}} /></head>
       <body className="antialiased"><PlayerAppProvider>{children}</PlayerAppProvider></body>
     </html>
   );
