@@ -106,7 +106,7 @@ class NativeUiTest {
         compose.onNodeWithTag("avatar-carousel").performTouchInput { swipeLeft() }
         compose.onNodeWithTag("avatar-carousel").performScrollToNode(hasContentDescription("Avatar Luz"))
         compose.onNodeWithContentDescription("Avatar Luz").assertIsDisplayed().performClick()
-        compose.onNodeWithText("Luz selecionado").assertExists()
+        compose.onNodeWithContentDescription("Avatar Luz").assertIsSelected()
         compose.onNodeWithTag("student-join-action").assertIsDisplayed()
     }
     @Test fun teacherStartAndNextStayVisibleBesideLongParticipantLists() {
