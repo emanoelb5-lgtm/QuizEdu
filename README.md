@@ -54,9 +54,9 @@ A integração automática que utiliza o plano ChatGPT do visitante exige autori
 
 ## Regras do jogo
 
-- **Competição:** `500 + floor(500 * (1 - tempo_de_resposta / tempo_da_pergunta))` por acerto, até 1.000 pontos. Erros e ausência de resposta valem zero. Empates são resolvidos por mais acertos, menor soma dos tempos nos acertos e ordem de entrada.
+- **Competição:** o primeiro acerto registrado em cada pergunta recebe **1.000 pontos**, independentemente da demora dentro do prazo. Do segundo acerto em diante, aplica-se uma redução fixa de **300 pontos (30% do máximo)**, além da redução pelo tempo que já existia: `200 + floor(500 * (1 - tempo_de_resposta / tempo_da_pergunta))`, entre **200 e 700 pontos**. O desconto de 30% não aumenta para o terceiro ou os demais. Erros e ausência de resposta valem zero e não consomem o prêmio do primeiro acerto. Empates são resolvidos por mais acertos, menor soma dos tempos nos acertos e ordem de entrada.
 - **Aprendizagem:** 1.000 pontos por acerto, sem bônus de rapidez. Empates são resolvidos por mais acertos e ordem de entrada. O professor pode escolher tempo livre.
-- O servidor mede o tempo e calcula os pontos. O celular não decide sua pontuação.
+- O servidor mede o tempo e calcula os pontos. A primeira resposta correta é determinada no mesmo registro atômico da resposta, garantindo um único prêmio máximo por pergunta mesmo em envios simultâneos. O celular não decide sua pontuação.
 - Cada participante pode enviar **uma única resposta por pergunta**. Reenvios da mesma resposta são idempotentes; o celular confirma o envio quando o servidor aceita a resposta.
 - As respostas corretas e as explicações não são enviadas aos alunos durante a pergunta.
 - Até **100 participantes** por sala, **50 perguntas** por quiz, **200 quizzes** por conta permanente ou **50** por acesso temporário, **100 rascunhos** e **500 questões** no banco.

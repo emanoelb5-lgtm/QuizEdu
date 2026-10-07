@@ -1,5 +1,5 @@
 import { env } from "cloudflare:workers";
-import { AVATARS, DURATIONS, mediaPath, Question, QUESTION_TEMPLATES, Quiz, quizError, RoomState, scoreFor } from "./quiz";
+import { AVATARS, DURATIONS, MAX_POINTS, mediaPath, Question, QUESTION_TEMPLATES, Quiz, quizError, RoomState, scoreFor } from "./quiz";
 
 export class HttpError extends Error { constructor(public status: number, message: string) { super(message); } }
 export const db = () => { if (!env.DB) throw new HttpError(503, "O serviço está indisponível. Tente novamente em alguns instantes."); return env.DB; };
@@ -145,7 +145,15 @@ export async function answer(request: Request, code: string) {
   if (room.status !== "question" || room.question_index !== data.index || !room.starts_at || received < room.starts_at || (room.ends_at !== null && received > room.ends_at)) throw new HttpError(409, "O tempo desta pergunta terminou ou a rodada ainda não começou.");
   const q: Question = JSON.parse(room.questions)[room.question_index]; if (data.option < 0 || data.option >= q.options.length) throw new HttpError(400, "Alternativa inválida.");
   const elapsed = Math.max(0, received - room.starts_at); const correct = q.correct === data.option;
-  const result = await db().prepare("INSERT OR IGNORE INTO answers (room, player, question_index, option, correct, points, elapsed_ms, received_at) SELECT r.code, ?, ?, ?, ?, ?, ?, ? FROM rooms r WHERE r.code = ? AND r.status = 'question' AND r.question_index = ? AND r.starts_at <= ? AND (r.ends_at IS NULL OR r.ends_at >= ?) AND r.expires_at > ?").bind(me.id, data.index, data.option, correct ? 1 : 0, room.mode === "accuracy" ? (correct ? 1000 : 0) : scoreFor(correct, elapsed, q.seconds * 1000), elapsed, received, code, data.index, received, received, received).run();
+  // Award the first correct answer atomically with its insertion. Wrong answers
+  // and concurrent retries cannot consume or duplicate the maximum score.
+  const result = await db().prepare(`INSERT OR IGNORE INTO answers (room, player, question_index, option, correct, points, elapsed_ms, received_at)
+    SELECT r.code, ?, ?, ?, ?,
+      CASE WHEN r.mode = 'accuracy' OR NOT EXISTS (
+        SELECT 1 FROM answers a WHERE a.room = r.code AND a.question_index = r.question_index AND a.correct = 1
+      ) THEN ? ELSE ? END, ?, ?
+    FROM rooms r WHERE r.code = ? AND r.status = 'question' AND r.question_index = ? AND r.starts_at <= ? AND (r.ends_at IS NULL OR r.ends_at >= ?) AND r.expires_at > ?`)
+    .bind(me.id, data.index, data.option, correct ? 1 : 0, correct ? MAX_POINTS : 0, scoreFor(correct, elapsed, q.seconds * 1000), elapsed, received, code, data.index, received, received, received).run();
   if (!result.meta.changes) { const raced = await db().prepare("SELECT option FROM answers WHERE room = ? AND player = ? AND question_index = ?").bind(code, me.id, data.index).first<{ option: number }>(); if (!raced || raced.option !== data.option) throw new HttpError(409, "Sua resposta não pôde ser registrada nesta rodada."); }
   return json({ accepted: true, option: data.option });
 }

@@ -14,7 +14,11 @@ const rejects=(operation,expression)=>{assert.throws(operation,expression);check
 try{
   await fs.writeFile(path.join(temp,"package.json"),'{"type":"module"}');
   for(const name of ["quiz","question-import","question-ai"]){const source=await fs.readFile(`lib/${name}.ts`,"utf8");let output=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}}).outputText;output=output.replace('from "./quiz"','from "./quiz.js"');await fs.writeFile(path.join(temp,name+".js"),output);}
-  const {newQuestion,newQuiz,applyQuestionTemplate,emptyQuestion,questionIssues,quizError}=await import(pathToFileURL(path.join(temp,"quiz.js")));
+  const {newQuestion,newQuiz,applyQuestionTemplate,emptyQuestion,questionIssues,quizError,scoreFor}=await import(pathToFileURL(path.join(temp,"quiz.js")));
+  for (const elapsed of [0,10000,20000,30000]) eq(scoreFor(true,elapsed,30000,true),1000,"The first correct answer always receives the maximum.");
+  eq(scoreFor(true,0,30000),700);eq(scoreFor(true,15000,30000),450);eq(scoreFor(true,30000,30000),200);
+  eq(scoreFor(true,-100,30000),700);eq(scoreFor(true,40000,30000),200);
+  eq(scoreFor(false,0,30000,true),0);eq(scoreFor(false,15000,30000),0);
   const {IMPORT_EXAMPLE,IMPORT_CSV,parseQuestionText,parseQuestionCsv,parseQuestionRows,importNeedsReview}=await import(pathToFileURL(path.join(temp,"question-import.js")));
   const {questionAiPrompt}=await import(pathToFileURL(path.join(temp,"question-ai.js")));
   const aiSettings={topic:"Conservação do solo",audience:"EJA Campo",count:5,difficulty:"balanced",kind:"multiple",seconds:45,material:""};

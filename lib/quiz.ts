@@ -80,7 +80,11 @@ export function quizError(quiz: Quiz): string | null {
   return null;
 }
 export function mediaPath(value: unknown): value is string { return typeof value === "string" && /^\/api\/media\/[a-f0-9-]{36}$/.test(value); }
-export function scoreFor(correct: boolean, elapsedMs: number, durationMs: number) {
-  return correct ? 500 + Math.floor(500 * (1 - Math.max(0, Math.min(1, elapsedMs / durationMs)))) : 0;
+export const MAX_POINTS = 1000;
+export function scoreFor(correct: boolean, elapsedMs: number, durationMs: number, firstCorrect = false) {
+  if (!correct) return 0;
+  if (firstCorrect) return MAX_POINTS;
+  const timedPoints = 500 + Math.floor(500 * (1 - Math.max(0, Math.min(1, elapsedMs / durationMs))));
+  return timedPoints - MAX_POINTS * 0.3;
 }
 export function points(n: number) { return new Intl.NumberFormat("pt-BR").format(n); }
