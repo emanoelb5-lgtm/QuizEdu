@@ -30,6 +30,19 @@ O exemplo **Brasil e natureza** contém cinco perguntas que podem ser adaptadas.
 - **Testar como aluno:** abre uma simulação da pergunta, com escolha de resposta, cronômetro, resultado e visão do telão. Usa os mesmos componentes de enunciado e alternativas da sala. Não cria participantes, aulas nem respostas no histórico.
 - Imagens e explicações ficam em **Mais opções** quando são opcionais. O envio de imagens precisa terminar antes de salvar ou abrir a sala.
 
+## Criar perguntas com IA
+
+No editor, use **Criar com IA**. Informe assunto, turma, quantidade (até 20 por pedido), dificuldade e modelo: múltipla escolha, verdadeiro/falso ou situação prática. Opcionalmente, cole um texto de apoio de até 12.000 caracteres. O pedido solicita linguagem adequada à turma, gabarito explícito e explicações curtas no formato aceito pelo QuizEdu.
+
+1. Clique em **Preparar pedido** e **Copiar pedido**.
+2. Use **Abrir ChatGPT**, entre na conta que deseja usar e envie o pedido em uma conversa.
+3. Copie a resposta completa, volte ao QuizEdu e use **Colar resposta e revisar**.
+4. Confira os fatos, as alternativas e o gabarito. Selecione as perguntas e adicione ao rascunho.
+
+Este é um fluxo assistido com copiar/colar. O QuizEdu não envia chamadas de IA, não usa uma chave do proprietário, não recebe a senha do ChatGPT e não tem acesso às conversas. A geração acontece na conta aberta no ChatGPT e segue os limites dela. O login **Continuar com ChatGPT** do QuizEdu identifica o educador e guarda suas atividades; não autoriza geração de IA.
+
+A integração automática que utiliza o plano ChatGPT do visitante exige autorização própria para inferência. A [documentação oficial de Sign in with ChatGPT](https://developers.openai.com/siwc/token-sharing-open-source) disponibiliza o fluxo aberto para aplicativos locais/de código aberto; aplicativos pagos ou hospedados remotamente precisam solicitar acesso à OpenAI. Esse acesso não está configurado neste site. A geração direta não deve ser ativada apenas com o login de identidade nem com a chave/saldo do proprietário.
+
 ## Biblioteca e recuperação
 
 - **Conta permanente:** o login do ChatGPT identifica o educador; quizzes, rascunhos, banco e aulas ficam no servidor. Ao vincular o acesso temporário, o trabalho existente é transferido para sua conta. O login não exige chave de API nem assinatura de um serviço de IA.

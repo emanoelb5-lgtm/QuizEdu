@@ -13,9 +13,15 @@ const ok=(value,message)=>{assert.ok(value,message);checks++;};
 const rejects=(operation,expression)=>{assert.throws(operation,expression);checks++;};
 try{
   await fs.writeFile(path.join(temp,"package.json"),'{"type":"module"}');
-  for(const name of ["quiz","question-import"]){const source=await fs.readFile(`lib/${name}.ts`,"utf8");let output=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}}).outputText;output=output.replace('from "./quiz"','from "./quiz.js"');await fs.writeFile(path.join(temp,name+".js"),output);}
+  for(const name of ["quiz","question-import","question-ai"]){const source=await fs.readFile(`lib/${name}.ts`,"utf8");let output=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ESNext}}).outputText;output=output.replace('from "./quiz"','from "./quiz.js"');await fs.writeFile(path.join(temp,name+".js"),output);}
   const {newQuestion,newQuiz,applyQuestionTemplate,emptyQuestion,questionIssues,quizError}=await import(pathToFileURL(path.join(temp,"quiz.js")));
   const {IMPORT_EXAMPLE,IMPORT_CSV,parseQuestionText,parseQuestionCsv,parseQuestionRows,importNeedsReview}=await import(pathToFileURL(path.join(temp,"question-import.js")));
+  const {questionAiPrompt}=await import(pathToFileURL(path.join(temp,"question-ai.js")));
+  const aiSettings={topic:"Conservação do solo",audience:"EJA Campo",count:5,difficulty:"balanced",kind:"multiple",seconds:45,material:""};
+  const aiPrompt=questionAiPrompt(aiSettings);ok(aiPrompt.includes("Crie 5 perguntas"));ok(aiPrompt.includes('Turma/público: "EJA Campo"'));
+  for(const kind of ["multiple","true_false","scenario"]){const prompt=questionAiPrompt({...aiSettings,kind});const format=prompt.split("Formato (substitua os trechos entre colchetes e escreva o gabarito correto):\n")[1];const parsed=parseQuestionText(format);eq(parsed.items.length,1);eq(parsed.items[0].question.seconds,45);eq(parsed.items[0].question.correct,kind==="true_false"?0:1);eq(importNeedsReview(parsed.items[0]),false);}
+  const material='A cobertura protege o solo.\nTexto com "aspas".';ok(questionAiPrompt({...aiSettings,material}).endsWith(JSON.stringify(material)));eq(questionAiPrompt({...aiSettings,seconds:25}).includes("Tempo: 30"),true);
+  rejects(()=>questionAiPrompt({...aiSettings,topic:" "}),/assunto/);rejects(()=>questionAiPrompt({...aiSettings,count:21}),/20/);rejects(()=>questionAiPrompt({...aiSettings,count:1.5}),/20/);rejects(()=>questionAiPrompt({...aiSettings,material:"x".repeat(12001)}),/12.000/);rejects(()=>questionAiPrompt({...aiSettings,kind:"image"}),/modelo/);
   const blank=newQuestion();eq(blank.correct,-1,"A new question must not silently mark A as correct.");eq(blank.options.length,4);ok(emptyQuestion(blank));eq(newQuiz().questions[0].correct,-1);
   const tf=newQuestion("true_false",{seconds:60});eq(tf.options,["Verdadeiro","Falso"]);eq(tf.correct,-1);eq(tf.seconds,60);ok(emptyQuestion(tf));eq(emptyQuestion({...tf,correct:0}),false);
   eq(newQuestion("scenario",{seconds:45,optionCount:3}).options.length,3);eq(newQuestion("image",{seconds:45}).seconds,45);eq(newQuestion("multiple",{seconds:25,optionCount:1}).seconds,30);eq(newQuestion("multiple",{optionCount:9}).options.length,4);
@@ -48,5 +54,5 @@ try{
   const duplicateOptions=parseQuestionRows([["Pergunta","A","B","Correta"],["P?","Mesmo","mesmo","Mesmo"]]);eq(duplicateOptions.items[0].question.correct,-1);
   const count=Array.from({length:100},(_,i)=>`${i+1}. Pergunta ${i+1}?\nA) Sim\nB) Não\nResposta: A`).join("\n\n");eq(parseQuestionText(count).items.length,100);rejects(()=>parseQuestionText(count+"\n\n101. Pergunta?\nA) Sim\nB) Não"),/até 100/);
   const rows=await readSheet("tests/fixtures/question-import.xlsx");const excel=parseQuestionRows(rows);eq(excel.items.length,2);eq(excel.items[0].question.correct,0);eq(excel.items[0].question.seconds,30);eq(excel.items[1].question.correct,0);eq(excel.items[1].question.kind,"true_false");eq(excel.items.some(importNeedsReview),false);
-  console.log(`✓ Question templates, explicit answer marking, text/CSV/Excel import, ambiguity checks, multiline content and review. ${checks} checks passed.`);
+  console.log(`✓ Question templates, ChatGPT request formats, explicit answer marking, text/CSV/Excel import, ambiguity checks, multiline content and review. ${checks} checks passed.`);
 }finally{await fs.rm(temp,{recursive:true,force:true});}
