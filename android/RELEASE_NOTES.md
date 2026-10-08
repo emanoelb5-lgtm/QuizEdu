@@ -1,9 +1,10 @@
-QuizEdu Android 1.2.0 — avatares ilustrados e controles sempre visíveis.
+QuizEdu Android 1.2.1 — tela do aluno mais simples.
 
-- 24 personagens Adventurer, de Lisa Wischofsky / DiceBear (CC BY 4.0), incluídos no aplicativo para carregar sem serviço externo.
-- Escolha do avatar em carrossel horizontal: deslize para explorar e toque para selecionar.
-- Botão de entrar fixo na tela, também com o teclado aberto.
-- Iniciar quiz ou apresentação, avançar e revelar resultado permanecem na tela enquanto você consulta o QR code, os participantes ou o ranking.
-- Os avatares ilustrados aparecem na espera, nos participantes, no ranking e no pódio. Salas e preferências de versões anteriores continuam compatíveis.
+- Barra superior com Sair e confirmação antes de deixar a sala. O botão Voltar do Android também pede confirmação.
+- Pontuação atual e posição ficam num resumo compacto, sempre visível durante o quiz.
+- Conteúdo concentrado na etapa atual: espera, slide, pergunta ou resultado. O progresso e o cronômetro continuam disponíveis.
+- Removidos os avisos repetidos, as regras e a lista da turma durante a atividade do aluno.
+- A confirmação de resposta, a resposta correta e a explicação continuam na tela.
+- Mantidos os 24 avatares ilustrados, o carrossel e os controles fixos do professor.
 
-Inclui as melhorias de sincronização, importação e edição das versões anteriores. Instale sobre o app atual: mesmo pacote e certificado. Android 7 ou superior.
+Instale sobre a versão atual: mesmo pacote e certificado. Android 7 ou superior.

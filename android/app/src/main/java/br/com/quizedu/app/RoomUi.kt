@@ -54,16 +54,17 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
             Spacer(Modifier.height(25.dp))
             if (vm.roomError == null) CircularProgressIndicator()
             Text(vm.roomError ?: "Conectando à sala ${vm.currentCode}…", style = MaterialTheme.typography.titleLarge)
-            Text("Seu nome e sua pontuação serão retomados neste aparelho.", color = EduMuted)
-            TextButton(onClick = vm::leaveRoom) { Text("Entrar em outra sala") }
+            if (vm.roomTeacher) TextButton(onClick = vm::leaveRoom) { Text("Voltar às minhas aulas") }
+            else if (vm.roomError != null) TextButton(onClick = { vm.openRoom(vm.currentCode, false) }, enabled = !vm.busy) { Text("Tentar novamente") }
         }
         return
     }
-    if (state.status == "closed") {
+    if (state.status == "closed" && vm.roomTeacher) {
         Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) { Heading("Esta sala foi encerrada.", "Peça ao professor o código da próxima aula."); Button(onClick = vm::leaveRoom) { Text("Entrar em outra sala") } }
         return
     }
-    if (!vm.roomTeacher && state.me == null && state.status != "finished") { JoinScreen(vm, state); return }
+    if (!vm.roomTeacher && state.me == null && state.status !in listOf("finished", "closed")) { JoinScreen(vm, state); return }
+    if (!vm.roomTeacher) { StudentRoomScreen(vm, state); return }
     val context = LocalContext.current
     Column(Modifier.fillMaxSize()) {
     LazyColumn(Modifier.weight(1f).fillMaxWidth().testTag("room-content"), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
@@ -133,7 +134,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
     val canJoin = state.status == "lobby" || (state.presentation != null && state.status == "slide")
     Column(Modifier.fillMaxSize().imePadding()) {
         LazyColumn(Modifier.weight(1f).fillMaxWidth(), contentPadding = PaddingValues(22.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
-            item { Heading("Você chegou!", "${state.title} · Sala ${state.code}") }
+            item { Heading("Entrar na sala", state.title) }
             item { OutlinedTextField(name, { name = it.take(24) }, label = { Text("Como você quer aparecer?") }, singleLine = true,
                 keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Done), keyboardActions = KeyboardActions(onDone = { keyboard?.hide() }), modifier = Modifier.fillMaxWidth()) }
             item { Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { Text("Escolha seu avatar", fontWeight = FontWeight.Bold); Text("Arraste para ver mais", color = EduMuted, fontSize = 12.sp) } }
@@ -155,7 +156,6 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
             item { Text("${avatarOption(avatar).name} selecionado", color = EduMuted, fontSize = 14.sp) }
             item { TextButton(onClick = { openWeb(context, "https://www.dicebear.com/styles/adventurer/") }, contentPadding = PaddingValues(0.dp)) { Text("Adventurer · Lisa Wischofsky / DiceBear · CC BY 4.0", fontSize = 12.sp) } }
             if (!canJoin) item { InfoCard("A turma está respondendo. Em uma apresentação, aguarde o professor passar para um slide de conteúdo para entrar.") }
-            item { TextButton(onClick = vm::leaveRoom) { Text("Usar outro código") } }
         }
         Surface(color = Color.White, shadowElevation = 8.dp, modifier = Modifier.fillMaxWidth()) {
             Button(onClick = { keyboard?.hide(); vm.join(name.trim(), avatar) }, enabled = canJoin && !vm.busy && vm.connected && name.trim().length >= 2,
@@ -196,7 +196,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
         }
     }
 }
-@Composable private fun QuestionPanel(vm: QuizViewModel, state: RoomSnapshot, revealed: Boolean) {
+@Composable internal fun QuestionPanel(vm: QuizViewModel, state: RoomSnapshot, revealed: Boolean) {
     val question = state.question ?: return
     var elapsed by remember { mutableStateOf(SystemClock.elapsedRealtime()) }
     LaunchedEffect(state.status, state.startsAt, revealed) { while (!revealed) { elapsed = SystemClock.elapsedRealtime(); delay(100) } }
@@ -225,7 +225,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
                 else if (selected) Icon(Icons.Default.Check, "Sua resposta")
             }
         }
-        if (!revealed && !vm.roomTeacher) Text(when { !ready -> "Prepare-se. As alternativas liberam quando a rodada começa."; answered -> "Resposta enviada! Aguarde o resultado da rodada."; over -> "O tempo terminou. Aguarde o resultado."; !vm.connected -> "A resposta precisa de conexão. O aplicativo tenta reconectar automaticamente."; else -> "Escolha uma alternativa. Sua primeira resposta é a que vale." }, color = EduMuted)
+        if (!revealed && !vm.roomTeacher && (!ready || answered || over)) Text(when { !ready -> "Prepare-se."; answered -> "Resposta confirmada. Aguarde o resultado."; over -> "Tempo encerrado."; !vm.connected -> "Reconectando… Aguarde para responder."; else -> "" }, color = EduMuted)
         if (revealed && state.raw.str("explanation").isNotBlank()) InfoCard(state.raw.str("explanation"))
         if (revealed && !vm.roomTeacher) state.me?.let { Text("+${points(it.optInt("roundPoints"))} nesta rodada · ${points(it.optInt("score"))} no total", color = EduBlue, fontWeight = FontWeight.Bold) }
     } }
@@ -241,7 +241,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
         }
     }
 }
-@Composable private fun Podium(players: List<JSONObject>) {
+@Composable internal fun Podium(players: List<JSONObject>) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Bottom) {
         players.take(2).forEachIndexed { index, player -> Surface(color = if (index == 0) EduNavy else Color(0xFFEAF0FF), shape = RoundedCornerShape(22.dp), modifier = Modifier.weight(1f)) {
             Column(Modifier.padding(18.dp).heightIn(min = if (index == 0) 220.dp else 185.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {

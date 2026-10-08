@@ -22,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -74,8 +75,8 @@ fun openWeb(context: Context, path: String) {
             TopAppBar(title = { Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
                 Surface(color = EduBlue, shape = RoundedCornerShape(10.dp)) { Icon(Icons.Default.HelpOutline, "", tint = EduLime, modifier = Modifier.padding(7.dp).size(24.dp)) }
                 Text("Quiz", fontWeight = FontWeight.ExtraBold, color = EduNavy); Text("Edu", fontWeight = FontWeight.Bold, color = EduBlue, modifier = Modifier.offset(x = (-8).dp))
-            } }, navigationIcon = { if (vm.screen != AppScreen.Home) IconButton(onClick = { if (vm.screen == AppScreen.Room) exitConfirm = true else if (vm.screen == AppScreen.Editor) vm.closeEditor() else vm.home() }, enabled = !vm.busy) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Voltar") } },
-                actions = { if (vm.screen == AppScreen.Home) TextButton(onClick = { vm.mode(!vm.teacher) }, enabled = !vm.busy) { Text(if (vm.teacher) "Sou aluno" else "Sou professor") } })
+            } }, navigationIcon = { if (vm.screen != AppScreen.Home && !(vm.screen == AppScreen.Room && !vm.roomTeacher)) IconButton(onClick = { if (vm.screen == AppScreen.Room) exitConfirm = true else if (vm.screen == AppScreen.Editor) vm.closeEditor() else vm.home() }, enabled = !vm.busy) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Voltar") } },
+                actions = { if (vm.screen == AppScreen.Room && !vm.roomTeacher) TextButton(onClick = { exitConfirm = true }, enabled = !vm.busy, modifier = Modifier.testTag("student-exit")) { Icon(Icons.Default.Logout, null, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(5.dp)); Text("Sair") }; if (vm.screen == AppScreen.Home) TextButton(onClick = { vm.mode(!vm.teacher) }, enabled = !vm.busy) { Text(if (vm.teacher) "Sou aluno" else "Sou professor") } })
             if (vm.busy) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         }
     }) { padding ->
@@ -90,7 +91,7 @@ fun openWeb(context: Context, path: String) {
     }
     if (exitConfirm) AlertDialog(onDismissRequest = { exitConfirm = false }, title = { Text(if (vm.roomTeacher) "Voltar às minhas aulas?" else "Sair desta sala?") },
         text = { Text(if (vm.roomTeacher) "A sala continua aberta e pode ser retomada na lista de salas." else "Sua participação e os pontos permanecem na sala. Para retomar, entre novamente com este aparelho.") },
-        confirmButton = { TextButton(onClick = { exitConfirm = false; vm.leaveRoom() }) { Text("Sair da tela") } }, dismissButton = { TextButton(onClick = { exitConfirm = false }) { Text("Continuar aqui") } })
+        confirmButton = { TextButton(onClick = { exitConfirm = false; vm.leaveRoom() }) { Text(if (vm.roomTeacher) "Sair da tela" else "Sair da sala") } }, dismissButton = { TextButton(onClick = { exitConfirm = false }) { Text(if (vm.roomTeacher) "Continuar aqui" else "Continuar na sala") } })
 }
 @Composable fun InfoCard(text: String, warning: Boolean = false) {
     Surface(color = if (warning) Color(0xFFFFF4DD) else Color(0xFFEAF0FF), shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth()) {
@@ -127,7 +128,6 @@ fun openWeb(context: Context, path: String) {
         if (previous.matches(Regex("[0-9]{6}"))) item { OutlinedCard(onClick = { vm.openRoom(previous, false) }) {
             Row(Modifier.padding(18.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Default.Restore, null, tint = EduBlue); Spacer(Modifier.width(12.dp)); Column { Text("Retomar minha sala", fontWeight = FontWeight.Bold); Text("Código $previous", color = EduMuted) } }
         } }
-        item { InfoCard("Ao reabrir o aplicativo, sua sala, seu nome e sua pontuação são retomados neste aparelho.") }
     }
     Surface(color = Color.White, shadowElevation = 8.dp, modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(horizontal = 22.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {

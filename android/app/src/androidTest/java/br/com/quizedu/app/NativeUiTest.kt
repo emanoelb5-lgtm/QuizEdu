@@ -73,7 +73,7 @@ class NativeUiTest {
         compose.onNodeWithText("Código de 6 números").performTextInput("123456")
         compose.onNodeWithText("Entrar na sala").performClick()
         compose.waitUntil(10000) { vm.room != null }
-        compose.onNodeWithText("Você chegou!").assertIsDisplayed()
+        compose.onNodeWithText("Entrar na sala").assertIsDisplayed()
         compose.onNodeWithText("Como você quer aparecer?").performTextInput("Luana")
         compose.onNodeWithTag("student-join-action").assertIsDisplayed()
         compose.onNodeWithText("Como você quer aparecer?").performImeAction()
@@ -108,6 +108,67 @@ class NativeUiTest {
         compose.onNodeWithContentDescription("Avatar Luz").assertIsDisplayed().performClick()
         compose.onNodeWithContentDescription("Avatar Luz").assertIsSelected()
         compose.onNodeWithTag("student-join-action").assertIsDisplayed()
+    }
+    @Test fun studentKeepsCurrentScoreAcrossQuestionResultAndPresentationWithoutClassroomLists() {
+        val initial = studentQuestion()
+        client.transition(initial)
+        compose.runOnIdle { vm.openRoom("123456", false) }
+        compose.waitUntil(10000) { vm.room?.version == "question:1" }
+        compose.onNodeWithTag("student-current-score").assertTextEquals("1.500 pontos").assertIsDisplayed()
+        compose.onNodeWithText("2º lugar").assertIsDisplayed()
+        compose.onNodeWithText("Pergunta 1 de 3").assertIsDisplayed()
+        compose.onNodeWithText("Quanto é 2 + 2?").assertIsDisplayed()
+        compose.onNodeWithText("4").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("student-current-score").assertIsDisplayed()
+        compose.onNodeWithTag("student-exit").assertIsDisplayed()
+        compose.onNodeWithText("Aluno 100").assertDoesNotExist()
+        compose.onNodeWithText("Classificação").assertDoesNotExist()
+
+        val results = initial.copy().put("status", "results").put("version", "results:2").put("revision", 2).put("correct", 1).put("explanation", "Somar duas unidades a duas unidades resulta em quatro.")
+        results.getJSONObject("me").put("score", 2200).put("answered", true).put("roundCorrect", true).put("roundPoints", 700)
+        client.transition(results)
+        compose.waitUntil(1500) { vm.room?.version == "results:2" }
+        compose.onNodeWithTag("student-current-score").assertTextEquals("2.200 pontos").assertIsDisplayed()
+        compose.onNodeWithText("Resposta certa!").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("+700 pontos nesta rodada").assertIsDisplayed()
+        compose.onNodeWithText("Classificação").assertDoesNotExist()
+
+        val slide = newSlide("blank").put("title", "Números e quantidades")
+        slide.arr("elements").put(newElement("text", "azul").put("x", 40).put("y", 40).put("w", 1000).put("h", 180).put("doc", richText("Números e quantidades")))
+        client.transition(results.copy().put("status", "slide").put("version", "slide:3").put("revision", 3).put("presentation", JSONObject().put("index", 1).put("step", 0).put("total", 4).put("slide", slide)))
+        compose.waitUntil(1500) { vm.room?.version == "slide:3" }
+        compose.onNodeWithText("Slide 2 de 4").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithText("Números e quantidades").assertIsDisplayed()
+        compose.onNodeWithTag("student-current-score").assertTextEquals("2.200 pontos").assertIsDisplayed()
+        compose.onNodeWithText("Aluno 100").assertDoesNotExist()
+        compose.onNodeWithTag("student-exit").assertIsDisplayed()
+    }
+    @Test fun studentExitRequiresConfirmationAndReturningPreservesIdentityAndScore() {
+        client.transition(studentQuestion())
+        compose.runOnIdle { vm.openRoom("123456", false) }
+        compose.waitUntil(10000) { vm.room?.me != null }
+        val participantId = vm.room!!.me!!.str("id")
+        compose.onNodeWithTag("student-exit").performClick()
+        compose.onNodeWithText("Sair desta sala?").assertIsDisplayed()
+        compose.onNodeWithText("Continuar na sala").performClick()
+        compose.onNodeWithTag("student-current-score").assertTextEquals("1.500 pontos").assertIsDisplayed()
+        assertEquals(AppScreen.Room, vm.screen)
+        compose.onNodeWithTag("student-exit").performClick()
+        compose.onNodeWithText("Sair da sala").performClick()
+        compose.waitUntil(10000) { vm.screen == AppScreen.Home }
+        compose.onNodeWithTag("student-exit").assertDoesNotExist()
+        compose.runOnIdle { vm.openRoom("123456", false) }
+        compose.waitUntil(10000) { vm.room?.me != null }
+        compose.onNodeWithTag("student-current-score").assertTextEquals("1.500 pontos").assertIsDisplayed()
+        assertEquals(participantId, vm.room!!.me!!.str("id"))
+    }
+    private fun studentQuestion(): JSONObject {
+        val now = System.currentTimeMillis()
+        val me = JSONObject().put("id", "student-luana").put("name", "Luana").put("avatar", "adventurer-02").put("score", 1500).put("position", 2).put("answered", false).put("option", JSONObject.NULL)
+        val players = JSONArray((1..100).map { JSONObject().put("id", "player-$it").put("name", "Aluno $it").put("avatar", "adventurer-01").put("position", it).put("score", 0) })
+        return JSONObject().put("code", "123456").put("title", "Aula de matemática").put("teacher", "Clara").put("status", "question").put("index", 0).put("total", 3).put("isHost", false)
+            .put("serverNow", now).put("version", "question:1").put("revision", 1).put("startsAt", now - 1000).put("endsAt", now + 60000).put("players", players).put("me", me)
+            .put("question", JSONObject().put("text", "Quanto é 2 + 2?").put("options", JSONArray(listOf("3", "4"))).put("seconds", 60))
     }
     @Test fun teacherStartAndNextStayVisibleBesideLongParticipantLists() {
         val players = JSONArray((1..100).map { JSONObject().put("id", "player-$it").put("name", "Aluno $it").put("avatar", avatarOptions[(it - 1) % 24].id).put("position", it).put("score", 0) })
