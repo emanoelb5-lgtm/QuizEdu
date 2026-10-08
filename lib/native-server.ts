@@ -5,7 +5,7 @@ type Device = {id:string;device_name:string;owner:string|null;source_owner:strin
 const uuid=(value:unknown):value is string=>typeof value==="string"&&/^[a-f0-9-]{36}$/.test(value);
 export async function startNative(request:Request){
  const data=await body(request);if(typeof data.challenge!=="string"||! /^[a-f0-9]{64}$/.test(data.challenge))throw new HttpError(400,"Vínculo inválido.");
- const name=cleanName(data.deviceName||"QuizEdu Android",80),now=Date.now();
+ const name=cleanName(data.deviceName||"Prativerso Android",80),now=Date.now();
  const ip=await hash(request.headers.get("CF-Connecting-IP")||"unknown");
  await db().prepare("DELETE FROM native_sessions WHERE expires_at < ?").bind(now).run();
  const count=await db().prepare("SELECT COUNT(*) n FROM native_sessions WHERE ip_hash = ? AND created_at > ?").bind(ip,now-600000).first<{n:number}>();
@@ -31,7 +31,7 @@ export async function nativeStatus(request:Request){
 }
 export async function approveNative(request:Request){
  // Approval belongs to the existing browser account, never a second app's bearer.
- if(request.headers.has("Authorization")||request.headers.get("Origin")!==new URL(request.url).origin)throw new HttpError(403,"Autorize o aplicativo pelo QuizEdu no navegador.");
+ if(request.headers.has("Authorization")||request.headers.get("Origin")!==new URL(request.url).origin)throw new HttpError(403,"Autorize o aplicativo pelo Prativerso no navegador.");
  const copy=request.clone() as unknown as Request;const data=await body(request);if(!uuid(data.id))throw new HttpError(400,"Vínculo inválido.");
  if(platformIdentity(request))await linkAccount(copy);
  const user=(await educator(request))!;

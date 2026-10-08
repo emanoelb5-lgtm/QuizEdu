@@ -50,7 +50,7 @@ export function questionIssues(q:Question):QuestionIssue[] {
   if(q.kind!==undefined&&!QUESTION_TEMPLATES.some(t=>t.kind===q.kind))error("kind","Escolha um modelo válido.");
   if(q.kind==="true_false"&&(q.options.length!==2||q.options[0]!=="Verdadeiro"||q.options[1]!=="Falso"))error("options","Use as alternativas Verdadeiro e Falso neste modelo.");
   if(q.kind==="image"&&!q.image)error("image","Adicione a imagem que a turma vai observar.");
-  if(q.image&&!mediaPath(q.image))error("image","Selecione uma imagem enviada pelo QuizEdu.");
+  if(q.image&&!mediaPath(q.image))error("image","Selecione uma imagem enviada pelo Prativerso.");
   if(q.imageAlt!==undefined&&(typeof q.imageAlt!=="string"||q.imageAlt.length>180))error("imageAlt","Use até 180 caracteres na descrição da imagem.");
   else if(q.image&&(!q.imageAlt?.trim()||q.imageAlt.trim()==="Imagem da pergunta"))warning("imageAlt","Descreva o que aparece na imagem para ajudar quem não consegue vê-la.");
   if(q.optionImages&&(!Array.isArray(q.optionImages)||q.optionImages.length!==q.options.length||q.optionImages.some(v=>typeof v!=="string"||(v&&!mediaPath(v)))))error("image","Verifique as imagens das alternativas.");

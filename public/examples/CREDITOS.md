@@ -1,4 +1,4 @@
-# QuizEdu photo credits
+# Prativerso photo credits
 
 All six are real sourced photographs. JPEGs are 1200×675 (16:9), quality 86, cropped from original photos.
 

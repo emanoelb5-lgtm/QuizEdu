@@ -1,13 +1,13 @@
 "use client";
 import { useEffect, useState } from "react";
-import { CircleHelp, Loader2, WifiOff } from "lucide-react";
+import { Loader2, WifiOff } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 import { LiveClock, serverTime } from "@/lib/live-clock";
 export class ApiError extends Error { constructor(message:string,public status:number){super(message);} }
 export function Brand({ dark = false, href = "/" }: { dark?: boolean; href?: string | null }) {
-  const content=<><span className="brand-mark"><CircleHelp size={24} strokeWidth={2.5}/></span><span>Quiz<span className="brand-edu">Edu</span></span></>;
+  const content=<><span className="brand-mark" aria-hidden="true"><svg viewBox="0 0 64 64" fill="none"><path className="brand-orbit" d="M56 19A26 26 0 1 0 44 56" strokeWidth="3" strokeLinecap="round"/><path className="brand-letter" d="M25 49V18H35C43 18 47 22 47 29S43 40 35 40H25" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round"/><circle className="brand-spark" cx="55" cy="49" r="5"/></svg></span><span className="brand-name">Prativerso</span></>;
   const className=`brand ${dark ? "brand-light" : ""}`;
-  return href===null?<span className={className} aria-label="QuizEdu">{content}</span>:<a href={href} className={className} aria-label="QuizEdu, início">{content}</a>;
+  return href===null?<span className={className} aria-label="Prativerso">{content}</span>:<a href={href} className={className} aria-label="Prativerso, início">{content}</a>;
 }
 export function Notifications() { return <Toaster theme="light" position="bottom-center" richColors />; }
 export async function api<T = any>(path: string, body?: unknown, method?: string): Promise<T> {

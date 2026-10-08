@@ -1,6 +1,6 @@
 /* Only public assets are cached. Live rooms, answers, profiles and sign-in
    always use the network; offline navigation preserves the route to retry. */
-const CACHE = "quizedu-player-v1";
+const CACHE = "quizedu-player-v2";
 const SHELL = ["/offline.html", "/favicon.svg", "/app-icon-192.png", "/app-icon-512.png"];
 self.addEventListener("install", event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
@@ -12,7 +12,7 @@ self.addEventListener("fetch", event => {
   const request = event.request; const url = new URL(request.url);
   if (request.method !== "GET" || url.origin !== self.location.origin || url.pathname.startsWith("/api/") || url.pathname.includes("signin-with-chatgpt") || url.pathname.includes("signout-with-chatgpt") || url.pathname === "/callback") return;
   if (request.mode === "navigate" && (url.pathname === "/jogar" || /^\/participar\/\d{6}\/?$/.test(url.pathname))) {
-    event.respondWith(fetch(request).catch(async () => (await caches.match("/offline.html")) || new Response("Sem conexão. Reabra o QuizEdu quando a internet voltar.",{status:503,headers:{"Content-Type":"text/plain;charset=utf-8"}})));
+    event.respondWith(fetch(request).catch(async () => (await caches.match("/offline.html")) || new Response("Sem conexão. Reabra o Prativerso quando a internet voltar.",{status:503,headers:{"Content-Type":"text/plain;charset=utf-8"}})));
     return;
   }
   const asset = SHELL.includes(url.pathname) || (/^\/assets\/.+\.[a-z0-9]+$/i.test(url.pathname) && ["script","style","font"].includes(request.destination));

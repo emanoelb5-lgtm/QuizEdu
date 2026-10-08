@@ -21,7 +21,7 @@ export async function androidSigning(request:Request){
  if(!token||token.length>16000)throw new HttpError(401,"GitHub Actions authentication required.");
  let parts:string[],header:Record<string,unknown>,claims:Record<string,unknown>;
  try{parts=token.split(".");if(parts.length!==3)throw new Error();header=JSON.parse(new TextDecoder().decode(decode(parts[0])));claims=JSON.parse(new TextDecoder().decode(decode(parts[1])));}catch{throw new HttpError(401,"Invalid Actions token.");}
- if(header.alg!=="RS256"||header.typ!=="JWT"||typeof header.kid!=="string"||!trustedSigningClaims(claims))throw new HttpError(403,"This workflow is not authorized to sign QuizEdu.");
+ if(header.alg!=="RS256"||header.typ!=="JWT"||typeof header.kid!=="string"||!trustedSigningClaims(claims))throw new HttpError(403,"This workflow is not authorized to sign Prativerso.");
  if(!jwks||jwks.expires<Date.now()||!jwks.keys.some(k=>k.kid===header.kid)){
    const response=await fetch(`${issuer}/.well-known/jwks`,{signal:AbortSignal.timeout(10000)});
    if(!response.ok)throw new HttpError(503,"GitHub signing identity unavailable.");
@@ -32,6 +32,6 @@ export async function androidSigning(request:Request){
  const imported=await crypto.subtle.importKey("jwk",key,{name:"RSASSA-PKCS1-v1_5",hash:"SHA-256"},false,["verify"]);
  if(!await crypto.subtle.verify("RSASSA-PKCS1-v1_5",imported,decode(parts[2]),new TextEncoder().encode(parts.slice(0,2).join("."))))throw new HttpError(401,"Invalid Actions signature.");
  const bundle=(env as unknown as Record<string,unknown>).ANDROID_SIGNING_BUNDLE;
- if(typeof bundle!=="string"||bundle.length>30000)throw new HttpError(503,"QuizEdu signing is not configured.");
+ if(typeof bundle!=="string"||bundle.length>30000)throw new HttpError(503,"Prativerso signing is not configured.");
  return json(JSON.parse(bundle));
 }

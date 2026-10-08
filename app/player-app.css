@@ -4,28 +4,28 @@
 .player-room-actions .player-room-code{font-size:.875rem;letter-spacing:.04em;white-space:nowrap}
 .player-room-actions .player-exit,.player-room-actions .player-install-small{min-height:40px;padding:9px 10px;font-size:.875rem;gap:6px}
 .player-install-wrap{max-width:470px;margin:4px auto 12px;padding:0 25px}
-.player-install-card{display:flex;align-items:flex-start;gap:13px;padding:18px;background:#fff;border:1px solid #dce4ff;border-radius:17px;box-shadow:0 5px 20px #3155ed08}
-.install-card-icon{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;color:var(--blue);background:#eaf0ff;flex-shrink:0}
+.player-install-card{display:flex;align-items:flex-start;gap:13px;padding:18px;background:#fff;border:1px solid #dce4ff;border-radius:17px;box-shadow:0 5px 20px #6546d708}
+.install-card-icon{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;color:var(--blue);background:#f0edff;flex-shrink:0}
 .player-install-card>div{min-width:0;flex:1}
 .player-install-card b{display:block;font-size:1rem;line-height:1.4}
-.player-install-card p{font-size:.875rem;color:#65708a;line-height:1.5;margin:5px 0 11px}
+.player-install-card p{font-size:.875rem;color:#69657b;line-height:1.5;margin:5px 0 11px}
 .player-install-card .btn{padding:10px 14px;font-size:.875rem;min-height:42px}
 .player-install-card .btn:disabled{opacity:.7;cursor:wait;box-shadow:none;transform:none}
 .player-install-card .install-status{margin:9px 0 0}
 .player-install-card .install-status:empty{display:none}
-.player-install-card .install-help{padding:6px 0;min-height:36px;margin-top:5px;text-align:left;background:transparent;color:#3155ed;white-space:normal}
+.player-install-card .install-help{padding:6px 0;min-height:36px;margin-top:5px;text-align:left;background:transparent;color:#6546d7;white-space:normal}
 .install-spinner{animation:install-spin 1s linear infinite;flex-shrink:0}
 @keyframes install-spin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.install-spinner{animation:none}}
 .install-dialog{max-width:460px!important}
 .install-steps{list-style:decimal;padding-left:22px;display:grid;gap:15px;margin:10px 0;font-size:1rem;line-height:1.6}
 .install-steps li{padding-left:4px}
-.install-note{font-size:.875rem;line-height:1.5;color:#65708a}
+.install-note{font-size:.875rem;line-height:1.5;color:#69657b}
 .player-teacher-link{font-size:.875rem;color:#526785;font-weight:600;padding:9px 0;white-space:nowrap}
 .player-home{max-width:470px;margin:20px auto 0;padding:15px 25px}
 .player-home h1{font-size:clamp(2.3rem,8vw,3.2rem);line-height:1.12;letter-spacing:-.055em;margin:17px 0 12px}
 .player-home h1>span{color:var(--blue)}
-.player-home>p{font-size:1rem;color:#65708a;line-height:1.6;margin-bottom:26px}
+.player-home>p{font-size:1rem;color:#69657b;line-height:1.6;margin-bottom:26px}
 .player-code-form{gap:12px;margin-top:23px}
 .player-code-form .code-input{font-size:2rem;letter-spacing:.16em;text-align:center;min-width:0;width:100%;padding:15px 13px;font-variant-numeric:tabular-nums}
 .player-code-form>.btn,.player-scan-button{width:100%;min-height:50px;font-size:1rem}
@@ -33,17 +33,17 @@
 .player-entry-divider::before,.player-entry-divider::after{content:"";height:1px;flex:1;background:#dce3ef}
 .player-home .player-install-card{margin-top:27px}
 .player-home .player-home-error{font-size:1rem;line-height:1.5;margin:18px 0 0}
-.player-resume-card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px 12px;align-items:center;background:#eaf0ff;border:1px solid #cfdcff;border-radius:14px;padding:16px;margin:22px 0;color:#2545c2}
+.player-resume-card{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px 12px;align-items:center;background:#f0edff;border:1px solid #cfdcff;border-radius:14px;padding:16px;margin:22px 0;color:#5033b7}
 .player-resume-card>div{min-width:0;display:flex;flex-direction:column;gap:3px}
 .player-resume-card b{font-size:1rem;line-height:1.4;overflow-wrap:anywhere}
-.player-resume-card span{font-size:.875rem;color:#65708a}
+.player-resume-card span{font-size:.875rem;color:#69657b}
 .player-resume-card>.btn{font-size:.875rem;min-height:40px;padding:9px 12px}
 .player-resume-card>.btn-quiet{grid-column:2/-1;justify-self:start;min-height:32px;padding:5px 0;background:transparent}
 .scanner-dialog{max-width:480px!important}
-.scanner-camera{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:14px;background:#15203d;margin:7px 0}
+.scanner-camera{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:14px;background:#23213d;margin:7px 0}
 .scanner-camera video{width:100%;height:100%;object-fit:cover}
-.scanner-camera::after{content:"";position:absolute;inset:16% 26%;border:2px solid #d2fb66;border-radius:13px;pointer-events:none}
-.scanner-camera>span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#fff;background:#15203d;font-size:.9375rem;z-index:1}
+.scanner-camera::after{content:"";position:absolute;inset:16% 26%;border:2px solid #ffb35c;border-radius:13px;pointer-events:none}
+.scanner-camera>span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:12px;color:#fff;background:#23213d;font-size:.9375rem;z-index:1}
 .scanner-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap}
 .scanner-actions .btn{font-size:.9375rem;min-height:44px}
 @media(max-width:480px){.player-topbar{padding:16px}.player-room-actions{gap:4px}.player-room-actions .player-exit,.player-room-actions .player-install-small{padding:8px}.player-install-wrap{padding:0 18px}.player-home{padding:15px 20px;margin-top:13px}.player-install-card{padding:16px;gap:10px}.player-resume-card{padding:14px}.scanner-actions .btn{flex:1}}

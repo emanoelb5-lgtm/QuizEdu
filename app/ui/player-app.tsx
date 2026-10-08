@@ -27,9 +27,9 @@ export function PlayerAppProvider({children}:{children:React.ReactNode}) {
     void window.__quizEduInstall?.install();
   }
   return <InstallContext.Provider value={{...installation,install,showHelp:()=>setHelp(true)}}>{children}
-    <Dialog open={help} onOpenChange={setHelp}><DialogContent className="q-dialog install-dialog"><DialogTitle>Coloque o QuizEdu na tela inicial</DialogTitle><DialogDescription>Abra pelo ícone do app para voltar à sua sala mesmo depois de fechar o navegador.</DialogDescription>
+    <Dialog open={help} onOpenChange={setHelp}><DialogContent className="q-dialog install-dialog"><DialogTitle>Coloque o Prativerso na tela inicial</DialogTitle><DialogDescription>Abra pelo ícone do app para voltar à sua sala mesmo depois de fechar o navegador.</DialogDescription>
       <p className="install-note">{installation.ios?"No iPhone e no iPad, a instalação é feita pelo menu do navegador.":"Se este endereço abriu dentro de outro aplicativo, abra-o no Chrome, Edge ou Samsung Internet para instalar."}</p>
-      <ol className="install-steps">{installation.ios?<><li>Abra o menu <b>Compartilhar</b> do navegador. Se a opção não aparecer, abra este endereço no Safari.</li><li>Toque em <b>Adicionar à Tela de Início</b> e confirme <b>Adicionar</b>.</li></>:<><li>Abra o menu do navegador, geralmente indicado por <b>⋮</b>.</li><li>Escolha <b>Instalar aplicativo</b> ou <b>Adicionar à tela inicial</b> e confirme.</li></>}<li>Depois, abra o ícone <b>QuizEdu</b> no celular.</li></ol>
+      <ol className="install-steps">{installation.ios?<><li>Abra o menu <b>Compartilhar</b> do navegador. Se a opção não aparecer, abra este endereço no Safari.</li><li>Toque em <b>Adicionar à Tela de Início</b> e confirme <b>Adicionar</b>.</li></>:<><li>Abra o menu do navegador, geralmente indicado por <b>⋮</b>.</li><li>Escolha <b>Instalar aplicativo</b> ou <b>Adicionar à tela inicial</b> e confirme.</li></>}<li>Depois, abra o ícone <b>Prativerso</b> no celular.</li></ol>
       <p className="install-note">A instalação é opcional. O quiz também funciona no navegador.</p><button className="btn btn-primary" onClick={()=>setHelp(false)}>Entendi</button>
     </DialogContent></Dialog>
   </InstallContext.Provider>;
@@ -51,13 +51,13 @@ export function AppInstallButton({compact=false}:{compact?:boolean}) {
   const {status,install}=useContext(InstallContext);
   if (!["ready","waiting","prompting"].includes(status) || (compact && status === "waiting")) return null;
   const ready=status === "ready";
-  return <button type="button" className={`btn ${compact?"btn-quiet player-install-small":"btn-primary"}`} disabled={!ready} onClick={install} aria-label={ready?"Instalar QuizEdu":status === "prompting"?"Confirme a instalação no navegador":"Preparando instalação"} aria-busy={!ready}>{ready?<Download size={18}/>:<LoaderCircle className="install-spinner" size={18}/>}<span>{ready?(compact?"Instalar":"Instalar QuizEdu"):status === "prompting"?"Confirme no navegador":"Preparando instalação"}</span></button>;
+  return <button type="button" className={`btn ${compact?"btn-quiet player-install-small":"btn-primary"}`} disabled={!ready} onClick={install} aria-label={ready?"Instalar Prativerso":status === "prompting"?"Confirme a instalação no navegador":"Preparando instalação"} aria-busy={!ready}>{ready?<Download size={18}/>:<LoaderCircle className="install-spinner" size={18}/>}<span>{ready?(compact?"Instalar":"Instalar Prativerso"):status === "prompting"?"Confirme no navegador":"Preparando instalação"}</span></button>;
 }
 export function AppInstallCard() {
   const {status,ios,showHelp}=useContext(InstallContext);
   if(status === "installed")return null;
   const message=status === "waiting"?"O botão será liberado assim que o navegador estiver pronto.":status === "prompting"?"Confirme a instalação na janela do navegador.":status === "dismissed"?"Instalação cancelada. Você pode continuar o quiz ou instalar pelo menu.":status === "error"?"A janela de instalação não abriu. Atualize a página ou instale pelo menu.":status === "manual"?(ios?"No iPhone e no iPad, adicione o app pelo menu Compartilhar.":"Abra no Chrome, Edge ou Samsung Internet para usar a instalação do app."):"";
-  return <aside className="player-install-card"><span className="install-card-icon"><Smartphone size={25}/></span><div><b>Fechou? Volte pelo app.</b><p>Instale o QuizEdu para encontrar sua sala na tela inicial.</p><AppInstallButton/><p className="install-status" role="status" aria-live="polite">{message}</p>{status !== "prompting" && <button type="button" className="btn btn-quiet install-help" onClick={showHelp}>Como instalar pelo menu</button>}</div></aside>;
+  return <aside className="player-install-card"><span className="install-card-icon"><Smartphone size={25}/></span><div><b>Fechou? Volte pelo app.</b><p>Instale o Prativerso para encontrar sua sala na tela inicial.</p><AppInstallButton/><p className="install-status" role="status" aria-live="polite">{message}</p>{status !== "prompting" && <button type="button" className="btn btn-quiet install-help" onClick={showHelp}>Como instalar pelo menu</button>}</div></aside>;
 }
 export function ExitRoomButton({code,onExit}:{code:string;onExit?:()=>void}) {
   const [open,setOpen]=useState(false);

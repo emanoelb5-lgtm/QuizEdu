@@ -47,10 +47,10 @@ export function initialRoomCode(storage: StorageLike, launchCode: string): strin
 export function playerManifest(code?: string, ticket?: string) {
   const valid = /^\d{6}$/.test(code || "");
   return {
-    id: "/jogar", name: "QuizEdu", short_name: "QuizEdu", lang: "pt-BR",
+    id: "/jogar", name: "Prativerso", short_name: "Prativerso", lang: "pt-BR",
     description: "Entre na sala do professor e retome seu quiz pelo celular.",
     start_url: valid ? `/jogar?sala=${code}${ticket ? `#retomar=${encodeURIComponent(ticket)}` : ""}` : "/jogar",
-    scope: "/", display: "standalone", background_color: "#f5f7fc", theme_color: "#3155ed",
+    scope: "/", display: "standalone", background_color: "#f8f7fc", theme_color: "#6546d7",
     prefer_related_applications: false,
     icons: [
       {src:"/app-icon-192.png",sizes:"192x192",type:"image/png",purpose:"any"},

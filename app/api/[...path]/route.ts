@@ -69,7 +69,7 @@ async function handle(request: Request) {
     return json({ error: "Página não encontrada." }, 404);
   } catch (e) {
     if (e instanceof HttpError) return json({ error: e.message }, e.status);
-    console.error("QuizEdu request failed", (e as Error).message);
+    console.error("Prativerso request failed", (e as Error).message);
     return json({ error: "Não foi possível concluir agora. Seus dados continuam na tela. Tente novamente." }, 503);
   }
 }

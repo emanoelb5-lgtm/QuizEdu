@@ -6,18 +6,18 @@ import "./player-app.css";
 import "./presentation.css";
 
 export const metadata: Metadata = {
-  title: "QuizEdu · Sua turma entra no jogo",
-  description: "Crie quizzes, convide sua turma por QR code e jogue ao vivo. Perguntas, cronômetro e classificação em cada rodada.",
-  applicationName: "QuizEdu",
+  title: "Prativerso · Conhecimento em prática",
+  description: "Apresentações interativas e quizzes ao vivo para aprender participando. Crie sua aula, convide a turma por QR code e acompanhe cada resposta.",
+  applicationName: "Prativerso",
   manifest: "/api/app-manifest",
-  appleWebApp: {capable:true,title:"QuizEdu",statusBarStyle:"default"},
+  appleWebApp: {capable:true,title:"Prativerso",statusBarStyle:"default"},
   icons: {
     icon: "/favicon.svg",
     shortcut: "/favicon.svg",
     apple: "/app-icon-192.png",
   },
 };
-export const viewport: Viewport = {themeColor:"#3155ed",viewportFit:"cover"};
+export const viewport: Viewport = {themeColor:"#6546d7",viewportFit:"cover"};
 
 export default function RootLayout({
   children,

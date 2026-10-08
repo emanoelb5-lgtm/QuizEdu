@@ -116,7 +116,7 @@ async function pptx(pkg:Package){
     if(slideNode?.attrs.showMasterSp!=="0")await readTree(all(master,"spTree")[0],masterRels,transform,true);await readTree(all(layout,"spTree")[0],layoutRels,transform,true);await readTree(all(slideNode,"spTree")[0],relations,transform);
     const bgImage=all(background,"blip")[0];if(bgImage){const src=relations.get(bgImage.attrs.embed)||layoutRels.get(bgImage.attrs.embed)||masterRels.get(bgImage.attrs.embed);if(src)slide.background.image=await pkg.asset(src.path)||undefined;}
     const notesPath=[...relations.values()].find(r=>r.type.endsWith("/notesSlide"))?.path;if(notesPath){const notes=await pkg.document(notesPath);slide.notes=all(notes,"sp").filter(n=>!all(n,"ph").length||all(n,"ph")[0]?.attrs.type==="body").flatMap(n=>all(n,"p").map(p=>all(p,"t").map(txt).join(""))).join("\n").slice(0,5000);}
-    if(all(root,"timing").length)pkg.warn("Animações e efeitos avançados não são importados. Use as entradas e transições do QuizEdu.");
+    if(all(root,"timing").length)pkg.warn("Animações e efeitos avançados não são importados. Use as entradas e transições do Prativerso.");
     slide.title=slide.elements.filter(e=>e.type==="text").map(e=>richTextPlain(e.doc)).find(Boolean)?.split("\n")[0].slice(0,100)||`Slide ${pkg.result.deck.slides.length+1}`;pkg.result.deck.slides.push(slide);
   }
 }
@@ -148,10 +148,10 @@ export function parseLegacyPowerPoint(stream:Uint8Array,current:Uint8Array):Less
 }
 export async function importPresentation(bytes:Uint8Array,name:string):Promise<PresentationImport>{
   if(bytes.length>MAX_IMPORT_BYTES)throw new Error("Use um arquivo de até 15 MB.");const extension=name.toLowerCase().split(".").at(-1)||"";const deck=newDeck();deck.title=name.replace(/\.[^.]+$/,"").slice(0,100)||"Apresentação importada";deck.slides=[];const result:PresentationImport={deck,assets:[],warnings:[],format:extension.toUpperCase()};
-  if(extension==="json"){if(bytes.length>1048576)throw new Error("O arquivo QuizEdu pode ter até 1 MB.");const data=JSON.parse(new TextDecoder().decode(bytes));result.deck=validateDeck(data.deck||data);return result;}
+  if(extension==="json"){if(bytes.length>1048576)throw new Error("O arquivo Prativerso pode ter até 1 MB.");const data=JSON.parse(new TextDecoder().decode(bytes));result.deck=validateDeck(data.deck||data);return result;}
   if(["ppt","pps","pot"].includes(extension)){
     if(bytes[0]!==0xd0||bytes[1]!==0xcf)throw new Error("Este arquivo não é um PowerPoint antigo válido.");const cfb=CFB.read(bytes,{type:"array"}),stream=CFB.find(cfb,"PowerPoint Document"),current=CFB.find(cfb,"Current User");if(!stream?.content||!current?.content)throw new Error("PowerPoint antigo inválido ou protegido por senha.");deck.slides=parseLegacyPowerPoint(new Uint8Array(stream.content),new Uint8Array(current.content));result.warnings.push("PowerPoint antigo: os textos são recuperados por slide em caixas editáveis. Imagens, layout, notas e efeitos não são preservados. Para maior fidelidade, abra o original no PowerPoint ou LibreOffice e salve como PPTX.");
   }else if(["pptx","ppsx","potx","odp","otp"].includes(extension)){const pkg=await Package.open(bytes,result);if(["odp","otp"].includes(extension))await odp(pkg);else await pptx(pkg);}
-  else throw new Error("Escolha PowerPoint (PPT/PPTX/PPS/PPSX/POT/POTX), LibreOffice (ODP/OTP), PDF ou uma aula QuizEdu (JSON).");
+  else throw new Error("Escolha PowerPoint (PPT/PPTX/PPS/PPSX/POT/POTX), LibreOffice (ODP/OTP), PDF ou uma aula Prativerso (JSON).");
   if(!deck.slides.length)throw new Error("Nenhum slide foi encontrado neste arquivo.");result.deck=validateDeck(deck);if(new TextEncoder().encode(JSON.stringify(deck)).length>1048576)throw new Error("O documento importado ultrapassa 1 MB. Divida a apresentação.");return result;
 }

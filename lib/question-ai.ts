@@ -17,7 +17,7 @@ export function questionAiPrompt(settings:AiQuestionSettings):string {
   const seconds=DURATIONS.includes(settings.seconds)?settings.seconds:30;
   const trueFalse=settings.kind==="true_false";
   const example=trueFalse?`1. [Afirmação curta e verificável]\nResposta: Verdadeiro\nTempo: ${seconds}\nExplicação: [Justificativa breve]`:`1. [Enunciado da pergunta]\nA) [Primeira alternativa]\nB) [Segunda alternativa]\nC) [Terceira alternativa]\nD) [Quarta alternativa]\nResposta: B\nTempo: ${seconds}\nExplicação: [Justificativa breve da resposta correta]`;
-  return `Crie ${settings.count} perguntas originais em português do Brasil para um quiz educativo no QuizEdu.
+  return `Crie ${settings.count} perguntas originais em português do Brasil para um quiz educativo no Prativerso.
 
 Assunto: ${JSON.stringify(topic)}
 Turma/público: ${JSON.stringify(audience||"Adapte a linguagem ao assunto, sem presumir conhecimentos especializados.")}

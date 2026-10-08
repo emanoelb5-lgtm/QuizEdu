@@ -43,7 +43,7 @@ export async function educator(request: Request, required = true) {
 }
 export function publicProfile(user: Educator) { return { id: user.id, name: user.name, permanent: !!user.auth_id }; }
 export async function body(request: Request,limit=65536) {
-  const origin = request.headers.get("Origin"); if (origin && origin !== new URL(request.url).origin) throw new HttpError(403, "Esta ação precisa ser feita no QuizEdu.");
+  const origin = request.headers.get("Origin"); if (origin && origin !== new URL(request.url).origin) throw new HttpError(403, "Esta ação precisa ser feita no Prativerso.");
   if (!request.headers.get("Content-Type")?.includes("application/json")) throw new HttpError(415, "Formato de envio inválido.");
   const largeMessage=limit===65536?"Este quiz ultrapassou o limite de 64 KB.":"Esta aula ultrapassou o limite de 1 MB. Use imagens enviadas e divida o conteúdo em mais de uma aula.";
   if (Number(request.headers.get("Content-Length") || 0) > limit) throw new HttpError(413, largeMessage);

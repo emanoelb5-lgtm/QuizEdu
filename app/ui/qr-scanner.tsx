@@ -30,7 +30,7 @@ export function QrScanner({open,onClose,onCode}:{open:boolean;onClose:()=>void;o
             const ratio=Math.min(1,640/Math.max(element.videoWidth,element.videoHeight));canvas.width=Math.round(element.videoWidth*ratio);canvas.height=Math.round(element.videoHeight*ratio);
             context!.drawImage(element,0,0,canvas.width,canvas.height);
             const image=context!.getImageData(0,0,canvas.width,canvas.height);const result=decode(image.data,image.width,image.height,{inversionAttempts:"attemptBoth"});
-            if(result){const code=roomCode(result.data,window.location.origin);if(code){alive=false;stop();found.current(code);return;}if(lastInvalid!==result.data){lastInvalid=result.data;setError("Esse QR code não é de uma sala deste QuizEdu. Aponte para o código do professor.");}}
+            if(result){const code=roomCode(result.data,window.location.origin);if(code){alive=false;stop();found.current(code);return;}if(lastInvalid!==result.data){lastInvalid=result.data;setError("Esse QR code não é de uma sala deste Prativerso. Aponte para o código do professor.");}}
           }} catch {alive=false;stop();setReady(false);setError("Não foi possível continuar a leitura. Tente novamente ou digite o código da sala.");return;}
           timer=setTimeout(scan,250);
         }

@@ -66,7 +66,7 @@ export async function deleteQuestion(request: Request,id: string) { const user =
 
 export async function uploadImage(request: Request) {
   const user = (await educator(request))!;
-  if (request.headers.get("Origin") !== new URL(request.url).origin) throw new HttpError(403,"Envie a imagem pelo QuizEdu.");
+  if (request.headers.get("Origin") !== new URL(request.url).origin) throw new HttpError(403,"Envie a imagem pelo Prativerso.");
   if (!env.BUCKET) throw new HttpError(503,"O envio de imagens está indisponível agora. Seu texto continua salvo.");
   if (Number(request.headers.get("Content-Length") || 0) > 1048576) throw new HttpError(413,"Use uma imagem de até 1 MB.");
   const reader = request.body?.getReader(); if (!reader) throw new HttpError(400,"Selecione uma imagem.");
@@ -124,5 +124,5 @@ export async function reportCsv(request:Request,code:string) {
   const report=await reportData(request,code); const rows:unknown[][]=[["Participante","Classificação","Pontos totais","Pergunta","Enunciado","Resposta enviada","Resposta correta","Resultado","Pontos na pergunta","Tempo em segundos"]];
   for(const p of report.players)report.questions.forEach((q,i)=>{const a=p.answers[i]; rows.push([p.name,p.position,p.score,i+1,q.question.text,a?q.question.options[a.option]:"Sem resposta",q.question.options[q.question.correct],a?(a.correct?"Acerto":"Erro"):"Sem resposta",a?.points||0,a?(a.elapsedMs/1000).toFixed(2):""]);});
   const cell=(value:unknown)=>{let text=String(value??""); if(/^[\s]*[=+\-@]/.test(text))text="'"+text; return '"'+text.replaceAll('"','""')+'"';};
-  return new Response("\ufeff"+rows.map(r=>r.map(cell).join(";")).join("\r\n"),{headers:{"Content-Type":"text/csv; charset=utf-8","Content-Disposition":`attachment; filename="QuizEdu-relatorio-${code}.csv"`,"Cache-Control":"no-store, private","X-Content-Type-Options":"nosniff"}});
+  return new Response("\ufeff"+rows.map(r=>r.map(cell).join(";")).join("\r\n"),{headers:{"Content-Type":"text/csv; charset=utf-8","Content-Disposition":`attachment; filename="Prativerso-relatorio-${code}.csv"`,"Cache-Control":"no-store, private","X-Content-Type-Options":"nosniff"}});
 }

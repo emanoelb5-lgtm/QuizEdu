@@ -13,7 +13,8 @@ export type PresentationSummary={id:string;title:string;subject:string;topic:str
 export type PublicSlide=Omit<LessonSlide,"question"|"notes"> & {notes?:string};
 export type RoomPresentation={id:string;index:number;total:number;step:number;steps:number;blackout:boolean;slide:PublicSlide|null;questionIndex:number;review:boolean;theme:string;showSlideNumbers:boolean;outline?:{id:string;title:string;kind:LessonSlide["kind"];questionIndex:number}[]};
 export const SLIDE_THEMES=[
-  {id:"azul",name:"QuizEdu",background:"#ffffff",text:"#15203d",muted:"#61708a",accent:"#3155ed",secondary:"#eaf0ff",font:"Arial"},
+  {id:"prativerso",name:"Prativerso",background:"#ffffff",text:"#23213d",muted:"#69657b",accent:"#6546d7",secondary:"#f0edff",font:"Arial"},
+  {id:"azul",name:"Azul clássico",background:"#ffffff",text:"#15203d",muted:"#61708a",accent:"#3155ed",secondary:"#eaf0ff",font:"Arial"},
   {id:"noite",name:"Noite",background:"#111c35",text:"#ffffff",muted:"#c0cce1",accent:"#d2fb66",secondary:"#20304b",font:"Arial"},
   {id:"campo",name:"Campo",background:"#f6fff8",text:"#123b2c",muted:"#4a7263",accent:"#168653",secondary:"#dcf5e5",font:"Trebuchet MS"},
   {id:"oceano",name:"Oceano",background:"#eefbff",text:"#09354b",muted:"#497486",accent:"#087eaa",secondary:"#cfeef8",font:"Arial"},
@@ -29,7 +30,7 @@ export function richTextPlain(node?:RichNode):string {if(!node)return "";if(node
 export function color(value:unknown):value is string{return typeof value==="string"&&/^#[\da-f]{6}$/i.test(value);}
 export function safeLink(value:unknown):string|null {if(typeof value!=="string"||value.length>1500)return null;try{const url=new URL(value);return ["https:","http:"].includes(url.protocol)&&!url.username&&!url.password?url.href:null;}catch{return null;}}
 export function youtubeId(value:string):string|null {try{const url=new URL(value);if(!["https:","http:"].includes(url.protocol))return null;const host=url.hostname.replace(/^www\./,"");const id=host==="youtu.be"?url.pathname.slice(1):["youtube.com","youtube-nocookie.com","m.youtube.com"].includes(host)?url.searchParams.get("v")||url.pathname.match(/^\/(?:embed|shorts)\/([\w-]{11})/)?.[1]:null;return id&&/^[\w-]{11}$/.test(id)?id:null;}catch{return null;}}
-export function baseElement(type:SlideElement["type"],theme="azul"):SlideElement {const t=themeFor(theme);const base:SlideElement={id:crypto.randomUUID(),type,x:80,y:100,w:480,h:170,rotation:0,opacity:100,locked:false,hidden:false,build:0};
+export function baseElement(type:SlideElement["type"],theme="prativerso"):SlideElement {const t=themeFor(theme);const base:SlideElement={id:crypto.randomUUID(),type,x:80,y:100,w:480,h:170,rotation:0,opacity:100,locked:false,hidden:false,build:0};
   if(type==="text")return {...base,doc:richText("Digite seu texto"),font:t.font,fontSize:30,color:t.text,align:"left"};
   if(type==="image")return {...base,x:160,y:90,w:600,h:360,src:"",alt:"",fit:"cover",positionX:50,positionY:50,radius:12};
   if(type==="shape")return {...base,w:240,h:150,shape:"rect",fill:t.secondary,stroke:t.accent,strokeWidth:2,radius:12};
@@ -38,7 +39,7 @@ export function baseElement(type:SlideElement["type"],theme="azul"):SlideElement
   return {...base,x:140,y:105,w:720,h:405,videoId:"",videoStart:0};
 }
 function textElement(text:string,x:number,y:number,w:number,h:number,size:number,theme:string,accent=false):SlideElement {const t=themeFor(theme);return {...baseElement("text",theme),x,y,w,h,fontSize:size,color:accent?t.accent:t.text,doc:richText(text)};}
-export function newSlide(layout="title",theme="azul"):LessonSlide {
+export function newSlide(layout="title",theme="prativerso"):LessonSlide {
   const t=themeFor(theme);const slide:LessonSlide={id:crypto.randomUUID(),kind:"content",title:SLIDE_LAYOUTS.find(l=>l.id===layout)?.name||"Slide",notes:"",background:{color:t.background},transition:"fade",elements:[]};
   const title=(text="Título do slide")=>textElement(text,65,45,865,90,44,theme);
   if(layout==="blank")return slide;
@@ -51,8 +52,8 @@ export function newSlide(layout="title",theme="azul"):LessonSlide {
   else slide.elements=[title(),textElement("Apresente a ideia principal.\n\nAcrescente um exemplo.\n\nConvide a turma para observar e conversar.",70,175,850,310,34,theme)];
   return slide;
 }
-export function questionSlide(question=newQuestion(),theme="azul"):LessonSlide{return {...newSlide("blank",theme),kind:"question",title:question.text.slice(0,60)||"Pergunta para a turma",question};}
-export function newDeck():SlideDeck{return {id:crypto.randomUUID(),title:"Minha aula interativa",subject:"",topic:"",theme:"azul",slides:[newSlide("cover")],mode:"speed",untimed:false,showSlideNumbers:true};}
+export function questionSlide(question=newQuestion(),theme="prativerso"):LessonSlide{return {...newSlide("blank",theme),kind:"question",title:question.text.slice(0,60)||"Pergunta para a turma",question};}
+export function newDeck():SlideDeck{return {id:crypto.randomUUID(),title:"Minha aula interativa",subject:"",topic:"",theme:"prativerso",slides:[newSlide("cover")],mode:"speed",untimed:false,showSlideNumbers:true};}
 export function duplicateSlide(slide:LessonSlide):LessonSlide {const copy=structuredClone(slide);copy.id=crypto.randomUUID();if(copy.question)copy.question.id=crypto.randomUUID();const groups=new Map<string,string>();copy.elements=copy.elements.map(e=>{if(e.group&&!groups.has(e.group))groups.set(e.group,crypto.randomUUID());return {...e,id:crypto.randomUUID(),...(e.group?{group:groups.get(e.group)}:{})};});return copy;}
 export function duplicateDeck(deck:SlideDeck):SlideDeck {return {...structuredClone(deck),id:crypto.randomUUID(),title:`${deck.title.slice(0,90)} · cópia`,slides:deck.slides.map(duplicateSlide)};}
 export function deckQuestions(deck:SlideDeck):Question[]{return deck.slides.filter(s=>s.kind==="question").map(s=>s.question!);}
@@ -65,7 +66,7 @@ export function sampleDeck():SlideDeck {
   const text=(value:string,x:number,y:number,w:number,h:number,size:number,color="#123b2c"):SlideElement=>({...baseElement("text",theme),x,y,w,h,font:"Arial",fontSize:size,color,doc:richText(value)});
   const image=(src:string,alt:string,x:number,y:number,w:number,h:number):SlideElement=>({...baseElement("image",theme),src,alt,x,y,w,h,radius:18});
   const photo=(title:string,section:string,src:string,alt:string,body:string,prompt:string)=>{
-    const slide=newSlide("blank",theme);slide.title=title;slide.background={color:"#f6fff8"};slide.notes=`Converse com a turma: ${prompt}\nPeça exemplos da comunidade antes de avançar para a pergunta.\nCréditos das fotografias: consulte /examples/creditos.json no QuizEdu.`;
+    const slide=newSlide("blank",theme);slide.title=title;slide.background={color:"#f6fff8"};slide.notes=`Converse com a turma: ${prompt}\nPeça exemplos da comunidade antes de avançar para a pergunta.\nCréditos das fotografias: consulte /examples/creditos.json no Prativerso.`;
     slide.elements=[text(section.toUpperCase(),54,30,890,30,18,"#168653"),text(title,54,77,890,72,44),image(src,alt,54,168,485,274),text(body,582,177,362,263,27),{...baseElement("shape",theme),shape:"rect",x:54,y:473,w:890,h:58,fill:"#dcf5e5",strokeWidth:0,radius:12},text(prompt,73,484,851,37,21)];return slide;
   };
   const cover=newSlide("blank",theme);cover.title=quiz.title;cover.background={color:"#123b2c",image:"/examples/solo.jpg",overlay:58};cover.notes="Apresente o tema. Convide os alunos a observar as fotografias, conversar e participar das seis perguntas. O gabarito e as explicações ficam nas perguntas, visíveis ao professor.";
@@ -97,7 +98,7 @@ export function validateDeck(raw:any,strict=false):SlideDeck {
   if(!raw||!id(raw.id)||!text(raw.title,100)||!raw.title.trim()||!text(raw.subject,60)||!text(raw.topic,60)||!SLIDE_THEMES.some(t=>t.id===raw.theme)||!["speed","accuracy"].includes(raw.mode)||typeof raw.untimed!=="boolean"||(raw.untimed&&raw.mode!=="accuracy")||typeof raw.showSlideNumbers!=="boolean"||!Array.isArray(raw.slides)||raw.slides.length<1||raw.slides.length>MAX_SLIDES)fail("Verifique a aula: título, modo de jogo e até 150 slides.");
   const ids=new Set<string>();const unique=(v:unknown)=>{if(!id(v)||ids.has(v as string))fail("Cada slide e objeto precisa de uma identificação única.");ids.add(v as string);};let questionCount=0;
   const slides:LessonSlide[]=raw.slides.map((s:any,i:number)=>{unique(s?.id);if(!["content","question"].includes(s.kind)||!text(s.title,100)||!text(s.notes,5000)||!["none","fade","slide"].includes(s.transition)||!s.background||!color(s.background.color)||!Array.isArray(s.elements)||s.elements.length>MAX_ELEMENTS)fail(`Slide ${i+1}: verifique o conteúdo e até 60 objetos.`);
-    const background:SlideBackground={color:s.background.color};if(s.background.color2!==undefined){if(!color(s.background.color2))fail("Cor do fundo inválida.");background.color2=s.background.color2;}if(s.background.angle!==undefined){if(!number(s.background.angle,0,360))fail("Direção do degradê inválida.");background.angle=s.background.angle;}if(s.background.image){if(!mediaPath(s.background.image))fail("Use uma imagem enviada pelo QuizEdu.");background.image=s.background.image;}if(s.background.overlay!==undefined){if(!number(s.background.overlay,0,90))fail("Escurecimento de fundo inválido.");background.overlay=s.background.overlay;}
+    const background:SlideBackground={color:s.background.color};if(s.background.color2!==undefined){if(!color(s.background.color2))fail("Cor do fundo inválida.");background.color2=s.background.color2;}if(s.background.angle!==undefined){if(!number(s.background.angle,0,360))fail("Direção do degradê inválida.");background.angle=s.background.angle;}if(s.background.image){if(!mediaPath(s.background.image))fail("Use uma imagem enviada pelo Prativerso.");background.image=s.background.image;}if(s.background.overlay!==undefined){if(!number(s.background.overlay,0,90))fail("Escurecimento de fundo inválido.");background.overlay=s.background.overlay;}
     const elements:SlideElement[]=s.elements.map((e:any)=>{unique(e?.id);if(!["text","image","shape","table","chart","video"].includes(e.type)||!number(e.x,0,SLIDE_WIDTH)||!number(e.y,0,SLIDE_HEIGHT)||!number(e.w,12,SLIDE_WIDTH)||!number(e.h,8,SLIDE_HEIGHT)||e.x+e.w>SLIDE_WIDTH+.1||e.y+e.h>SLIDE_HEIGHT+.1||!number(e.rotation,-180,180)||!number(e.opacity,0,100)||typeof e.locked!=="boolean"||typeof e.hidden!=="boolean"||!Number.isInteger(e.build)||e.build<0||e.build>20||(e.group!==undefined&&!id(e.group)))fail(`Slide ${i+1}: posição ou formato de objeto inválido.`);
       const base:SlideElement={id:e.id,type:e.type,x:e.x,y:e.y,w:e.w,h:e.h,rotation:e.rotation,opacity:e.opacity,locked:e.locked,hidden:e.hidden,build:e.build,...(e.group?{group:e.group}:{})};
       for(const key of ["color","fill","stroke"] as const)if(e[key]!==undefined){if(!color(e[key]))fail("Cor de objeto inválida.");base[key]=e[key];}

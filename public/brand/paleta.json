@@ -1,0 +1,13 @@
+{
+  "marca": "Prativerso",
+  "lema": "Conhecimento em prática.",
+  "cores": {
+    "violeta": "#6546D7",
+    "laranja": "#FFB35C",
+    "verdeAgua": "#56DBC2",
+    "tinta": "#23213D",
+    "nevoa": "#F8F7FC"
+  },
+  "tipografiaInterface": "Arial, Helvetica, sans-serif",
+  "nomeDoTema": "prativerso"
+}

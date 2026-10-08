@@ -1,6 +1,6 @@
 {
-  "name": "quizedu",
-  "version": "3.5.0",
+  "name": "prativerso",
+  "version": "3.6.0",
   "private": true,
   "engines": {
     "node": ">=22.13.0"

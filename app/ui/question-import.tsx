@@ -19,7 +19,7 @@ export function QuestionImportDialog({remaining,defaultSeconds,replaceEmpty,onIm
     if(current===token.current)reviewed(parsed,uploaded.name);
   }catch(e){if(current===token.current)setError((e as Error).message.includes("Use ")||(e as Error).message.includes("planilha")||(e as Error).message.includes("CSV")||(e as Error).message.includes("pergunta")?(e as Error).message:"Não foi possível ler esse arquivo. Confira se ele está íntegro ou use o modelo CSV.");}finally{if(current===token.current)setBusy(false);}}
   function reset(){token.current++;setResult(null);setError("");setBusy(false);}
-  function download(){const url=URL.createObjectURL(new Blob([IMPORT_CSV],{type:"text/csv;charset=utf-8"}));const a=document.createElement("a");a.href=url;a.download="QuizEdu-modelo-perguntas.csv";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+  function download(){const url=URL.createObjectURL(new Blob([IMPORT_CSV],{type:"text/csv;charset=utf-8"}));const a=document.createElement("a");a.href=url;a.download="Prativerso-modelo-perguntas.csv";a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
   function toggle(i:number,on:boolean){setSelection(old=>on?[...old,i]:old.filter(at=>at!==i));}
   function rowIssues(row:ImportItem){return [...row.fatal,...questionIssues(row.question).map(i=>i.message),...row.notes];}
   const pending=result?selection.filter(i=>questionIssues(result.items[i].question).some(issue=>issue.severity==="error")).length:0;

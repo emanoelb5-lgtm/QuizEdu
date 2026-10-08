@@ -97,8 +97,8 @@ try {
   state = await host.request(`/api/rooms/${code}/control`, { action: "next", status: "results", index: 2 }); eq(state.status, "finished"); eq(state.players[0].name, "Alice"); check(state.players.every(p => p.position >= 1 && p.position <= 3));
   eq((await alice.request(`/api/rooms/${code}`)).status, "finished", "Reload retains final scores and participant identity.");
   eq((await host.request("/api/dashboard")).rooms.length, 0, "Finished rooms leave the active-room list.");
-  const hostHtml = await host.request(`/sala/${code}`); check(hostHtml.includes("QuizEdu"), "Host route renders.");
-  const playerHtml = await alice.request(`/participar/${code}`); check(playerHtml.includes("QuizEdu"), "Participant route renders.");
+  const hostHtml = await host.request(`/sala/${code}`); check(hostHtml.includes("Prativerso"), "Host route renders.");
+  const playerHtml = await alice.request(`/participar/${code}`); check(playerHtml.includes("Prativerso"), "Participant route renders.");
   console.log("✓ Expired timers, unanswered participants, cumulative scores, simultaneous answers and final result.");
   // A difficult question still awards full points to the first correct answer,
   // even after an earlier wrong answer and near the end of the timer.

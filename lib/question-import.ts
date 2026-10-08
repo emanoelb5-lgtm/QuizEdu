@@ -35,7 +35,7 @@ function item(question:Question,source:string,notes:string[]=[]):ImportItem {
   const fatal:string[]=[];
   if(question.text.length>400)fatal.push("O enunciado ultrapassa 400 caracteres.");
   if(question.explanation.length>500)fatal.push("A explicação ultrapassa 500 caracteres.");
-  if(question.options.length>4)fatal.push("O QuizEdu aceita até quatro alternativas.");
+  if(question.options.length>4)fatal.push("O Prativerso aceita até quatro alternativas.");
   if(question.kind==="true_false"&&(question.options.length!==2||question.options[0]!=="Verdadeiro"||question.options[1]!=="Falso"))fatal.push("No modelo Verdadeiro ou falso, use essas duas alternativas nesta ordem. Corrija a planilha antes de adicionar.");
   question.options.forEach((o,i)=>{if(o.length>180)fatal.push(`A alternativa ${LETTERS[i]||i+1} ultrapassa 180 caracteres.`);});
   return {question,source,notes,fatal};

@@ -1,4 +1,6 @@
-# QuizEdu
+# Prativerso
+
+**Conhecimento em prática.** Identidade em violeta, laranja e verde água. [Kit da marca](public/brand/prativerso-kit.zip) · [Guia de aplicação](public/brand/LEIA-ME.md).
 
 Plataforma gratuita para educadores, em português, com quizzes ao vivo e aulas completas de slides com perguntas intercaladas. Uma tela para o professor, um telão e outra tela para cada participante.
 
@@ -32,14 +34,14 @@ No painel inicial, abra **Aulas com slides** e **Nova aula**. O exemplo **Solo v
 - **Salvamento:** automático, na conta ou no acesso temporário, com revisões para evitar que uma tela sobrescreva outra. Uma cópia no aparelho protege alterações durante falhas de conexão. Conflitos oferecem guardar outra cópia ou abrir a versão da conta. Notas do professor pertencem à aula e não são enviadas aos alunos.
 - **Apresentação:** a prévia permite ensaiar sem abrir uma partida. **Abrir sala** usa o mesmo QR code, nomes, avatares e app persistente dos alunos. **Iniciar aula** começa no primeiro slide. Setas/Space avançam, B pausa o telão entre perguntas e F alterna tela inteira. Uma nova pergunta inicia a rodada nos celulares. O ranking lateral segue acumulado até o pódio final, usando as mesmas regras de pontuação. As notas ficam no painel do professor; **Abrir telão em outra janela** projeta só a apresentação e o ranking. O ponteiro acompanha o telão em outra janela do mesmo navegador quando BroadcastChannel está disponível.
 - **Retomada e revisão:** todos os aparelhos acompanham o slide atual. Novos alunos podem entrar no intervalo de conteúdo; perguntas em andamento preservam a lista da rodada. Perguntas concluídas podem ser revistas, sem nova tentativa e sem repetir pontos. A ordem das perguntas inéditas é preservada. Salas guardam uma cópia da aula: editar ou excluir a apresentação original não muda aulas já abertas nem seus relatórios.
-- **Arquivos:** **Arquivo** baixa a aula QuizEdu em JSON, insere slides de uma cópia JSON, exporta PowerPoint com textos/formas/tabelas/gráficos editáveis e notas, ou abre impressão com um slide por página para salvar PDF pelo navegador. PowerPoint e PDF são cópias estáticas: as rodadas, o ranking e as entradas progressivas acontecem dentro do QuizEdu. Vídeos são links no PowerPoint. A importação oferece prévia e seleção de slides de PPTX/PPSX/POTX, ODP/OTP, PPT/PPS/POT antigos, PDF e JSON. PPTX preserva objetos básicos editáveis; formatos antigos recuperam textos; PDF abre como páginas visuais sobre as quais é possível adicionar conteúdo e perguntas. Animações, fontes e objetos especiais podem precisar de ajustes; os avisos aparecem antes de confirmar.
+- **Arquivos:** **Arquivo** baixa a aula Prativerso em JSON, insere slides de uma cópia JSON, exporta PowerPoint com textos/formas/tabelas/gráficos editáveis e notas, ou abre impressão com um slide por página para salvar PDF pelo navegador. PowerPoint e PDF são cópias estáticas: as rodadas, o ranking e as entradas progressivas acontecem dentro do Prativerso. Vídeos são links no PowerPoint. A importação oferece prévia e seleção de slides de PPTX/PPSX/POTX, ODP/OTP, PPT/PPS/POT antigos, PDF e JSON. PPTX preserva objetos básicos editáveis; formatos antigos recuperam textos; PDF abre como páginas visuais sobre as quais é possível adicionar conteúdo e perguntas. Animações, fontes e objetos especiais podem precisar de ajustes; os avisos aparecem antes de confirmar.
 - **Limites de preparação:** até 150 slides, 60 objetos por slide, 50 perguntas, 5.000 caracteres de notas por slide e 1 MB no documento JSON, sem os arquivos de imagem, que ficam no armazenamento de mídia. Até 200 aulas em conta permanente ou 50 em acesso temporário. A lista usa apenas metadados, sem carregar os documentos completos. Os limites existentes de sala continuam: 100 participantes, cinco salas abertas por educador e validade de 24 horas.
 
 ### Importação e edição (3.3 / Android 1.1)
 
 Use **Importar apresentação** na biblioteca ou no editor, confira a prévia e selecione os slides. Arquivos até 15 MB, até 150 slides, 12 MB de imagens extraídas e 32 MB de conteúdo descompactado. Os limites da aula e da conta continuam sendo respeitados. Imagens são reduzidas antes do envio; apenas imagens dos slides selecionados são enviadas. O documento é validado e nenhuma macro é executada.
 
-O site oferece copiar/aplicar formatação entre objetos do mesmo tipo e redimensionamento proporcional com Shift. O Android acrescenta desfazer/refazer, copiar/colar entre slides, seleção múltipla, agrupamento, alinhamento, redimensionamento pelo toque e edição ampliada com estilos por trecho, cor e links. Na importação do Android, arquivos PowerPoint/LibreOffice são enviados ao QuizEdu para leitura; PDFs são renderizados no aparelho. O site lê os arquivos no navegador. Depois de salvar, os dois clientes acessam a mesma aula.
+O site oferece copiar/aplicar formatação entre objetos do mesmo tipo e redimensionamento proporcional com Shift. O Android acrescenta desfazer/refazer, copiar/colar entre slides, seleção múltipla, agrupamento, alinhamento, redimensionamento pelo toque e edição ampliada com estilos por trecho, cor e links. Na importação do Android, arquivos PowerPoint/LibreOffice são enviados ao Prativerso para leitura; PDFs são renderizados no aparelho. O site lê os arquivos no navegador. Depois de salvar, os dois clientes acessam a mesma aula.
 
 ### Refinamentos do editor (3.1)
 
@@ -48,13 +50,13 @@ O site oferece copiar/aplicar formatação entre objetos do mesmo tipo e redimen
 - **Sequência e espaço:** busque títulos, perguntas e conteúdo dos objetos, inclusive sem acentos; filtre apenas perguntas sem mudar a ordem da aula. O slide selecionado acompanha a navegação. O botão de foco oculta os painéis para ampliar o canvas; as notas podem ser recolhidas. Controles e rótulos maiores, atalhos acessíveis pelo teclado e alças com uma área de toque maior facilitam a edição.
 - **Camadas:** o painel permite mostrar, ocultar, bloquear e desbloquear cada objeto sem precisar abrir suas propriedades. **Ajustes do slide** retorna às configurações do fundo e da aula.
 
-### QuizEdu padrão e futuro Pro
+### Prativerso padrão e futuro Pro
 
-O QuizEdu padrão mantém gratuitamente as funções de quiz já existentes. A criação e apresentação de aulas com slides estão **liberadas no gratuito agora**, conforme a decisão do proprietário. A proposta de **QuizEdu Pro a R$19 por mês** está registrada para uma etapa futura. Esta versão não configura pagamentos, assinatura, cobrança automática, limite artificial de acesso ao editor ou retirada de recursos existentes.
+O Prativerso padrão mantém gratuitamente as funções de quiz já existentes. A criação e apresentação de aulas com slides estão **liberadas no gratuito agora**, conforme a decisão do proprietário. A proposta de **Prativerso Pro a R$19 por mês** está registrada para uma etapa futura. Esta versão não configura pagamentos, assinatura, cobrança automática, limite artificial de acesso ao editor ou retirada de recursos existentes.
 
 ## App do aluno e retomada da sala
 
-- Ao abrir o QR code da sala, o aluno encontra a instalação do app. **Instalar QuizEdu** abre diretamente a janela nativa do navegador. O botão só é habilitado quando essa instalação está disponível; antes disso, aparece **Preparando instalação**. A solicitação é capturada antes de a página terminar de carregar e usada uma única vez, no clique. Cancelar a instalação mantém o aluno no quiz. **Como instalar pelo menu** é uma ajuda separada. O app usa o mesmo site e não exige loja nem conta. No iPhone/iPad, use Compartilhar e **Adicionar à Tela de Início**; se necessário, abra no Safari. Navegadores dentro de outros aplicativos podem exigir abrir o endereço no navegador do aparelho.
+- Ao abrir o QR code da sala, o aluno encontra a instalação do app. **Instalar Prativerso** abre diretamente a janela nativa do navegador. O botão só é habilitado quando essa instalação está disponível; antes disso, aparece **Preparando instalação**. A solicitação é capturada antes de a página terminar de carregar e usada uma única vez, no clique. Cancelar a instalação mantém o aluno no quiz. **Como instalar pelo menu** é uma ajuda separada. O app usa o mesmo site e não exige loja nem conta. No iPhone/iPad, use Compartilhar e **Adicionar à Tela de Início**; se necessário, abra no Safari. Navegadores dentro de outros aplicativos podem exigir abrir o endereço no navegador do aparelho.
 - O ícone abre **[o acesso dos alunos](https://quizedu-emanuel.emanuelb5.chatgpt.site/jogar)** e retoma a última sala neste aparelho. Nome, avatar, respostas confirmadas e pontos continuam no servidor. A sala permanece válida por 24 horas; encerrar a sala impede novas respostas.
 - **Sair da sala** desativa a retomada automática e abre a entrada por código ou câmera. Sair não exclui o participante nem seus pontos; voltar pelo mesmo aparelho/navegador mantém o acesso, mesmo depois de iniciar o quiz.
 - **Ler QR code** pede permissão de câmera, lê apenas códigos de salas deste site e encerra a câmera ao fechar a janela, trocar de página ou colocar o app em segundo plano. As imagens são processadas no aparelho, sem envio ao servidor; também há entrada por seis números.
@@ -76,14 +78,14 @@ O QuizEdu padrão mantém gratuitamente as funções de quiz já existentes. A c
 
 ## Criar perguntas com IA
 
-No editor, use **Criar com IA**. Informe assunto, turma, quantidade (até 20 por pedido), dificuldade e modelo: múltipla escolha, verdadeiro/falso ou situação prática. Opcionalmente, cole um texto de apoio de até 12.000 caracteres. O pedido solicita linguagem adequada à turma, gabarito explícito e explicações curtas no formato aceito pelo QuizEdu.
+No editor, use **Criar com IA**. Informe assunto, turma, quantidade (até 20 por pedido), dificuldade e modelo: múltipla escolha, verdadeiro/falso ou situação prática. Opcionalmente, cole um texto de apoio de até 12.000 caracteres. O pedido solicita linguagem adequada à turma, gabarito explícito e explicações curtas no formato aceito pelo Prativerso.
 
 1. Clique em **Preparar pedido** e **Copiar pedido**.
 2. Use **Abrir ChatGPT**, entre na conta que deseja usar e envie o pedido em uma conversa.
-3. Copie a resposta completa, volte ao QuizEdu e use **Colar resposta e revisar**.
+3. Copie a resposta completa, volte ao Prativerso e use **Colar resposta e revisar**.
 4. Confira os fatos, as alternativas e o gabarito. Selecione as perguntas e adicione ao rascunho.
 
-Este é um fluxo assistido com copiar/colar. O QuizEdu não envia chamadas de IA, não usa uma chave do proprietário, não recebe a senha do ChatGPT e não tem acesso às conversas. A geração acontece na conta aberta no ChatGPT e segue os limites dela. O login **Continuar com ChatGPT** do QuizEdu identifica o educador e guarda suas atividades; não autoriza geração de IA.
+Este é um fluxo assistido com copiar/colar. O Prativerso não envia chamadas de IA, não usa uma chave do proprietário, não recebe a senha do ChatGPT e não tem acesso às conversas. A geração acontece na conta aberta no ChatGPT e segue os limites dela. O login **Continuar com ChatGPT** do Prativerso identifica o educador e guarda suas atividades; não autoriza geração de IA.
 
 A integração automática que utiliza o plano ChatGPT do visitante exige autorização própria para inferência. A [documentação oficial de Sign in with ChatGPT](https://developers.openai.com/siwc/token-sharing-open-source) disponibiliza o fluxo aberto para aplicativos locais/de código aberto; aplicativos pagos ou hospedados remotamente precisam solicitar acesso à OpenAI. Esse acesso não está configurado neste site. A geração direta não deve ser ativada apenas com o login de identidade nem com a chave/saldo do proprietário.
 

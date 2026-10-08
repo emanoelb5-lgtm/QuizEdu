@@ -26,7 +26,7 @@ export function PlayerHome() {
         if(!alive)return;
         if(room.status==="closed"){try{leaveActiveRoom(localStorage,candidate);}catch{}setActive(null);setError("A sala anterior foi encerrada. Entre com o código da próxima atividade.");}
         else if(room.me || room.status==="lobby" || (room.presentation&&room.status==="slide")){try{saveActiveRoom(localStorage,room);}catch{}window.location.replace(`/participar/${candidate}`);return;}
-        else{setCode(candidate);setError("Para retomar seu participante, abra o QuizEdu no navegador em que você entrou na sala.");}
+        else{setCode(candidate);setError("Para retomar seu participante, abra o Prativerso no navegador em que você entrou na sala.");}
       }catch(reason){if(!alive)return;const failure=reason as ApiError;setError(failure.status===0||failure.status>=500?"Sem conexão no momento. Sua sala continua guardada; tente retomá-la quando a internet voltar.":failure.message);if(failure.status===404||failure.status===409){try{leaveActiveRoom(localStorage,candidate);}catch{}setActive(null);}}
       if(alive)setRestoring(false);
     }
