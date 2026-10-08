@@ -1,10 +1,10 @@
-QuizEdu Android 1.2.2 — exemplos de aula e quiz ilustrados.
+Prativerso Android 1.3.0 — conhecimento em prática.
 
-- Apresentação de exemplo com fotografias reais e seis perguntas intercaladas.
-- Quiz de exemplo com todos os modelos: múltipla escolha, verdadeiro ou falso, imagem, situação prática, sim ou não e alternativas ilustradas.
-- Exemplos compartilhados com o site. Novas versões do conteúdo chegam pelo sistema, sem exigir outro APK.
-- Cada uso abre uma cópia independente, pronta para editar, salvar e apresentar. Exemplos já carregados podem ser retomados para edição sem conexão.
-- Fotografias dos exemplos disponíveis no editor, nos slides e nas perguntas.
-- Mantida a tela limpa do aluno com pontuação, posição, cronômetro e saída confirmada.
+- QuizEdu agora se chama Prativerso.
+- Nova marca com um P em órbita, ícone próprio e cores violeta, laranja e verde água.
+- Identidade consistente com o site, incluindo navegação, botões e telas de participação.
+- Tema Prativerso para novas apresentações, mantendo os temas e o conteúdo das aulas existentes.
+- Mantida a tela simples do aluno, com pontuação, posição, cronômetro e saída confirmada.
+- Mantidos os exemplos ilustrados, importação de apresentações e sincronização das salas ao vivo.
 
-Instale sobre a versão atual: mesmo pacote e certificado. Android 7 ou superior.
+Instale sobre a versão atual: mesmo pacote e certificado, com as contas e aulas preservadas. Android 7 ou superior.

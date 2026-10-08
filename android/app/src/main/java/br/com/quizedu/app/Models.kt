@@ -66,7 +66,8 @@ fun richText(text: String, bold: Boolean = false, italic: Boolean = false): JSON
 
 data class DeckTheme(val id: String, val name: String, val background: String, val text: String, val accent: String, val secondary: String, val font: String = "Arial")
 val deckThemes = listOf(
-    DeckTheme("azul", "QuizEdu", "#ffffff", "#15203d", "#3155ed", "#eaf0ff"),
+    DeckTheme("prativerso", "Prativerso", "#ffffff", "#23213d", "#6546d7", "#f0edff"),
+    DeckTheme("azul", "Azul clássico", "#ffffff", "#15203d", "#3155ed", "#eaf0ff"),
     DeckTheme("noite", "Noite", "#111c35", "#ffffff", "#d2fb66", "#20304b"),
     DeckTheme("campo", "Campo", "#f6fff8", "#123b2c", "#168653", "#dcf5e5", "Trebuchet MS"),
     DeckTheme("oceano", "Oceano", "#eefbff", "#09354b", "#087eaa", "#cfeef8"),
@@ -93,7 +94,7 @@ fun newElement(type: String, theme: String): JSONObject {
     return e
 }
 private fun textElement(text: String, x: Int, y: Int, w: Int, h: Int, size: Int, theme: String): JSONObject = newElement("text", theme).put("x", x).put("y", y).put("w", w).put("h", h).put("fontSize", size).put("doc", richText(text))
-fun newSlide(layout: String = "title", theme: String = "azul"): JSONObject {
+fun newSlide(layout: String = "title", theme: String = "prativerso"): JSONObject {
     val t = themeFor(theme)
     val slide = JSONObject().put("id", uid()).put("kind", "content").put("title", "Novo slide").put("notes", "")
         .put("background", JSONObject().put("color", t.background)).put("transition", "fade").put("elements", JSONArray())
@@ -125,7 +126,7 @@ fun newSlide(layout: String = "title", theme: String = "azul"): JSONObject {
     }
     return slide.put("elements", jsonArray(elements))
 }
-fun newDeck(): JSONObject = JSONObject().put("id", uid()).put("title", "Minha aula interativa").put("subject", "").put("topic", "").put("theme", "azul")
+fun newDeck(): JSONObject = JSONObject().put("id", uid()).put("title", "Minha aula interativa").put("subject", "").put("topic", "").put("theme", "prativerso")
     .put("slides", JSONArray().put(newSlide("cover"))).put("mode", "speed").put("untimed", false).put("showSlideNumbers", true)
 fun duplicateSlide(slide: JSONObject): JSONObject {
     val copy = slide.copy().put("id", uid())

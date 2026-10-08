@@ -7,6 +7,7 @@ import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -23,6 +24,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextOverflow
@@ -38,13 +40,13 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import org.json.JSONObject
 
-val EduBlue = Color(0xFF3155ED)
-val EduNavy = Color(0xFF111C35)
-val EduLime = Color(0xFFD2FB66)
-val EduMuted = Color(0xFF61708A)
+val EduBlue = Color(0xFF6546D7)
+val EduNavy = Color(0xFF23213D)
+val EduLime = Color(0xFFFFB35C)
+val EduMuted = Color(0xFF69657B)
 @Composable fun QuizEduTheme(content: @Composable () -> Unit) {
     MaterialTheme(colorScheme = lightColorScheme(primary = EduBlue, onPrimary = Color.White, secondary = EduNavy, tertiary = EduLime,
-        background = Color(0xFFF4F6FC), surface = Color.White, onSurface = Color(0xFF15203D), outline = Color(0xFFD5DFF1), surfaceVariant = Color(0xFFEAF0FF)),
+        background = Color(0xFFF8F7FC), surface = Color.White, onSurface = EduNavy, outline = Color(0xFFE3DFEE), surfaceVariant = Color(0xFFF0EDFF)),
         shapes = Shapes(small = RoundedCornerShape(12.dp), medium = RoundedCornerShape(18.dp), large = RoundedCornerShape(24.dp)), content = content)
 }
 fun openWeb(context: Context, path: String) {
@@ -73,8 +75,8 @@ fun openWeb(context: Context, path: String) {
     Scaffold(snackbarHost = { SnackbarHost(snack) }, topBar = {
         Column {
             TopAppBar(title = { Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
-                Surface(color = EduBlue, shape = RoundedCornerShape(10.dp)) { Icon(Icons.Default.HelpOutline, "", tint = EduLime, modifier = Modifier.padding(7.dp).size(24.dp)) }
-                Text("Quiz", fontWeight = FontWeight.ExtraBold, color = EduNavy); Text("Edu", fontWeight = FontWeight.Bold, color = EduBlue, modifier = Modifier.offset(x = (-8).dp))
+                Image(painterResource(R.drawable.ic_prativerso), contentDescription = null, modifier = Modifier.size(34.dp))
+                Text("Prativerso", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = EduNavy, maxLines = 1)
             } }, navigationIcon = { if (vm.screen != AppScreen.Home && !(vm.screen == AppScreen.Room && !vm.roomTeacher)) IconButton(onClick = { if (vm.screen == AppScreen.Room) exitConfirm = true else if (vm.screen == AppScreen.Editor) vm.closeEditor() else vm.home() }, enabled = !vm.busy) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Voltar") } },
                 actions = { if (vm.screen == AppScreen.Room && !vm.roomTeacher) TextButton(onClick = { exitConfirm = true }, enabled = !vm.busy, modifier = Modifier.testTag("student-exit")) { Icon(Icons.Default.Logout, null, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(5.dp)); Text("Sair") }; if (vm.screen == AppScreen.Home) TextButton(onClick = { vm.mode(!vm.teacher) }, enabled = !vm.busy) { Text(if (vm.teacher) "Sou aluno" else "Sou professor") } })
             if (vm.busy) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
@@ -94,7 +96,7 @@ fun openWeb(context: Context, path: String) {
         confirmButton = { TextButton(onClick = { exitConfirm = false; vm.leaveRoom() }) { Text(if (vm.roomTeacher) "Sair da tela" else "Sair da sala") } }, dismissButton = { TextButton(onClick = { exitConfirm = false }) { Text(if (vm.roomTeacher) "Continuar aqui" else "Continuar na sala") } })
 }
 @Composable fun InfoCard(text: String, warning: Boolean = false) {
-    Surface(color = if (warning) Color(0xFFFFF4DD) else Color(0xFFEAF0FF), shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth()) {
+    Surface(color = if (warning) Color(0xFFFFF4DD) else Color(0xFFF0EDFF), shape = RoundedCornerShape(14.dp), modifier = Modifier.fillMaxWidth()) {
         Row(Modifier.padding(15.dp), horizontalArrangement = Arrangement.spacedBy(10.dp), verticalAlignment = Alignment.CenterVertically) {
             Icon(if (warning) Icons.Default.WifiOff else Icons.Default.Info, null, tint = if (warning) Color(0xFF9A6A1A) else EduBlue)
             Text(text, style = MaterialTheme.typography.bodyMedium, color = EduNavy, modifier = Modifier.weight(1f))
@@ -132,7 +134,7 @@ fun openWeb(context: Context, path: String) {
     Surface(color = Color.White, shadowElevation = 8.dp, modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(horizontal = 22.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Button(onClick = { vm.acceptLink(code) }, enabled = code.length == 6, modifier = Modifier.fillMaxWidth().height(54.dp)) { Text("Entrar na sala", fontWeight = FontWeight.Bold) }
-            OutlinedButton(onClick = { scanner.launch(ScanOptions().setDesiredBarcodeFormats(ScanOptions.QR_CODE).setPrompt("Leia o QR code da sala QuizEdu").setBeepEnabled(false).setOrientationLocked(false)) }, modifier = Modifier.fillMaxWidth().height(54.dp)) {
+            OutlinedButton(onClick = { scanner.launch(ScanOptions().setDesiredBarcodeFormats(ScanOptions.QR_CODE).setPrompt("Leia o QR code da sala Prativerso").setBeepEnabled(false).setOrientationLocked(false)) }, modifier = Modifier.fillMaxWidth().height(54.dp)) {
                 Icon(Icons.Default.QrCodeScanner, null); Spacer(Modifier.width(10.dp)); Text("Ler QR code")
             }
         }
@@ -157,7 +159,7 @@ fun openWeb(context: Context, path: String) {
         } }
         if (vm.profile == null) {
             item { Button(onClick = vm::startPairing, enabled = !vm.busy && vm.pendingPair.isBlank(), modifier = Modifier.fillMaxWidth().height(54.dp)) { Icon(Icons.Default.Devices, null); Spacer(Modifier.width(10.dp)); Text("Vincular minha conta") } }
-            item { InfoCard("A conta é a mesma do QuizEdu no computador. Os alunos entram sem cadastro. Nenhuma assinatura Pro é necessária.") }
+            item { InfoCard("A conta é a mesma do Prativerso no computador. Os alunos entram sem cadastro. Nenhuma assinatura Pro é necessária.") }
             item { OutlinedCard { Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
                 Text("Quero experimentar agora", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 Text("Crie um acesso temporário, válido por 30 dias. Depois vincule a conta para guardar suas aulas.", color = EduMuted)
@@ -172,7 +174,7 @@ fun openWeb(context: Context, path: String) {
                     DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
                         DropdownMenuItem(text = { Text("Vincular ou trocar conta") }, onClick = { expanded = false; vm.startPairing() })
                         DropdownMenuItem(text = { Text("Aparelhos vinculados") }, onClick = { expanded = false; vm.showDevices() })
-                        DropdownMenuItem(text = { Text("Abrir QuizEdu no navegador") }, onClick = { expanded = false; openWeb(context, "/aulas") })
+                        DropdownMenuItem(text = { Text("Abrir Prativerso no navegador") }, onClick = { expanded = false; openWeb(context, "/aulas") })
                         DropdownMenuItem(text = { Text("Sair desta conta") }, onClick = { expanded = false; vm.signOut() })
                     }
                 }
@@ -224,7 +226,7 @@ fun openWeb(context: Context, path: String) {
                 }
             } }
         }
-        item { Text("QuizEdu Android ${BuildConfig.VERSION_NAME} · Feito para aprender juntos", color = EduMuted, fontSize = 12.sp, modifier = Modifier.padding(vertical = 10.dp)) }
+        item { Text("Prativerso Android ${BuildConfig.VERSION_NAME} · Conhecimento em prática", color = EduMuted, fontSize = 12.sp, modifier = Modifier.padding(vertical = 10.dp)) }
     }
     confirmDelete?.let { lesson -> AlertDialog(onDismissRequest = { confirmDelete = null }, title = { Text("Excluir esta aula?") }, text = { Text(lesson.str("title") + " será removida da biblioteca e deste aparelho. As salas já abertas permanecem com sua cópia da aula.") },
         confirmButton = { TextButton(onClick = { confirmDelete = null; vm.deleteLesson(lesson.str("id"), lesson.optInt("revision")) }) { Text("Excluir") } }, dismissButton = { TextButton(onClick = { confirmDelete = null }) { Text("Cancelar") } }) }

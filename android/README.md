@@ -1,4 +1,4 @@
-# QuizEdu Android
+# Prativerso Android
 
 Cliente **nativo**, sem WebView, em Kotlin e Jetpack Compose. Compartilha salas, pontuação, biblioteca, imagens e apresentações com o site. A autorização da conta acontece no navegador do usuário e concede uma sessão revogável ao aparelho; o app não recebe a senha do ChatGPT.
 
@@ -8,7 +8,7 @@ Baixe `QuizEdu-Android-1.2.2.apk` na [última versão do GitHub Releases](https:
 
 ## Compilar no GitHub
 
-O workflow [.github/workflows/android.yml](../.github/workflows/android.yml) roda em pushes de alterações Android para main e pode ser iniciado em **Actions → QuizEdu Android → Run workflow**. Executa testes JVM, lint, testes de interface em emulador Android 15, compila o APK de distribuição, verifica o certificado e publica no GitHub Releases. Pull requests só compilam/testam.
+O workflow [.github/workflows/android.yml](../.github/workflows/android.yml) roda em pushes de alterações Android para main e pode ser iniciado em **Actions → Prativerso Android → Run workflow**. Executa testes JVM, lint, testes de interface em emulador Android 15, compila o APK de distribuição, verifica o certificado e publica no GitHub Releases. Pull requests só compilam/testam.
 
 Ferramentas fixadas: Java 17, Gradle 8.13, AGP 8.11.1, Kotlin 2.1.21, Compose BOM 2025.05.01, compile/target SDK 36 e min SDK 24. As actions são fixadas por commit.
 

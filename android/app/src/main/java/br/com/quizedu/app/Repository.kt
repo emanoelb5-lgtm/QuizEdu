@@ -90,7 +90,7 @@ class QuizApi(private val secrets: SecretStore, private val teacher: Boolean) : 
                     connection.connectTimeout = 5000; connection.readTimeout = 5000
                     connection.instanceFollowRedirects = false
                     connection.setRequestProperty("Accept", "text/event-stream")
-                    connection.setRequestProperty("User-Agent", "QuizEdu-Android/${BuildConfig.VERSION_NAME}")
+                    connection.setRequestProperty("User-Agent", "Prativerso-Android/${BuildConfig.VERSION_NAME}")
                     if (connection.responseCode != 200) throw ApiError(connection.responseCode, "Reconectando à sala…")
                     if (connection.contentType?.startsWith("text/event-stream") != true) throw IOException("Atualização contínua indisponível.")
                     connection.inputStream.bufferedReader(Charsets.UTF_8).use { input ->
@@ -122,7 +122,7 @@ class QuizApi(private val secrets: SecretStore, private val teacher: Boolean) : 
             connection.instanceFollowRedirects = false
             connection.setRequestProperty("Accept", "application/json")
             connection.setRequestProperty("Origin", BuildConfig.SITE_URL)
-            connection.setRequestProperty("User-Agent", "QuizEdu-Android/${BuildConfig.VERSION_NAME}")
+            connection.setRequestProperty("User-Agent", "Prativerso-Android/${BuildConfig.VERSION_NAME}")
             if (presentationName != null) connection.setRequestProperty("X-Presentation-Name", presentationName)
             val cookies = try { JSONObject(secrets.get(cookieKey).ifEmpty { "{}" }) } catch (_: Exception) { JSONObject() }
             if (cookies.length() > 0) connection.setRequestProperty("Cookie", cookies.keys().asSequence().joinToString("; ") { "$it=${cookies.str(it)}" })
@@ -139,7 +139,7 @@ class QuizApi(private val secrets: SecretStore, private val teacher: Boolean) : 
             val stream = if (status in 200..299) connection.inputStream else connection.errorStream
             val raw = stream?.use { String(it.readBytes(), Charsets.UTF_8) } ?: ""
             val result = try { JSONObject(raw) } catch (_: Exception) {
-                throw ApiError(status, "Não foi possível acessar o QuizEdu. Verifique sua conexão e tente novamente.")
+                throw ApiError(status, "Não foi possível acessar o Prativerso. Verifique sua conexão e tente novamente.")
             }
             if (status !in 200..299) throw ApiError(status, result.str("error", "Não foi possível concluir agora."))
             result

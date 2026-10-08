@@ -96,7 +96,7 @@ class QuizViewModel(application: Application, val repository: QuizRepository) : 
     }
     fun acceptLink(value: String) {
         val code = roomCode(value)
-        if (code == null) { notify("Leia o QR code de uma sala QuizEdu ou digite o código de 6 números."); return }
+        if (code == null) { notify("Leia o QR code de uma sala Prativerso ou digite o código de 6 números."); return }
         teacher = false; repository.preferences.edit().putBoolean("teacher_mode", false).apply()
         openRoom(code, false)
     }

@@ -119,7 +119,7 @@ fun annotatedRichText(doc: JSONObject?, scale: Float, baseSize: Float): Annotate
                 Text("PERGUNTA PARA A TURMA", fontSize = (20 * textScale).sp, color = EduBlue, fontWeight = FontWeight.Bold)
                 Text(question?.str("text")?.ifBlank { "Escreva sua pergunta" } ?: "Pergunta", fontSize = (43 * textScale).sp, color = hexColor(background.str("color"), Color.White).let { if (it == EduNavy) Color.White else EduNavy }, fontWeight = FontWeight.Bold, lineHeight = (51 * textScale).sp, maxLines = 3)
                 question?.arr("options")?.strings()?.chunked(2)?.forEachIndexed { row, options -> Row(horizontalArrangement = Arrangement.spacedBy((18 * scale).dp)) {
-                    options.forEachIndexed { column, option -> Box(Modifier.weight(1f).background(Color(0xFFEAF0FF), RoundedCornerShape((8 * scale).dp)).padding((16 * scale).dp)) {
+                    options.forEachIndexed { column, option -> Box(Modifier.weight(1f).background(Color(0xFFF0EDFF), RoundedCornerShape((8 * scale).dp)).padding((16 * scale).dp)) {
                         Text("${('A'.code + row * 2 + column).toChar()}  ${option.ifBlank { "Alternativa" }}", fontSize = (22 * textScale).sp, color = EduNavy, maxLines = 2)
                     }
                 } } }
@@ -154,7 +154,7 @@ fun annotatedRichText(doc: JSONObject?, scale: Float, baseSize: Float): Annotate
         "image" -> if (imageOverrides[e.str("src")] != null || mediaUrl(e.str("src")) != null) AsyncImage(imageOverrides[e.str("src")] ?: mediaUrl(e.str("src")), e.str("alt", "Imagem do slide"), modifier = Modifier.fillMaxSize(),
             contentScale = if (e.str("fit") == "contain") ContentScale.Fit else ContentScale.Crop,
             alignment = BiasAlignment((e.optDouble("positionX", 50.0).toFloat() - 50f) / 50f, (e.optDouble("positionY", 50.0).toFloat() - 50f) / 50f))
-        else Box(Modifier.fillMaxSize().background(Color(0xFFEAF0FF)), contentAlignment = Alignment.Center) { Icon(Icons.Default.Image, "Imagem ainda não adicionada", tint = EduMuted, modifier = Modifier.size((70 * scale).dp)) }
+        else Box(Modifier.fillMaxSize().background(Color(0xFFF0EDFF)), contentAlignment = Alignment.Center) { Icon(Icons.Default.Image, "Imagem ainda não adicionada", tint = EduMuted, modifier = Modifier.size((70 * scale).dp)) }
         "shape" -> Canvas(Modifier.fillMaxSize()) {
             val fill = hexColor(e.str("fill"), Color.Transparent).copy(alpha = e.optDouble("fillOpacity", 100.0).toFloat().coerceIn(0f, 100f) / 100f)
             val stroke = hexColor(e.str("stroke"), Color.Transparent)

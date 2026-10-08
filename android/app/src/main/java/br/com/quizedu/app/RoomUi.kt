@@ -142,7 +142,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
                 items(avatarOptions, key = { it.id }) { option ->
                     val selected = avatar == option.id
                     val shape = RoundedCornerShape(20.dp)
-                    Surface(color = if (selected) Color(0xFFEAF0FF) else Color.White, shape = shape,
+                    Surface(color = if (selected) Color(0xFFF0EDFF) else Color.White, shape = shape,
                         modifier = Modifier.width(94.dp).border(2.dp, if (selected) EduBlue else Color(0xFFDCE3EF), shape)
                             .selectable(selected = selected, role = Role.RadioButton, onClick = { avatar = option.id })
                             .semantics { contentDescription = "Avatar ${option.name}" }.testTag("avatar-${option.id}")) {
@@ -172,8 +172,8 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
         Text("Convide a turma", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
         Image(bitmap.asImageBitmap(), "QR code para entrar na sala $code", modifier = Modifier.size(185.dp))
         Text(code, fontSize = 40.sp, letterSpacing = 4.sp, fontWeight = FontWeight.ExtraBold, color = EduBlue)
-        Text("No Android: abra o QuizEdu e toque em “Ler QR code”. No navegador: leia o QR code ou digite o código da sala.", color = EduMuted)
-        InfoCard("No computador, abra esta sala no QuizEdu com a mesma conta. O celular passa a controlar a apresentação e o placar.")
+        Text("No Android: abra o Prativerso e toque em “Ler QR code”. No navegador: leia o QR code ou digite o código da sala.", color = EduMuted)
+        InfoCard("No computador, abra esta sala no Prativerso com a mesma conta. O celular passa a controlar a apresentação e o placar.")
     } }
 }
 @Composable private fun TeacherControls(vm: QuizViewModel, state: RoomSnapshot, onClose: () -> Unit) {
@@ -216,7 +216,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
         question.arr("options").strings().forEachIndexed { index, text ->
             val isCorrect = revealed && state.correct == index
             val selected = state.me?.optInt("option", -1) == index && !state.me!!.isNull("option")
-            val background = if (isCorrect) Color(0xFFE3F5E9) else if (selected) Color(0xFFEAF0FF) else Color.White
+            val background = if (isCorrect) Color(0xFFE3F5E9) else if (selected) Color(0xFFF0EDFF) else Color.White
             OutlinedButton(onClick = { vm.answer(index) }, enabled = !vm.roomTeacher && !vm.busy && vm.connected && ready && !over && !answered && !revealed,
                 colors = ButtonDefaults.outlinedButtonColors(containerColor = background, disabledContainerColor = background, disabledContentColor = EduNavy), modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(14.dp), contentPadding = PaddingValues(15.dp)) {
                 Text(('A'.code + index).toChar().toString(), color = if (isCorrect) Color(0xFF168653) else EduBlue, fontWeight = FontWeight.Bold, modifier = Modifier.width(28.dp))
@@ -231,7 +231,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
     } }
 }
 @Composable private fun PlayerRow(player: JSONObject, me: String?, showScore: Boolean = true, onRemove: (() -> Unit)? = null) {
-    Surface(color = if (player.str("id") == me) Color(0xFFEAF0FF) else Color.White, shape = RoundedCornerShape(15.dp)) {
+    Surface(color = if (player.str("id") == me) Color(0xFFF0EDFF) else Color.White, shape = RoundedCornerShape(15.dp)) {
         Row(Modifier.fillMaxWidth().padding(15.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(11.dp)) {
             if (showScore) Text("${player.optInt("position")}º", fontWeight = FontWeight.Bold, color = EduMuted)
             PlayerAvatar(player.str("avatar"), 38.dp)
@@ -243,7 +243,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
 }
 @Composable internal fun Podium(players: List<JSONObject>) {
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp), verticalAlignment = Alignment.Bottom) {
-        players.take(2).forEachIndexed { index, player -> Surface(color = if (index == 0) EduNavy else Color(0xFFEAF0FF), shape = RoundedCornerShape(22.dp), modifier = Modifier.weight(1f)) {
+        players.take(2).forEachIndexed { index, player -> Surface(color = if (index == 0) EduNavy else Color(0xFFF0EDFF), shape = RoundedCornerShape(22.dp), modifier = Modifier.weight(1f)) {
             Column(Modifier.padding(18.dp).heightIn(min = if (index == 0) 220.dp else 185.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Icon(Icons.Default.EmojiEvents, null, tint = if (index == 0) EduLime else EduBlue)
                 PlayerAvatar(player.str("avatar"), if (index == 0) 78.dp else 64.dp)
