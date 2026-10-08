@@ -105,3 +105,45 @@
 .player-home-action-dock .action-dock-inner{max-width:550px;gap:10px}.player-home-action-dock .btn{flex:1;padding:12px}
 @media(max-width:480px){.action-dock{padding-left:max(16px,env(safe-area-inset-left));padding-right:max(16px,env(safe-area-inset-right))}.action-dock-inner{gap:12px}.host-action-dock .btn{flex:1;max-width:230px;padding:12px}.dock-room-summary b{font-size:.875rem}.dock-room-summary span{font-size:.75rem}.dock-room-summary>svg{display:none}.avatar-picker-heading{flex-wrap:wrap;gap:4px}.avatar-carousel-item{flex-basis:90px!important}.avatar-carousel .avatar-choice img{width:72px;height:72px}.player-shell .rank-avatar .illustrated-avatar{width:34px;height:34px}.podium-avatar .illustrated-avatar{width:68px;height:68px}.podium-first .podium-avatar .illustrated-avatar{width:84px;height:84px}.player-join-shell .join-workspace{padding-top:6px}.player-join-shell .join-workspace h1{font-size:2rem}}
 @media(max-height:480px){.action-dock{padding-top:9px;padding-bottom:calc(9px + env(safe-area-inset-bottom))}.action-dock .btn{min-height:44px}}
+
+/* Student activity: persistent navigation and a compact personal score. */
+.student-room-shell .player-topbar{position:sticky;top:0;z-index:40;max-width:none;height:68px;padding:12px max(24px,calc((100% - 650px)/2 + 24px));background:#f5f7fc;border-bottom:1px solid #e6ebf5}
+.student-overview{position:sticky;top:68px;z-index:30;max-width:650px;margin:auto;padding:12px 24px 14px;background:#f5f7fc;border-bottom:1px solid #e6ebf5}
+.student-overview h1{font-size:1.125rem;line-height:1.35;letter-spacing:-.015em;margin:0 0 10px;overflow-wrap:anywhere;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.student-overview-row{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.student-identity{display:flex;align-items:center;gap:9px;min-width:0;color:#61708a;font-size:1rem}
+.student-identity .illustrated-avatar{flex-shrink:0}
+.student-identity>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.student-current-score{display:flex;flex-direction:column;align-items:flex-end;gap:3px;flex-shrink:0}
+.student-current-score strong{font-size:1.125rem;line-height:1.25;color:var(--blue)}
+.student-current-score strong span{font-size:.875rem;font-weight:500}
+.student-current-score small{font-size:.8125rem;color:#61708a}
+.student-room-waiting{max-width:650px;margin:0 auto;padding:48px 24px;text-align:center}
+.student-room-waiting>svg{color:var(--blue);margin:0 auto 14px}
+.student-room-waiting h2{font-size:1.25rem;margin:0 0 10px}
+.student-room-waiting p{font-size:1rem;line-height:1.5;color:#61708a}
+.student-room-shell .player-live{margin:12px auto 0;padding:8px 24px 28px}
+.student-room-shell .player-score-row{justify-content:flex-start;margin-bottom:12px;font-size:.8125rem}
+.student-room-shell .answer-sent,.student-room-shell .answer-pending{padding:22px 16px;gap:10px}
+.student-room-shell .answer-sent>svg{color:var(--blue)}
+.student-room-shell .answer-sent h2,.student-room-shell .answer-pending h2{font-size:1.25rem}
+.student-room-shell .player-countdown{min-height:240px;gap:18px}
+.student-room-shell .student-lesson-slide{margin-top:12px}
+.student-room-shell .student-lesson-meta{padding-bottom:8px;font-size:.8125rem;margin-bottom:12px}
+.student-room-shell .student-slide-tools .btn{font-size:.875rem;min-height:44px;padding:10px 12px}
+.student-room-results{margin-top:12px;padding-top:12px}
+.student-room-results h2{font-size:1.375rem;margin-top:12px}
+.student-room-results .result-icon{width:52px;height:52px;border-radius:16px}
+.student-room-results .player-round-points{font-size:1.75rem;margin:16px 0}
+.student-room-results .player-round-points span{font-size:.875rem}
+.student-room-results .next-waiting{font-size:.875rem;margin-top:18px}
+.student-room-final{padding-top:24px}
+.student-room-final>h2{font-size:1.5rem;margin:0 0 12px}
+.student-room-final>p{color:#61708a;font-size:1rem}
+@media(max-width:420px){
+.student-room-shell .player-topbar{padding:12px 18px}
+.student-overview{padding:12px 18px}
+.student-overview-row{gap:10px}
+.student-room-shell .player-live{padding:8px 18px 24px}
+.student-room-waiting{padding:36px 18px}
+}

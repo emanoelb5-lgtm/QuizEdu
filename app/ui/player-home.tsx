@@ -4,7 +4,7 @@ import { DoorOpen, Loader2, QrCode } from "lucide-react";
 import { ActiveRoom, initialRoomCode, leaveActiveRoom, readActiveRoom, roomCode, saveActiveRoom } from "@/lib/player-app";
 import type { RoomState } from "@/lib/quiz";
 import { api, ApiError, Brand, Loading } from "./shared";
-import { AppInstallCard, usePlayerManifest } from "./player-app";
+import { usePlayerManifest } from "./player-app";
 import { QrScanner } from "./qr-scanner";
 import { ActionDock } from "./action-dock";
 
@@ -43,7 +43,7 @@ export function PlayerHome() {
       {active&&<aside className="player-resume-card"><DoorOpen size={24}/><div><b>{active.title}</b><span>Sala {active.code}</span></div><button className="btn btn-primary" disabled={busy} onClick={()=>enter(active.code)}>Retomar</button><button className="btn btn-quiet" onClick={forget}>Sair dessa sala</button></aside>}
       <form id="player-code-form" className="form-stack player-code-form" onSubmit={event=>{event.preventDefault();void enter(code);}}><label htmlFor="app-room-code">Código da sala</label><input className="code-input" id="app-room-code" inputMode="numeric" autoComplete="off" pattern="[0-9]{6}" maxLength={6} placeholder="000000" value={code} onChange={event=>setCode(event.target.value.replace(/\D/g,"").slice(0,6))} required/></form>
 
-      {error&&<p className="form-error player-home-error" role="alert">{error}</p>}<AppInstallCard/>
+      {error&&<p className="form-error player-home-error" role="alert">{error}</p>}
     </main>}
     {!restoring&&<ActionDock className="player-home-action-dock"><button type="submit" form="player-code-form" className="btn btn-primary" disabled={busy||code.length!==6}>{busy?<Loader2 size={19} className="spin"/>:<DoorOpen size={19}/>}Entrar na sala</button><button className="btn btn-outline" disabled={busy} onClick={()=>{setError("");setScanner(true);}}><QrCode size={21}/>Ler QR code</button></ActionDock>}
     <QrScanner open={scanner} onClose={()=>setScanner(false)} onCode={value=>{setScanner(false);setCode(value);void enter(value);}}/>
