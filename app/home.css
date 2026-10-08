@@ -1,0 +1,29 @@
+/* Keep the first screen focused on creating and joining. */
+.home-topbar{position:sticky;top:0;z-index:20;min-height:76px;height:auto}
+.home-topbar .top-actions{gap:12px}.home-topbar .btn{min-height:44px}
+.home-topbar .profile-chip{min-width:40px;min-height:44px}
+.welcome-workspace{max-width:1120px;padding-top:36px;padding-bottom:36px}
+.welcome>h1{font-size:clamp(1.85rem,3.5vw,2.5rem);margin-bottom:26px}
+.welcome-choices{display:grid;grid-template-columns:1.1fr 1fr;gap:24px;align-items:stretch}
+.welcome-create,.welcome-join{padding:28px;border:1px solid var(--border);border-radius:20px;background:#fff;min-width:0}
+.welcome-card-heading{display:flex;align-items:center;gap:12px}.welcome-card-heading h2{font-size:1.25rem;line-height:1.35}
+.welcome-icon{width:46px;height:46px;display:grid;place-items:center;border-radius:14px;background:var(--secondary);color:var(--primary);flex-shrink:0}
+.welcome-description{font-size:1rem;line-height:1.6;margin-top:16px;color:var(--muted-foreground)}
+.welcome-create-actions{display:grid;gap:12px;margin-top:24px}
+.welcome-action{display:flex;align-items:center;gap:16px;min-height:90px;width:100%;padding:18px;border:1px solid var(--border);border-radius:14px;text-align:left;background:#fff;color:var(--ink)}
+.welcome-action>svg{color:var(--primary);flex-shrink:0}.welcome-action>span{display:grid;gap:4px;min-width:0}.welcome-action b{font-size:1.0625rem}.welcome-action small{font-size:.875rem;line-height:1.5;color:var(--muted-foreground)}
+.welcome-action:hover:not(:disabled){border-color:var(--primary);background:var(--secondary)}
+.welcome-example{display:inline-flex;align-items:center;gap:8px;min-height:44px;margin-top:16px;padding:7px 0;border:0;background:none;color:var(--primary);font-size:.875rem;font-weight:600;text-align:left}
+.welcome-join-form{display:grid;gap:12px;margin-top:24px}.welcome-join-form .code-input{font-size:clamp(1.75rem,5vw,2.5rem);padding:14px 10px;letter-spacing:.2em}
+.welcome-join-form .btn{width:100%;min-height:48px}.welcome-room-help{font-size:.875rem;color:var(--muted-foreground);line-height:1.5;margin-top:1px}
+.dashboard-focused{display:block}.dashboard-focused .quiz-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr))}
+.home-example{display:flex;align-items:center;gap:12px;padding:14px 0;margin-top:14px;color:var(--muted-foreground);font-size:.875rem}.home-example .btn{font-size:.875rem;min-height:44px}
+.home-profile-dialog .field-help{font-size:.875rem}.home-profile-dialog .permanent-entry{margin-top:4px}
+.home-topbar .profile-chip>span:last-child{max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+@media(max-width:720px){.home-topbar{height:auto;min-height:72px;padding:12px 20px;flex-wrap:nowrap;gap:12px}.welcome-workspace{padding-top:26px}.welcome-choices{grid-template-columns:1fr;gap:18px}.welcome-join{order:-1}.welcome-create,.welcome-join{padding:22px}.welcome>h1{margin-bottom:22px}.welcome-action{min-height:80px;padding:15px}.welcome-create-actions{margin-top:18px}.welcome-description{margin-top:12px}.welcome-join-form{margin-top:18px}}
+@media(max-width:440px){.home-topbar{padding-left:16px;padding-right:16px;gap:8px}.home-topbar .top-actions{gap:6px}.home-topbar .home-room-label{display:none}.home-topbar .home-room-button{width:44px;padding:10px!important}.home-topbar .btn-primary{padding:10px 15px}.welcome-workspace{padding-left:16px;padding-right:16px}.welcome-create,.welcome-join{padding:20px}.welcome-card-heading h2{font-size:1.125rem}.welcome-icon{width:40px;height:40px}.home-example{flex-wrap:wrap}.home-topbar .brand{flex-shrink:1;min-width:0}.home-topbar .brand-name{overflow:hidden;text-overflow:ellipsis}}
+
+.player-entry-shell .player-topbar{position:sticky;top:0;z-index:20;background:var(--background);min-height:72px;gap:12px}
+.player-entry-shell .player-topbar .btn{min-height:44px;flex-shrink:0}.player-entry-shell .brand{min-width:0;flex-shrink:1}.player-entry-shell .brand-name{overflow:hidden;text-overflow:ellipsis}
+.player-entry h1{font-size:clamp(1.75rem,6vw,2.3rem);line-height:1.2;margin:0 0 24px;letter-spacing:-.035em}
+.player-entry>.field-help{font-size:.875rem;margin-top:14px;margin-bottom:0}

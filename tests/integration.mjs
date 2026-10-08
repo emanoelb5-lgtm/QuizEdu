@@ -32,7 +32,7 @@ try {
     for (const statement of sql.split("--> statement-breakpoint").map(s => s.trim()).filter(Boolean)) await database.prepare(statement).run();
   }
   const anonymous = new Client(); const host = new Client(); const stranger = new Client();
-  const landing = await anonymous.request("/"); check(landing.includes("Meus quizzes") && landing.includes('lang="pt-BR"'), "The educator workspace renders in Portuguese.");
+  const landing = await anonymous.request("/"); check(landing.includes("Crie ou participe") && landing.includes('lang="pt-BR"'), "The home page exposes creation and participation in Portuguese.");
   const guest = await anonymous.request("/api/dashboard"); eq(guest.profile, null); eq(guest.quizzes, []);
   await anonymous.request("/api/quizzes", {}, 401);
   await host.request("/api/profile", { name: "Professor Emanuel" }, 201); check(host.cookies.has("qe_host"), "Host gets an opaque session cookie.");
