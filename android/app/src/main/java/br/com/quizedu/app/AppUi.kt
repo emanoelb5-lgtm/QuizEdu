@@ -59,7 +59,7 @@ fun openWeb(context: Context, path: String) {
     val context = LocalContext.current
     var openPairingBrowser by remember { mutableStateOf(false) }
     val signIn: () -> Unit = {
-        vm.mode(true)
+        if (!vm.teacher) vm.mode(true)
         if (vm.pendingPair.isNotBlank()) openWeb(context, "/vincular-app?id=${vm.pendingPair}")
         else { openPairingBrowser = true; vm.startPairing() }
     }
@@ -250,7 +250,6 @@ fun openWeb(context: Context, path: String) {
                 OutlinedButton(onClick = { vm.useExample(false) }, enabled = !vm.busy, modifier = Modifier.fillMaxWidth().testTag("quiz-example")) { Icon(Icons.Default.Quiz, null); Spacer(Modifier.width(8.dp)); Text("Usar quiz de exemplo") }
             } } }
         }
-        item { Text("Prativerso Android ${BuildConfig.VERSION_NAME} · Conhecimento em prática", color = EduMuted, fontSize = 12.sp, modifier = Modifier.padding(vertical = 10.dp)) }
     }
     confirmDelete?.let { lesson -> AlertDialog(onDismissRequest = { confirmDelete = null }, title = { Text("Excluir esta aula?") }, text = { Text(lesson.str("title") + " será removida da biblioteca e deste aparelho. As salas já abertas permanecem com sua cópia da aula.") },
         confirmButton = { TextButton(onClick = { confirmDelete = null; vm.deleteLesson(lesson.str("id"), lesson.optInt("revision")) }) { Text("Excluir") } }, dismissButton = { TextButton(onClick = { confirmDelete = null }) { Text("Cancelar") } }) }
