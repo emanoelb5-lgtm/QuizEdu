@@ -1,10 +1,10 @@
-Prativerso Android 1.3.0 — conhecimento em prática.
+Prativerso Android 1.3.1 — entrada mais simples.
 
-- QuizEdu agora se chama Prativerso.
-- Nova marca com um P em órbita, ícone próprio e cores violeta, laranja e verde água.
-- Identidade consistente com o site, incluindo navegação, botões e telas de participação.
-- Tema Prativerso para novas apresentações, mantendo os temas e o conteúdo das aulas existentes.
-- Mantida a tela simples do aluno, com pontuação, posição, cronômetro e saída confirmada.
-- Mantidos os exemplos ilustrados, importação de apresentações e sincronização das salas ao vivo.
+- Botão Entrar no canto superior, com abertura direta do vínculo no navegador.
+- Tela de participação com código e QR code, sem o bloco grande de explicações.
+- Criação e participação com caminhos claros e separados.
+- Acesso temporário disponível em uma janela, quando solicitado.
+- Minhas apresentações e salas em andamento aparecem antes dos exemplos.
+- Mesmas contas, aulas, assinatura e pacote; instale sobre a versão atual.
 
-Instale sobre a versão atual: mesmo pacote e certificado, com as contas e aulas preservadas. Android 7 ou superior.
+Android 7 ou superior.

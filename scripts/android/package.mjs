@@ -10,7 +10,7 @@ if(verified.status!==0)throw new Error("APK signature verification failed.");
 const certificate=verified.stdout.match(/Signer #1 certificate SHA-256 digest:\s*([a-f0-9]+)/i)?.[1]?.toLowerCase();
 if(certificate!==process.env.QUIZEDU_CERT_SHA256)throw new Error("APK signed with an unexpected certificate.");
 fs.mkdirSync("release-assets",{recursive:true});
-const name="Prativerso-Android-1.3.0.apk",data=fs.readFileSync(apk);
+const name="Prativerso-Android-1.3.1.apk",data=fs.readFileSync(apk);
 fs.writeFileSync("release-assets/"+name,data);
 fs.writeFileSync("release-assets/SHA256SUMS.txt",createHash("sha256").update(data).digest("hex")+"  "+name+"\n");
 console.log("APK de distribuição verificado. "+Math.round(data.length/1024/1024)+" MB.");

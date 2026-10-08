@@ -38,6 +38,19 @@ class NativeUiTest {
         vm = QuizViewModel(app, repository)
         compose.setContent { QuizEduTheme { Box(Modifier.sizeIn(maxWidth = 360.dp, maxHeight = 560.dp)) { QuizEduApp(vm) } } }
     }
+    @Test fun guestCanJoinOrOpenCreationWithoutAnInlineRegistrationForm() {
+        compose.runOnIdle { vm.signOut(); vm.mode(false) }
+        compose.onNodeWithTag("home-sign-in").assertIsDisplayed()
+        compose.onNodeWithTag("home-room-code").assertIsDisplayed()
+        compose.onNodeWithText("Ler QR code").assertIsDisplayed()
+        compose.onNodeWithTag("trial-name").assertDoesNotExist()
+        compose.onNodeWithTag("home-create").performScrollTo().performClick()
+        compose.onNodeWithTag("home-trial").performScrollTo().performClick()
+        compose.onNodeWithTag("trial-name").assertIsDisplayed()
+        compose.onNodeWithText("Cancelar").performClick()
+        compose.onNodeWithTag("trial-name").assertDoesNotExist()
+        compose.onNodeWithTag("home-sign-in").assertIsDisplayed()
+    }
     @Test fun liveSignalsAdvanceTheRoomAndOldSnapshotsCannotRollItBack() {
         val now = System.currentTimeMillis()
         val initial = JSONObject().put("code", "123456").put("title", "Aula ao vivo").put("teacher", "Clara").put("status", "slide").put("index", -1).put("total", 1).put("serverNow", now).put("version", "slide:1").put("revision", 1).put("isHost", false).put("players", JSONArray()).put("me", JSONObject().put("id", uid()).put("name", "Luana").put("avatar", "🦁"))
