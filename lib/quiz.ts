@@ -58,13 +58,15 @@ export function questionIssues(q:Question):QuestionIssue[] {
 }
 export function newQuiz(): Quiz { return { id: crypto.randomUUID(), title: "Meu novo quiz", questions: [newQuestion()] }; }
 export function sampleQuiz(): Quiz {
-  return { id: crypto.randomUUID(), title: "Brasil e natureza", questions: [
-    { text: "Qual é o maior bioma brasileiro em área?", options: ["Cerrado", "Amazônia", "Caatinga", "Mata Atlântica"], correct: 1, explanation: "A Amazônia ocupa a maior área entre os biomas brasileiros.", seconds: 30 },
-    { text: "Qual prática ajuda a proteger o solo da erosão?", options: ["Deixar o solo descoberto", "Queimar a vegetação", "Manter a cobertura vegetal", "Retirar a matéria orgânica"], correct: 2, explanation: "A cobertura vegetal reduz o impacto da chuva e ajuda a manter o solo no lugar.", seconds: 30 },
-    { text: "Na fotossíntese, as plantas utilizam principalmente qual fonte de energia?", options: ["Luz solar", "Vento", "Som", "Calor do solo"], correct: 0, explanation: "As plantas usam a energia da luz para produzir compostos orgânicos.", seconds: 20 },
-    { text: "Qual destes animais é um importante polinizador?", options: ["Minhoca", "Abelha", "Peixe", "Sapo"], correct: 1, explanation: "As abelhas transportam pólen entre flores e contribuem para a reprodução de muitas plantas.", seconds: 20 },
-    { text: "Qual é a capital do estado do Pará?", options: ["Manaus", "São Luís", "Macapá", "Belém"], correct: 3, explanation: "Belém é a capital do Pará.", seconds: 20 }
-  ].map(q => ({ ...q, id: crypto.randomUUID() })) };
+  const questions: Omit<Question,"id">[] = [
+    {kind:"multiple",text:"Qual prática ajuda a proteger o solo da erosão?",options:["Deixar o solo descoberto","Queimar os restos vegetais","Manter a cobertura vegetal","Retirar a matéria orgânica"],correct:2,seconds:30,explanation:"A cobertura reduz o impacto das gotas da chuva e ajuda a manter as partículas de solo no lugar."},
+    {kind:"true_false",text:"A matéria orgânica contribui para a estrutura do solo e para a retenção de água.",options:["Verdadeiro","Falso"],correct:0,seconds:30,explanation:"Restos vegetais em decomposição alimentam organismos e ajudam a formar uma estrutura que armazena água e permite a circulação de ar."},
+    {kind:"image",text:"Qual sinal de degradação aparece nesta fotografia?",image:"/examples/erosao.jpg",imageAlt:"Solo exposto com canais e sulcos abertos pelo escoamento da água.",options:["Sulcos de erosão","Cobertura de palhada","Adubação verde","Formação de um minhocário"],correct:0,seconds:45,explanation:"Os sulcos mostram caminhos por onde a água escoou e removeu partículas. Cobertura e práticas de conservação ajudam a reduzir esse processo."},
+    {kind:"scenario",text:"Após uma chuva forte, a água arrastou terra de um terreno inclinado. Qual decisão ajuda a conservar esse solo?",options:["Remover toda a vegetação","Manter o solo nu até a próxima safra","Cobrir o solo e planejar o cultivo em nível","Abrir linhas de plantio no sentido da descida"],correct:2,seconds:45,explanation:"A cobertura protege a superfície. O cultivo em nível e outras práticas adequadas à área ajudam a reduzir a velocidade do escoamento."},
+    {kind:"multiple",text:"Entre duas safras, devemos manter o solo totalmente descoberto?",options:["Sim","Não"],correct:1,seconds:30,explanation:"Manter palhada ou plantas de cobertura ajuda a proteger o solo mesmo quando a cultura principal não está no campo."},
+    {kind:"multiple",text:"Qual destas superfícies tende a receber menor impacto direto das gotas da chuva?",options:["Solo protegido por palhada","Solo exposto e erodido"],optionImages:["/examples/palhada.jpg","/examples/erosao.jpg"],correct:0,seconds:45,explanation:"A palhada intercepta as gotas antes que atinjam diretamente o solo. Observe as imagens e compare a proteção de cada superfície."}
+  ];
+  return {id:crypto.randomUUID(),title:"Solo vivo, turma em ação",subject:"Agroecologia",topic:"Conservação do solo",mode:"speed",untimed:false,questions:questions.map(q=>({...q,id:crypto.randomUUID()}))};
 }
 export function quizError(quiz: Quiz): string | null {
   if (!quiz || typeof quiz.title !== "string" || !Array.isArray(quiz.questions)) return "O quiz está em um formato inválido.";
@@ -80,7 +82,8 @@ export function quizError(quiz: Quiz): string | null {
   }
   return null;
 }
-export function mediaPath(value: unknown): value is string { return typeof value === "string" && /^\/api\/media\/[a-f0-9-]{36}$/.test(value); }
+export const EXAMPLE_IMAGES=["solo","palhada","erosao","minhoca","cultivo","plantio"].map(name=>`/examples/${name}.jpg`);
+export function mediaPath(value: unknown): value is string { return typeof value === "string" && (/^\/api\/media\/[a-f0-9-]{36}$/.test(value)||EXAMPLE_IMAGES.includes(value)); }
 export const MAX_POINTS = 1000;
 export function scoreFor(correct: boolean, elapsedMs: number, durationMs: number, firstCorrect = false) {
   if (!correct) return 0;

@@ -5,6 +5,7 @@ import {deletePresentation,listPresentations,readPresentation,savePresentation} 
 import {approveNative,listNative,nativeInfo,nativeStatus,revokeNative,startNative} from "@/lib/native-server";
 import {androidSigning} from "@/lib/android-signing";
 import {readPresentationImport} from "@/lib/presentation-import-server";
+import {readExamples} from "@/lib/examples-server";
 export const dynamic = "force-dynamic";
 async function handle(request: Request) {
   try {
@@ -20,6 +21,7 @@ async function handle(request: Request) {
       if(method==="DELETE"&&path[1]==="devices"&&path.length===3)return await revokeNative(request,path[2]);
     }
     if (method === "GET" && path.join("/") === "ping") return json({serverNow:Date.now()});
+    if (method === "GET" && path.join("/") === "examples") return readExamples();
     if (method === "GET" && path.join("/") === "app-manifest") return await appManifest(request);
     if (method === "GET" && path[0] === "dashboard" && path.length === 1) return await dashboard(request);
     if (path[0] === "presentations") {

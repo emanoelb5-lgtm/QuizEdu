@@ -147,3 +147,6 @@
 .student-room-shell .player-live{padding:8px 18px 24px}
 .student-room-waiting{padding:36px 18px}
 }
+
+.example-photo{width:132px;height:90px;object-fit:cover;border-radius:14px;flex-shrink:0}
+@media(max-width:600px){.example-photo{width:100%;height:auto;max-height:180px;aspect-ratio:16/9}.example-card:has(.example-photo){align-items:stretch;flex-direction:column}}
