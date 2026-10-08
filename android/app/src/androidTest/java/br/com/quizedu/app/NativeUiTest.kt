@@ -83,7 +83,7 @@ class NativeUiTest {
         }
     }
     @Test fun studentEntersWithNameAndAvatarWithoutAnAccount() {
-        compose.onNodeWithText("Código de 6 números").performTextInput("123456")
+        compose.onNodeWithTag("home-room-code").performTextInput("123456")
         compose.onNodeWithText("Entrar na sala").performClick()
         compose.waitUntil(10000) { vm.room != null }
         compose.onNodeWithText("Entrar na sala").assertIsDisplayed()
@@ -203,9 +203,9 @@ class NativeUiTest {
         compose.onNodeWithText("Próximo").assertIsDisplayed()
     }
     @Test fun teacherCreatesAndEditsARealNativeQuizSlide() {
-        compose.onNodeWithText("Sou professor").performClick()
+        compose.onNodeWithText("Minhas atividades").performClick()
         compose.waitUntil(10000) { !vm.busy && vm.teacher }
-        compose.onNodeWithText("Nova aula").performClick()
+        compose.onNodeWithText("Nova apresentação").performClick()
         compose.onNodeWithText("Salvar aula").assertIsDisplayed()
         compose.onNodeWithText("Adicionar slide").performScrollTo().performClick()
         compose.onNodeWithTag("slide-layouts").performScrollToNode(hasText("Quiz"))
