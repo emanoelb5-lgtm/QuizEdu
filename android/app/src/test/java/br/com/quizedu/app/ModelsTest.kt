@@ -92,6 +92,8 @@ class ModelsTest {
         assertTrue(one.matches(Regex("[a-f0-9]{64}"))); assertNotEquals(one, two)
         assertEquals("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", sha256("abc"))
         assertNotNull(mediaUrl("/api/media/" + uid())); assertNull(mediaUrl("https://evil.test/image.jpg")); assertNull(mediaUrl("/api/media/../../private"))
+        assertEquals(BuildConfig.SITE_URL + "/examples/palhada.jpg", mediaUrl("/examples/palhada.jpg"))
+        for (path in listOf("/examples/anything.jpg", "/examples/../../private", "/examples/solo.jpg?redirect=1")) assertNull(mediaUrl(path))
         assertEquals("dQw4w9WgXcQ", videoId("https://www.youtube.com/watch?v=dQw4w9WgXcQ")); assertNull(videoId("https://evil.test/watch?v=dQw4w9WgXcQ"))
     }
 }

@@ -172,6 +172,26 @@ class QuizViewModel(application: Application, val repository: QuizRepository) : 
         val draft = LessonDraft(newDeck(), 0, true); repository.store(draft)
         editor = draft; slideIndex = 0; selectedElement = null; screen = AppScreen.Editor
     }
+    fun useExample(presentation: Boolean) = perform {
+        if (profile == null) return@perform
+        val data = try {
+            repository.teacherApi.request("/api/examples").also { repository.preferences.edit().putString("examples_cache", it.toString()).apply() }
+        } catch (e: IOException) {
+            val cached = repository.preferences.getString("examples_cache", null) ?: throw e
+            JSONObject(cached)
+        }
+        val source = if (presentation) data.getJSONObject("presentation") else {
+            val quiz = data.getJSONObject("quiz")
+            newDeck().put("title", quiz.str("title")).put("subject", quiz.str("subject")).put("topic", quiz.str("topic"))
+                .put("mode", quiz.str("mode", "speed")).put("untimed", quiz.optBoolean("untimed"))
+                .put("slides", jsonArray(quiz.arr("questions").objects().map { q -> newSlide("question", "campo").put("title", q.str("text").take(60)).put("question", q.copy()) })).put("theme", "campo")
+        }
+        val deck = duplicateDeck(source).put("title", source.str("title"))
+        validateLesson(deck)?.let { throw IOException(it) }
+        clearHistory()
+        editor = LessonDraft(deck, 0, true); repository.store(editor!!)
+        slideIndex = 0; selectedElement = null; screen = AppScreen.Editor
+    }
     fun editLesson(id: String) = perform {
         clearHistory()
         editor = repository.load(id); slideIndex = 0; selectedElement = null; screen = AppScreen.Editor

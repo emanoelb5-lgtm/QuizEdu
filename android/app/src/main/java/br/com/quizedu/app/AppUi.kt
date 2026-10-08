@@ -178,6 +178,12 @@ fun openWeb(context: Context, path: String) {
                 }
             } }
             item { ImportPresentationButton(vm, Modifier.fillMaxWidth()) }
+            item { OutlinedCard { Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text("Solo vivo, turma em ação", fontWeight = FontWeight.Bold, fontSize = 20.sp)
+                Text("Experimente uma aula ilustrada ou um quiz com perguntas variadas. Depois adapte à sua turma.", color = EduMuted)
+                OutlinedButton(onClick = { vm.useExample(true) }, enabled = !vm.busy, modifier = Modifier.fillMaxWidth().testTag("presentation-example")) { Icon(Icons.Default.AutoAwesomeMotion, null); Spacer(Modifier.width(8.dp)); Text("Usar apresentação de exemplo") }
+                OutlinedButton(onClick = { vm.useExample(false) }, enabled = !vm.busy, modifier = Modifier.fillMaxWidth().testTag("quiz-example")) { Icon(Icons.Default.Quiz, null); Spacer(Modifier.width(8.dp)); Text("Usar quiz de exemplo") }
+            } } }
             if (vm.libraryOffline) item { InfoCard("Modo offline: edite os rascunhos e salve na conta quando a conexão voltar. As salas ao vivo precisam de internet.", true) }
             if (vm.profile?.optBoolean("permanent") != true) item { TextButton(onClick = vm::startPairing) { Icon(Icons.Default.CloudDone, null); Spacer(Modifier.width(8.dp)); Text("Vincular para guardar minhas aulas") } }
             if (vm.activeRooms.isNotEmpty()) {

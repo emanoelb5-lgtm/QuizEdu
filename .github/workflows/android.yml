@@ -75,11 +75,11 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          tag="android-v1.2.1-build.${{ github.run_number }}"
+          tag="android-v1.2.2-build.${{ github.run_number }}"
           if gh release view "$tag" >/dev/null 2>&1; then
-            gh release upload "$tag" release-assets/QuizEdu-Android-1.2.1.apk release-assets/SHA256SUMS.txt --clobber
+            gh release upload "$tag" release-assets/QuizEdu-Android-1.2.2.apk release-assets/SHA256SUMS.txt --clobber
           else
-            gh release create "$tag" release-assets/QuizEdu-Android-1.2.1.apk release-assets/SHA256SUMS.txt --target "$GITHUB_SHA" --title 'QuizEdu Android 1.2.1' --notes-file android/RELEASE_NOTES.md --latest
+            gh release create "$tag" release-assets/QuizEdu-Android-1.2.2.apk release-assets/SHA256SUMS.txt --target "$GITHUB_SHA" --title 'QuizEdu Android 1.2.2' --notes-file android/RELEASE_NOTES.md --latest
           fi
       - name: Guardar resultados dos testes
         if: always()

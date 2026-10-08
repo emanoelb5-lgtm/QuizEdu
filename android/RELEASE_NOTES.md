@@ -1,10 +1,10 @@
-QuizEdu Android 1.2.1 — tela do aluno mais simples.
+QuizEdu Android 1.2.2 — exemplos de aula e quiz ilustrados.
 
-- Barra superior com Sair e confirmação antes de deixar a sala. O botão Voltar do Android também pede confirmação.
-- Pontuação atual e posição ficam num resumo compacto, sempre visível durante o quiz.
-- Conteúdo concentrado na etapa atual: espera, slide, pergunta ou resultado. O progresso e o cronômetro continuam disponíveis.
-- Removidos os avisos repetidos, as regras e a lista da turma durante a atividade do aluno.
-- A confirmação de resposta, a resposta correta e a explicação continuam na tela.
-- Mantidos os 24 avatares ilustrados, o carrossel e os controles fixos do professor.
+- Apresentação de exemplo com fotografias reais e seis perguntas intercaladas.
+- Quiz de exemplo com todos os modelos: múltipla escolha, verdadeiro ou falso, imagem, situação prática, sim ou não e alternativas ilustradas.
+- Exemplos compartilhados com o site. Novas versões do conteúdo chegam pelo sistema, sem exigir outro APK.
+- Cada uso abre uma cópia independente, pronta para editar, salvar e apresentar. Exemplos já carregados podem ser retomados para edição sem conexão.
+- Fotografias dos exemplos disponíveis no editor, nos slides e nas perguntas.
+- Mantida a tela limpa do aluno com pontuação, posição, cronômetro e saída confirmada.
 
 Instale sobre a versão atual: mesmo pacote e certificado. Android 7 ou superior.

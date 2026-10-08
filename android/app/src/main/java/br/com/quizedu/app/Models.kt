@@ -31,7 +31,7 @@ fun roomCode(value: String, site: String = BuildConfig.SITE_URL): String? {
         Regex("^/participar/([0-9]{6})/?$").matchEntire(uri.path)?.groupValues?.get(1)
     } catch (_: Exception) { null }
 }
-fun mediaUrl(path: String): String? = if (path.matches(Regex("/api/media/[a-f0-9-]{36}"))) BuildConfig.SITE_URL + path else null
+fun mediaUrl(path: String): String? = if (path.matches(Regex("/api/media/[a-f0-9-]{36}")) || path.matches(Regex("/examples/(solo|palhada|erosao|minhoca|cultivo|plantio)\\.jpg"))) BuildConfig.SITE_URL + path else null
 fun videoId(value: String): String? {
     if (value.matches(Regex("[\\w-]{11}"))) return value
     return try {

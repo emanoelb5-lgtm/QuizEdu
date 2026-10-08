@@ -206,6 +206,34 @@ class NativeUiTest {
         assertEquals("Quanto é 2 + 2?", stored!!.deck.arr("slides").getJSONObject(1).getJSONObject("question").str("text"))
         assertTrue(stored.dirty)
     }
+    @Test fun teacherLoadsSharedExamplesAsIndependentEditableDraftsAndCanReuseCachedContent() {
+        compose.runOnIdle { vm.mode(true) }
+        compose.waitUntil(10000) { !vm.busy && vm.teacher }
+        compose.onNodeWithTag("presentation-example").performScrollTo().performClick()
+        compose.waitUntil(10000) { vm.screen == AppScreen.Editor && !vm.busy }
+        val firstId = vm.editor!!.id
+        val sourceQuestion = vm.editor!!.deck.arr("slides").getJSONObject(1).getJSONObject("question")
+        assertEquals(7, vm.editor!!.deck.arr("slides").length())
+        assertEquals("/examples/solo.jpg", vm.editor!!.deck.arr("slides").getJSONObject(0).getJSONObject("background").str("image"))
+        assertEquals(6, vm.editor!!.deck.arr("slides").objects().count { it.str("kind") == "question" })
+        compose.runOnIdle { vm.selectSlide(1); vm.changeSlide { it.getJSONObject("question").put("text", "Pergunta adaptada para a turma") }; vm.closeEditor() }
+        compose.waitUntil(10000) { vm.screen == AppScreen.Home && !vm.busy }
+        client.examplesUnavailable = true
+        compose.onNodeWithTag("quiz-example").performScrollTo().performClick()
+        compose.waitUntil(10000) { vm.screen == AppScreen.Editor && !vm.busy }
+        assertNotEquals(firstId, vm.editor!!.id)
+        assertEquals(6, vm.editor!!.deck.arr("slides").length())
+        val questions = vm.editor!!.deck.arr("slides").objects().map { it.getJSONObject("question") }
+        assertTrue(questions.any { it.str("kind") == "true_false" })
+        assertTrue(questions.any { it.str("kind") == "image" && it.str("image") == "/examples/erosao.jpg" })
+        assertTrue(questions.any { it.str("kind") == "scenario" })
+        assertTrue(questions.any { it.arr("options").strings() == listOf("Sim", "Não") })
+        assertTrue(questions.any { it.arr("optionImages").length() == 2 })
+        assertNotEquals(sourceQuestion.str("id"), questions[0].str("id"))
+        assertEquals("Pergunta adaptada para a turma", repository.local(firstId)!!.deck.arr("slides").getJSONObject(1).getJSONObject("question").str("text"))
+        assertNotEquals("Pergunta adaptada para a turma", questions[0].str("text"))
+        assertNull(validateLesson(vm.editor!!.deck))
+    }
     @Test fun androidKeystoreCredentialsSurviveRepositoryRecreation() {
         val token = randomToken()
         repository.secrets.set("test_session", token)
@@ -214,6 +242,7 @@ class NativeUiTest {
         assertEquals("", QuizRepository(app).secrets.get("test_session"))
     }
     private class FixtureClient : QuizClient {
+        @Volatile var examplesUnavailable = false
         private var participant: JSONObject? = null
         @Volatile private var liveRoom: JSONObject? = null
         @Volatile var roomRequests = 0
@@ -230,6 +259,16 @@ class NativeUiTest {
         override fun clear() {}
         override suspend fun image(bytes: ByteArray): JSONObject = throw IllegalStateException("No network uploads in UI tests.")
         override suspend fun request(path: String, data: JSONObject?, method: String): JSONObject {
+            if (path == "/api/examples") {
+                if (examplesUnavailable) throw java.io.IOException("Offline example fixture")
+                val questions = JSONArray((0..5).map { index -> JSONObject().put("id", uid()).put("kind", listOf("multiple", "true_false", "image", "scenario", "multiple", "multiple")[index])
+                    .put("text", "Pergunta de exemplo ${index + 1}").put("options", JSONArray(if (index == 1) listOf("Verdadeiro", "Falso") else if (index == 4) listOf("Sim", "Não") else listOf("Opção A", "Opção B"))).put("correct", 0).put("seconds", 30).put("explanation", "Explicação da resposta.")
+                    .also { if (index == 2) it.put("image", "/examples/erosao.jpg"); if (index == 5) it.put("optionImages", JSONArray(listOf("/examples/palhada.jpg", "/examples/erosao.jpg"))) } })
+                val cover = newSlide("cover", "campo").put("background", JSONObject().put("color", "#123b2c").put("image", "/examples/solo.jpg"))
+                val deck = newDeck().put("title", "Solo vivo, turma em ação").put("slides", JSONArray().put(cover))
+                questions.objects().forEach { deck.arr("slides").put(newSlide("question", "campo").put("question", it.copy())) }
+                return JSONObject().put("presentation", deck).put("quiz", JSONObject().put("title", deck.str("title")).put("questions", questions))
+            }
             if (path == "/api/ping") return JSONObject().put("serverNow", System.currentTimeMillis())
             if (path == "/api/dashboard") return JSONObject().put("profile", JSONObject().put("id", "11111111-1111-4111-8111-111111111111").put("name", "Professora Clara").put("permanent", true)).put("quizzes", JSONArray()).put("rooms", JSONArray())
             if (path == "/api/presentations") return JSONObject().put("presentations", JSONArray())
