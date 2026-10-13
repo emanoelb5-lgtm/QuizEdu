@@ -319,6 +319,54 @@ class NativeUiTest {
         assertNotEquals("Pergunta adaptada para a turma", questions[0].str("text"))
         assertNull(validateLesson(vm.editor!!.deck))
     }
+    @Test fun studentConfirmsMultiplePollChoicesAndSeesCountsOnlyAfterReveal() {
+        val initial = studentQuestion().put("index", 0).put("startsAt", System.currentTimeMillis() - 1000).put("endsAt", JSONObject.NULL).put("version", "poll:1").put("revision", 1)
+        initial.put("question", JSONObject().put("kind", "poll").put("text", "Como você prefere aprender?").put("allowMultiple", true).put("options", JSONArray(listOf("Texto", "Vídeo", "Debate"))))
+        initial.put("poll", JSONObject().put("revealed", false).put("allowMultiple", true).put("respondents", 0).put("myChoices", JSONArray()))
+        client.loseFirstVoteAck = true; client.transition(initial)
+        compose.runOnIdle { vm.openRoom("123456", false) }
+        compose.waitUntil(10000) { vm.room?.version == "poll:1" }
+        compose.onNodeWithTag("poll-option-0").performScrollTo().performClick().assertIsSelected()
+        compose.onNodeWithTag("poll-option-1").performScrollTo().performClick().assertIsSelected()
+        compose.onNodeWithTag("poll-percent-0").assertDoesNotExist()
+        compose.onNodeWithTag("poll-confirm").performScrollTo().performClick()
+        compose.waitUntil(10000) { vm.room?.poll?.arr("myChoices")?.length() == 2 && !vm.busy }
+        assertEquals(1, client.voteRequests); assertNull(vm.pollPending)
+        compose.onNodeWithTag("poll-confirmed").performScrollTo().assertIsDisplayed()
+        compose.onNodeWithTag("poll-percent-0").assertDoesNotExist()
+        val results = vm.room!!.raw.copy().put("status", "results").put("revision", 3).put("version", "poll:3")
+        results.getJSONObject("poll").put("revealed", true).put("respondents", 2).put("counts", JSONArray(listOf(2, 1, 0))).put("percentages", JSONArray(listOf(100, 50, 0)))
+        client.transition(results)
+        compose.waitUntil(1500) { vm.room?.version == "poll:3" }
+        compose.onNodeWithTag("poll-percent-0").performScrollTo().assertTextEquals("100%")
+        compose.onNodeWithTag("poll-percent-1").performScrollTo().assertTextEquals("50%")
+        compose.onNodeWithText("Resposta certa!").assertDoesNotExist()
+        compose.onNodeWithTag("student-ranking").assertIsDisplayed()
+        assertEquals(1500, vm.room!!.me!!.optInt("score"))
+    }
+    @Test fun teacherCanInsertAnEightOptionPollAndKeepItAsAnIndependentDraft() {
+        compose.runOnIdle { vm.mode(true) }
+        compose.waitUntil(10000) { !vm.busy }
+        compose.runOnIdle { vm.newLesson() }
+        compose.onNodeWithTag("presentation-editor").performScrollToNode(hasTestTag("add-poll"))
+        compose.onNodeWithTag("add-poll").assertIsDisplayed().performClick()
+        compose.onNodeWithTag("presentation-editor").performScrollToNode(hasTestTag("poll-prompt"))
+        compose.onNodeWithTag("poll-prompt").performTextInput("Qual projeto vamos desenvolver?")
+        androidx.test.espresso.Espresso.closeSoftKeyboard()
+        compose.onNodeWithTag("poll-multiple").performScrollTo().performClick()
+        repeat(4) {
+            compose.onNodeWithTag("presentation-editor").performScrollToNode(hasTestTag("poll-add-option"))
+            compose.onNodeWithTag("poll-add-option").performClick()
+        }
+        compose.onNodeWithTag("poll-add-option").assertIsNotEnabled()
+        compose.runOnIdle {
+            val q = vm.slide!!.getJSONObject("question")
+            assertEquals("poll", q.str("kind")); assertEquals(8, q.arr("options").length()); assertTrue(q.optBoolean("allowMultiple")); assertEquals(-1, q.optInt("correct"))
+            vm.changeSlide { it.getJSONObject("question").put("options", JSONArray((1..8).map { i -> "Tema $i" })) }
+            assertNull(validateLesson(vm.editor!!.deck))
+            assertTrue(repository.local(vm.editor!!.id)!!.deck.toString().contains("Qual projeto vamos desenvolver?"))
+        }
+    }
     @Test fun androidKeystoreCredentialsSurviveRepositoryRecreation() {
         val token = randomToken()
         repository.secrets.set("test_session", token)
@@ -327,6 +375,8 @@ class NativeUiTest {
         assertEquals("", QuizRepository(app).secrets.get("test_session"))
     }
     private class FixtureClient : QuizClient {
+        @Volatile var voteRequests = 0
+        @Volatile var loseFirstVoteAck = false
         @Volatile var cloudRequests = 0
         @Volatile var loseFirstWordAck = false
         private val wordWrites = mutableSetOf<String>()
@@ -352,6 +402,17 @@ class NativeUiTest {
             if (path == "/api/lessons") return JSONObject().put("lessons", JSONArray().put(readyMetadata())).put("subjects", JSONArray().put(JSONObject().put("id", "portugues").put("name", "Português"))).put("grades", JSONArray().put(JSONObject().put("id", "9").put("name", "9º ano")))
             if (path == "/api/lessons/artigo-opiniao-9-ano-aula-1") return JSONObject().put("lesson", readyMetadata()).put("presentation", readySource.copy())
             if (path == "/api/presentations" && data != null) return JSONObject().put("presentation", JSONObject().put("deck", data.getJSONObject("deck").copy()).put("revision", 1).put("writeId", data.str("writeId")))
+            if (path.endsWith("/vote")) {
+                voteRequests++
+                val next = liveRoom!!.copy()
+                if (next.getJSONObject("poll").arr("myChoices").length() == 0) {
+                    next.getJSONObject("poll").put("myChoices", data!!.getJSONArray("choices")).put("respondents", 1)
+                    next.getJSONObject("me").put("answered", true)
+                    next.put("revision", 2).put("version", "poll:2"); transition(next)
+                }
+                if (loseFirstVoteAck) { loseFirstVoteAck = false; throw java.io.IOException("Lost vote acknowledgement") }
+                return JSONObject().put("accepted", true)
+            }
             if (path.endsWith("/word")) {
                 cloudRequests++
                 val payload = data!!

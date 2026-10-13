@@ -47,6 +47,8 @@ class QuizViewModel(application: Application, val repository: QuizRepository, pr
     var cloudPending by mutableStateOf<JSONObject?>(try { repository.preferences.getString("cloud_pending", null)?.let(::JSONObject) } catch (_: Exception) { null }); private set
     var cloudNotice by mutableStateOf<String?>(null); private set
     var cloudNoticeError by mutableStateOf(false); private set
+    var pollPending by mutableStateOf<JSONObject?>(try { repository.preferences.getString("poll_pending", null)?.let(::JSONObject) } catch (_: Exception) { null }); private set
+    var pollNotice by mutableStateOf<String?>(null); private set
     var editor by mutableStateOf<LessonDraft?>(null); private set
     var slideIndex by mutableStateOf(0); private set
     var selectedElement by mutableStateOf<String?>(null); private set
@@ -393,11 +395,12 @@ class QuizViewModel(application: Application, val repository: QuizRepository, pr
         if (revision > 0) repository.teacherApi.request("/api/presentations/$id", JSONObject().put("revision", revision), "DELETE")
         repository.removeLocal(id); loadLibrary(); notify("Aula excluída.")
     }
-    fun uploadImage(uri: Uri, elementId: String? = null, question: Boolean = false, background: Boolean = false) = perform {
+    fun uploadImage(uri: Uri, elementId: String? = null, question: Boolean = false, background: Boolean = false, optionIndex: Int? = null) = perform {
         val path = repository.upload(uri)
         // Changes are applied after the upload without discarding the current deck.
         busy = false
         when {
+            optionIndex != null -> changeSlide { s -> val q = s.getJSONObject("question"); val photos = q.optJSONArray("optionImages") ?: JSONArray(List(q.arr("options").length()) { "" }); photos.put(optionIndex, path); q.put("optionImages", photos) }
             background -> changeSlide { it.getJSONObject("background").put("image", path) }
             question -> changeSlide { it.getJSONObject("question").put("image", path).put("imageAlt", "Imagem da pergunta") }
             elementId != null -> changeElement(elementId) { it.put("src", path) }
@@ -406,7 +409,7 @@ class QuizViewModel(application: Application, val repository: QuizRepository, pr
     }
     fun openRoom(code: String, asTeacher: Boolean) {
         roomGeneration++; liveClock = null
-        fullscreen = false; cloudNotice = null
+        fullscreen = false; cloudNotice = null; pollNotice = null
         currentCode = code; roomTeacher = asTeacher; room = null; screen = AppScreen.Room; roomError = null; connected = true; lastHeartbeat = 0; lastFullRoom = 0
         repository.preferences.edit().putString(if (asTeacher) "teacher_room" else "student_room", code).apply()
     }
@@ -429,6 +432,9 @@ class QuizViewModel(application: Application, val repository: QuizRepository, pr
             } else RoomSnapshot(raw)
             if (latest != null && olderRoom(next, latest)) return true
             room = next
+            pollPending?.takeIf { it.str("room") == next.code && it.str("player") == next.me?.str("id") }?.let { pending ->
+                if (pending.optInt("index", -1) != next.index || next.poll?.arr("myChoices")?.length()?.let { it > 0 } == true || next.status != "question") clearPendingPoll()
+            }
             if (liveClock == null) liveClock = LiveClock.sample(raw.optLong("serverNow"), sent, received)
             if (!raw.optBoolean("pulse")) lastFullRoom = SystemClock.elapsedRealtime()
             receivedAt = SystemClock.elapsedRealtime(); connected = true; roomError = null
@@ -505,6 +511,27 @@ class QuizViewModel(application: Application, val repository: QuizRepository, pr
     fun answer(option: Int) = perform {
         val snapshot = room ?: return@perform
         try { repository.studentApi.request("/api/rooms/${snapshot.code}/answer", JSONObject().put("index", snapshot.index).put("option", option)) }
+        finally { refreshRoom(force = true) }
+    }
+    private fun clearPendingPoll() { pollPending = null; repository.preferences.edit().remove("poll_pending").apply() }
+    fun votePoll(choices: List<Int>) = perform {
+        val state = room ?: return@perform
+        val question = state.question ?: return@perform
+        val player = state.me?.str("id") ?: return@perform
+        if (state.poll == null) return@perform
+        val previous = pollPending?.takeIf { it.str("room") == state.code && it.str("player") == player && it.optInt("index", -1) == state.index }
+        val selected = if (previous != null) previous.arr("choices").let { a -> (0 until a.length()).map { a.optInt(it, -1) } } else choices
+        val sorted = try { validatedPollChoices(question, selected) } catch (e: IllegalArgumentException) { pollNotice = e.message; return@perform }
+        if (previous == null && (state.status != "question" || state.poll!!.arr("myChoices").length() > 0)) return@perform
+        val pending = previous ?: JSONObject().put("room", state.code).put("player", player).put("index", state.index).put("choices", JSONArray(sorted))
+        pollPending = pending; repository.preferences.edit().putString("poll_pending", pending.toString()).commit()
+        try {
+            repository.studentApi.request("/api/rooms/${state.code}/vote", pending)
+            clearPendingPoll(); pollNotice = "Voto confirmado!"
+        } catch (e: ApiError) {
+            if (e.status != 429 && e.status < 500) clearPendingPoll()
+            pollNotice = e.message
+        } catch (_: IOException) { pollNotice = "Ainda não foi possível confirmar. Tente novamente: o mesmo voto não será contado duas vezes." }
         finally { refreshRoom(force = true) }
     }
     fun dismissPendingWord() { if (!busy) { cloudPending = null; repository.preferences.edit().remove("cloud_pending").apply(); cloudNotice = null } }

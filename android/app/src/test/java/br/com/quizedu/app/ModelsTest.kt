@@ -5,6 +5,31 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 class ModelsTest {
+    @Test fun pollsAcceptPhotosAndEightOptionsWithoutACorrectAnswerAndRejectInvalidVotes() {
+        val slide = newSlide("poll")
+        val q = slide.getJSONObject("question").put("text", "O que você prefere?").put("options", JSONArray(listOf("", ""))).put("optionImages", JSONArray(listOf("/examples/solo.jpg", "/examples/erosao.jpg")))
+        val deck = newDeck().put("slides", JSONArray().put(slide))
+        assertNull(validateLesson(deck))
+        assertEquals(-1, q.optInt("correct"))
+        assertEquals(listOf(1), validatedPollChoices(q, listOf(1)))
+        assertThrows(IllegalArgumentException::class.java) { validatedPollChoices(q, listOf(0, 1)) }
+        q.put("allowMultiple", true)
+        assertEquals(listOf(0, 1), validatedPollChoices(q, listOf(1, 0)))
+        for (choices in listOf(emptyList(), listOf(0, 0), listOf(-1), listOf(2))) assertThrows(IllegalArgumentException::class.java) { validatedPollChoices(q, choices) }
+        q.put("options", JSONArray((1..8).map { "Opção $it" })).remove("optionImages")
+        assertNull(validateLesson(deck))
+        val copy = duplicateSlide(slide)
+        assertTrue(copy.getJSONObject("question").optBoolean("allowMultiple"))
+        assertNotEquals(q.str("id"), copy.getJSONObject("question").str("id"))
+        q.arr("options").put("Nona opção"); assertNotNull(validateLesson(deck))
+    }
+    @Test fun pollsDoNotTriggerRankingAfterRevealOrFollowingContent() {
+        val sequence = RankingSpotlightSequence()
+        val raw = JSONObject().put("code", "123456").put("status", "results").put("index", 0).put("lastRoundIsPoll", true).put("presentation", JSONObject())
+        assertEquals(0L, sequence.observe(RoomSnapshot(raw), 100))
+        assertEquals(0L, sequence.observe(RoomSnapshot(raw.copy().put("status", "slide")), 200))
+        assertEquals(6300L, sequence.observe(RoomSnapshot(raw.copy().put("index", 1).put("lastRoundIsPoll", false)), 300))
+    }
     @Test fun cloudsPreserveAccentsAndValidateTheirPromptAcrossCopies() {
         assertEquals(cloudWordKey("  OPINIÃO  "), cloudWordKey("opinia\u0303o"))
         assertNotEquals(cloudWordKey("pôr"), cloudWordKey("por"))

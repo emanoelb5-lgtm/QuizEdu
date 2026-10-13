@@ -29,7 +29,8 @@ import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.math.roundToInt
 
-private val layouts = listOf("question" to "Quiz", "wordcloud" to "Nuvem de palavras", "true_false" to "Verdadeiro ou falso", "cover" to "Capa", "title" to "Título e texto", "columns" to "Duas colunas", "image" to "Texto e imagem", "quote" to "Citação", "section" to "Seção", "table" to "Tabela", "chart" to "Gráfico", "closing" to "Encerramento", "blank" to "Em branco")
+private data class ImageTarget(val elementId: String?, val question: Boolean, val background: Boolean, val optionIndex: Int?)
+private val layouts = listOf("poll" to "Enquete", "question" to "Quiz", "wordcloud" to "Nuvem de palavras", "true_false" to "Verdadeiro ou falso", "cover" to "Capa", "title" to "Título e texto", "columns" to "Duas colunas", "image" to "Texto e imagem", "quote" to "Citação", "section" to "Seção", "table" to "Tabela", "chart" to "Gráfico", "closing" to "Encerramento", "blank" to "Em branco")
 @Composable fun EditorScreen(vm: QuizViewModel) {
     val draft = vm.editor ?: return
     val slide = vm.slide ?: return
@@ -40,18 +41,18 @@ private val layouts = listOf("question" to "Quiz", "wordcloud" to "Nuvem de pala
     var slideMenu by remember { mutableStateOf(false) }
     var deleteConfirm by remember { mutableStateOf(false) }
     var cloudConfirm by remember { mutableStateOf(false) }
-    var uploadTarget by remember { mutableStateOf<Triple<String?, Boolean, Boolean>?>(null) }
+    var uploadTarget by remember { mutableStateOf<ImageTarget?>(null) }
     val photo = rememberLauncherForActivityResult(ActivityResultContracts.PickVisualMedia()) { uri ->
         val target = uploadTarget
-        if (uri != null && target != null) vm.uploadImage(uri, target.first, target.second, target.third)
+        if (uri != null && target != null) vm.uploadImage(uri, target.elementId, target.question, target.background, target.optionIndex)
         uploadTarget = null
     }
     val export = rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("application/json")) { uri ->
         if (uri != null) try { context.contentResolver.openOutputStream(uri)?.use { it.write(draft.deck.toString(2).toByteArray()) }; vm.notify("Cópia da aula exportada.") }
         catch (_: Exception) { vm.notify("Não foi possível exportar esta cópia.") }
     }
-    fun chooseImage(id: String? = null, question: Boolean = false, background: Boolean = false) {
-        uploadTarget = Triple(id, question, background)
+    fun chooseImage(id: String? = null, question: Boolean = false, background: Boolean = false, optionIndex: Int? = null) {
+        uploadTarget = ImageTarget(id, question, background, optionIndex)
         photo.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
     LazyColumn(Modifier.fillMaxSize().testTag("presentation-editor"), contentPadding = PaddingValues(bottom = 28.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -78,6 +79,7 @@ private val layouts = listOf("question" to "Quiz", "wordcloud" to "Nuvem de pala
             }
             ImportPresentationButton(vm, Modifier.fillMaxWidth())
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                item { FilledTonalButton(onClick = { vm.addSlide("poll") }, enabled = !vm.busy, modifier = Modifier.testTag("add-poll")) { Icon(Icons.Default.BarChart, null); Spacer(Modifier.width(6.dp)); Text("Enquete") } }
                 item { FilledTonalButton(onClick = { vm.addSlide("question") }, enabled = !vm.busy) { Icon(Icons.Default.Quiz, null); Spacer(Modifier.width(6.dp)); Text("Pergunta interativa") } }
                 item { FilledTonalButton(onClick = { vm.addSlide("wordcloud") }, enabled = !vm.busy, modifier = Modifier.testTag("add-word-cloud")) { Icon(Icons.Default.Cloud, null); Spacer(Modifier.width(6.dp)); Text("Nuvem de palavras") } }
             }
@@ -92,7 +94,7 @@ private val layouts = listOf("question" to "Quiz", "wordcloud" to "Nuvem de pala
             itemsIndexed(draft.deck.arr("slides").objects(), key = { _, s -> s.str("id") }) { index, s ->
                 Column(Modifier.width(132.dp).border(if (index == vm.slideIndex) 2.dp else 1.dp, if (index == vm.slideIndex) EduBlue else MaterialTheme.colorScheme.outline, RoundedCornerShape(10.dp)).clickable { vm.selectSlide(index) }.padding(5.dp)) {
                     SlideView(s, Modifier.fillMaxWidth())
-                    Text("${index + 1} · ${if (s.str("kind") == "question") "Quiz" else s.str("title")}", maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(5.dp))
+                    Text("${index + 1} · ${if (s.optJSONObject("question")?.str("kind") == "poll") "Enquete" else if (s.str("kind") == "question") "Quiz" else s.str("title")}", maxLines = 1, overflow = TextOverflow.Ellipsis, style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(5.dp))
                 }
             }
             item { OutlinedButton(onClick = { addSlide = true }, enabled = !vm.busy, modifier = Modifier.height(100.dp)) { Column(horizontalAlignment = Alignment.CenterHorizontally) { Icon(Icons.Default.Add, null); Text("Adicionar slide") } } }
@@ -114,7 +116,8 @@ private val layouts = listOf("question" to "Quiz", "wordcloud" to "Nuvem de pala
             }
             if (slide.str("kind") != "question") Text("Toque para editar. Arraste para mover e use a alça para redimensionar. Selecione vários objetos pela lista abaixo.", style = MaterialTheme.typography.bodySmall, color = EduMuted)
         } }
-        if (slide.str("kind") == "question") item { EditorCard { QuestionInspector(vm, slide.getJSONObject("question"), onImage = { chooseImage(question = true) }) } }
+        if (slide.optJSONObject("question")?.str("kind") == "poll") item { EditorCard { PollInspector(vm, slide.getJSONObject("question")) { index -> chooseImage(question = index == null, optionIndex = index) } } }
+        else if (slide.str("kind") == "question") item { EditorCard { QuestionInspector(vm, slide.getJSONObject("question"), onImage = { chooseImage(question = true) }) } }
         else if (slide.str("kind") == "wordcloud") item { EditorCard {
             Text("Nuvem de palavras ao vivo", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
             OutlinedTextField(slide.getJSONObject("wordCloud").str("prompt"), { value -> vm.changeSlide { it.getJSONObject("wordCloud").put("prompt", value.take(300)) } }, label = { Text("Tema ou pergunta da nuvem") }, modifier = Modifier.fillMaxWidth().testTag("cloud-prompt"), enabled = !vm.busy, minLines = 2)

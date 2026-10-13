@@ -91,7 +91,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
                 val slide = presentation?.optJSONObject("slide")
                 if (state.wordCloud != null) item { WordCloudPanel(vm, state) }
                 else if (presentation?.optBoolean("blackout") == true) item { Surface(color = Color.Black, shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f)) { Box(contentAlignment = Alignment.Center) { Text("Atenção à explicação do professor", color = Color.White) } } }
-                else if (slide != null) item { SlideView(slide, Modifier.fillMaxWidth(), step = presentation.optInt("step")) }
+                else if (slide != null) item { SlideView(slide, Modifier.fillMaxWidth(), step = presentation.optInt("step"), pollResults = state.poll) }
                 if (presentation != null) item { Text("Slide ${presentation.optInt("index") + 1} de ${presentation.optInt("total")}${if (presentation.optBoolean("review")) " · Revisão" else ""}", color = EduMuted) }
                 if (state.question != null && presentation?.optBoolean("review") == true) item { QuestionPanel(vm, state, revealed = true) }
                 if (!vm.roomTeacher) item { InfoCard("Acompanhe a explicação. As perguntas aparecem aqui quando o professor avançar a aula.") }
@@ -99,12 +99,12 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
             "question" -> item { QuestionPanel(vm, state, revealed = false) }
             "wordcloud" -> item { WordCloudPanel(vm, state) }
             "results" -> {
-                item { Heading("Resultado da rodada", "Os pontos somam ao longo de toda a aula.") }
+                if (state.poll == null) item { Heading("Resultado da rodada", "Os pontos somam ao longo de toda a aula.") }
                 item { QuestionPanel(vm, state, revealed = true) }
             }
             "finished" -> {
-                item { Heading("Uma turma, muitas conquistas.", "Placar final da aula") }
-                item { Podium(state.players) }
+                item { Heading("Aula concluída", if (state.gradingTotal > 0 || state.players.any { it.optInt("score") > 0 }) "Placar final da aula" else "As opiniões da turma estão no relatório.") }
+                if (state.gradingTotal > 0 || state.players.any { it.optInt("score") > 0 }) item { Podium(state.players) }
                 if (!vm.roomTeacher) item { state.me?.let { InfoCard("${it.str("name")}, você fez ${points(it.optInt("score"))} pontos e ficou em ${it.optInt("position")}º lugar.") } }
             }
         }
@@ -190,7 +190,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
             } else {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     if (state.presentation != null) OutlinedButton(onClick = { vm.control("previous") }, enabled = enabled && (state.presentation!!.optInt("index") > 0 || state.presentation!!.optInt("step") > 0) && state.status in listOf("slide", "results"), modifier = Modifier.weight(1f).heightIn(min = 52.dp)) { Icon(Icons.Default.SkipPrevious, null); Text("Anterior") }
-                    Button(onClick = { vm.control(when (state.status) { "question" -> "end_round"; "wordcloud" -> "end_cloud"; else -> "next" }) }, enabled = enabled, modifier = Modifier.weight(1f).heightIn(min = 52.dp).testTag("teacher-primary-action")) { Text(when (state.status) { "question" -> "Revelar resultado"; "wordcloud" -> "Concluir nuvem"; else -> "Próximo" }); Spacer(Modifier.width(5.dp)); Icon(Icons.Default.SkipNext, null) }
+                    Button(onClick = { vm.control(when (state.status) { "question" -> "end_round"; "wordcloud" -> "end_cloud"; else -> "next" }) }, enabled = enabled, modifier = Modifier.weight(1f).heightIn(min = 52.dp).testTag("teacher-primary-action")) { Text(when (state.status) { "question" -> if (state.poll != null) "Revelar resultados" else "Revelar resultado"; "wordcloud" -> "Concluir nuvem"; else -> "Próximo" }); Spacer(Modifier.width(5.dp)); Icon(Icons.Default.SkipNext, null) }
                 }
             }
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
@@ -203,6 +203,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
 }
 @Composable internal fun QuestionPanel(vm: QuizViewModel, state: RoomSnapshot, revealed: Boolean) {
     val question = state.question ?: return
+    if (state.poll != null) { PollPanel(vm, state); return }
     var elapsed by remember { mutableStateOf(SystemClock.elapsedRealtime()) }
     LaunchedEffect(state.status, state.startsAt, revealed) { while (!revealed) { elapsed = SystemClock.elapsedRealtime(); delay(100) } }
     val now = vm.serverTime(elapsed)

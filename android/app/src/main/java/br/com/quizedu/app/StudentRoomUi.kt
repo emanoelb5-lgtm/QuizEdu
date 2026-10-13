@@ -35,18 +35,18 @@ import coil.compose.AsyncImage
                     if (state.wordCloud != null) item { WordCloudPanel(vm, state) }
                     else if (presentation?.optBoolean("blackout") == true) item {
                         Surface(color = Color.Black, modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f)) { Box(contentAlignment = Alignment.Center) { Text("Aguarde o professor continuar.", color = Color.White) } }
-                    } else if (slide != null) item { SlideView(slide, Modifier.fillMaxWidth(), step = presentation.optInt("step")) }
-                    if (state.question != null && presentation?.optBoolean("review") == true) item { StudentRoundResult(state, review = true) }
+                    } else if (slide != null) item { SlideView(slide, Modifier.fillMaxWidth(), step = presentation.optInt("step"), pollResults = state.poll) }
+                    if (state.question != null && presentation?.optBoolean("review") == true) item { StudentRoundResult(vm, state, review = true) }
                 }
                 "question" -> item { QuestionPanel(vm, state, revealed = false) }
                 "wordcloud" -> item { WordCloudPanel(vm, state) }
-                "results" -> item { StudentRoundResult(state) }
+                "results" -> item { StudentRoundResult(vm, state) }
                 "finished" -> {
                     item { Text(if (state.presentation != null) "Aula concluída" else "Quiz concluído", fontWeight = FontWeight.Bold, fontSize = 22.sp) }
-                    if (state.total > 0) {
-                        state.me?.let { me -> item { Text("${me.optInt("correctCount")} acertos de ${state.total} perguntas", color = EduMuted) } }
+                    if (state.gradingTotal > 0) {
+                        state.me?.let { me -> item { Text("${me.optInt("correctCount")} acertos de ${state.gradingTotal} perguntas", color = EduMuted) } }
                     }
-                    if (state.players.isNotEmpty()) item { Podium(state.players) }
+                    if (state.players.isNotEmpty() && (state.gradingTotal > 0 || state.players.any { it.optInt("score") > 0 })) item { Podium(state.players) }
                 }
                 "closed" -> item { Text("Sala encerrada. Obrigado por participar.", color = EduMuted) }
             }
@@ -96,8 +96,9 @@ import coil.compose.AsyncImage
     }
 }
 
-@Composable private fun StudentRoundResult(state: RoomSnapshot, review: Boolean = false) {
+@Composable private fun StudentRoundResult(vm: QuizViewModel, state: RoomSnapshot, review: Boolean = false) {
     val question = state.question ?: return
+    if (state.poll != null) { PollPanel(vm, state); return }
     val me = state.me
     val correct = state.correct
     Column(Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(14.dp)) {

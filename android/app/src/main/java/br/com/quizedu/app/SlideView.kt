@@ -98,7 +98,7 @@ fun annotatedRichText(doc: JSONObject?, scale: Float, baseSize: Float): Annotate
 }
 
 @Composable fun SlideView(slide: JSONObject, modifier: Modifier = Modifier, step: Int = Int.MAX_VALUE,
-    selected: String? = null, editable: Boolean = false, onSelect: (String?) -> Unit = {}, onDrag: (String, Float, Float) -> Unit = { _, _, _ -> }, onResize: (String, Float, Float) -> Unit = { _, _, _ -> }, selectedIds: Set<String> = emptySet(), imageOverrides: Map<String, ByteArray> = emptyMap(), fullscreen: Boolean = false) {
+    selected: String? = null, editable: Boolean = false, onSelect: (String?) -> Unit = {}, onDrag: (String, Float, Float) -> Unit = { _, _, _ -> }, onResize: (String, Float, Float) -> Unit = { _, _, _ -> }, selectedIds: Set<String> = emptySet(), imageOverrides: Map<String, ByteArray> = emptyMap(), fullscreen: Boolean = false, pollResults: JSONObject? = null) {
     val density = LocalDensity.current
     val background = slide.optJSONObject("background") ?: JSONObject()
     BoxWithConstraints(modifier.aspectRatio(16f / 9f).clip(RoundedCornerShape(if (fullscreen) 0.dp else 10.dp)).background(hexColor(background.str("color", "#ffffff")))) {
@@ -124,7 +124,8 @@ fun annotatedRichText(doc: JSONObject?, scale: Float, baseSize: Float): Annotate
         }
         if (slide.str("kind") == "question") {
             val question = slide.optJSONObject("question")
-            Column(Modifier.fillMaxSize().padding((50 * scale).dp), verticalArrangement = Arrangement.spacedBy((24 * scale).dp)) {
+            if (question?.str("kind") == "poll") PollSlidePreview(question, pollResults, scale, textScale, ink)
+            else Column(Modifier.fillMaxSize().padding((50 * scale).dp), verticalArrangement = Arrangement.spacedBy((24 * scale).dp)) {
                 Text("PERGUNTA PARA A TURMA", fontSize = (20 * textScale).sp, color = EduBlue, fontWeight = FontWeight.Bold)
                 Text(question?.str("text")?.ifBlank { "Escreva sua pergunta" } ?: "Pergunta", fontSize = (43 * textScale).sp, color = ink, fontWeight = FontWeight.Bold, lineHeight = (51 * textScale).sp, maxLines = 3)
                 question?.arr("options")?.strings()?.chunked(2)?.forEachIndexed { row, options -> Row(horizontalArrangement = Arrangement.spacedBy((18 * scale).dp)) {

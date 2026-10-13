@@ -4,7 +4,7 @@ Cliente **nativo**, sem WebView, em Kotlin e Jetpack Compose. Compartilha salas,
 
 ## Instalar
 
-Baixe `Prativerso-Android-1.4.0.apk` na [última versão do GitHub Releases](https://github.com/emanoelb5-lgtm/QuizEdu/releases/latest), abra o arquivo no Android e permita a instalação pelo navegador ou gerenciador de arquivos quando solicitado. Requer Android 7.0 ou superior. No app, entre na sala por código/QR code ou toque em **Começar** no canto superior para vincular a conta e acessar suas atividades.
+Baixe `Prativerso-Android-1.5.0.apk` na [última versão do GitHub Releases](https://github.com/emanoelb5-lgtm/QuizEdu/releases/latest), abra o arquivo no Android e permita a instalação pelo navegador ou gerenciador de arquivos quando solicitado. Requer Android 7.0 ou superior. No app, entre na sala por código/QR code ou toque em **Começar** no canto superior para vincular a conta e acessar suas atividades.
 
 ## Compilar no GitHub
 
@@ -37,3 +37,7 @@ Aulas prontas são carregadas do catálogo do site, por disciplina, ano e assunt
 Nuvens de palavras podem ser criadas no editor e usadas nas mesmas salas do site: cada palavra aceita vale 100 pontos, duplicatas recebem aviso e a identificação do envio é preservada durante falhas de conexão. O ranking fica fixo no celular do aluno. O professor pode apresentar em tela cheia, com nuvem animada e ranking de seis segundos após cada pergunta.
 
 Na tela inicial, o app consulta as publicações do repositório para avisar sobre um APK mais recente; “Verificar atualização” permite uma consulta manual. O Android exige confirmar a instalação do APK. A compilação/publicação continua automática após alterações Android em main; a versão dos arquivos e da release é lida do Gradle.
+
+## Enquetes
+
+No editor, use **Enquete** para criar uma escolha única ou várias escolhas. Cada opção aceita texto, foto ou ambos (até oito opções). Os alunos selecionam as opções e confirmam o voto. O professor usa **Revelar resultados**; a rodada também é revelada quando todos votam. As contagens e porcentagens ficam ocultas até esse momento. Cada porcentagem considera os alunos que confirmaram o voto, por isso a soma pode passar de 100% em enquetes múltiplas. Não há gabarito nem pontos. Votos confirmados permanecem nas salas e nos relatórios, com reenvio sem duplicação após perda de conexão.

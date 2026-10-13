@@ -1,3 +1,17 @@
+Prativerso Android 1.5.0 — enquetes ao vivo.
+
+- Enquetes de escolha única ou múltipla nas aulas e quizzes.
+- Até oito opções de texto, foto ou ambos, com atalho no editor.
+- Marcação e confirmação do voto no celular do aluno.
+- Contagens e porcentagens reveladas pelo professor ou após todos votarem.
+- Porcentagens entre os alunos que responderam, inclusive em escolhas múltiplas.
+- Votos sem gabarito e sem alterar a pontuação das perguntas.
+- Reenvio seguro após perda de confirmação, sem duplicar votos.
+- Resultados preservados na aula, na revisão e no relatório web.
+- Mesmas contas, pacote e assinatura: instale sobre a versão atual.
+
+Android 7 ou superior. A instalação da atualização precisa ser confirmada no Android.
+
 Prativerso Android 1.4.0 — aulas prontas e participação ao vivo.
 
 - Catálogo de aulas por disciplina, ano e assunto, com prévia e texto de apoio.

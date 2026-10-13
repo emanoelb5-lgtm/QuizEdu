@@ -104,10 +104,11 @@ fun newSlide(layout: String = "title", theme: String = "prativerso"): JSONObject
     when (layout) {
         "wordcloud" -> slide.put("kind", "wordcloud").put("title", "Nuvem de palavras")
             .put("wordCloud", JSONObject().put("prompt", "Que palavras vêm à sua mente sobre este tema?"))
-        "question", "true_false" -> {
-            slide.put("kind", "question").put("title", "Pergunta para a turma")
-            slide.put("question", JSONObject().put("id", uid()).put("kind", if (layout == "true_false") "true_false" else "multiple")
+        "question", "true_false", "poll" -> {
+            slide.put("kind", "question").put("title", if (layout == "poll") "Enquete para a turma" else "Pergunta para a turma")
+            slide.put("question", JSONObject().put("id", uid()).put("kind", if (layout == "poll") "poll" else if (layout == "true_false") "true_false" else "multiple")
                 .put("text", "").put("options", JSONArray(if (layout == "true_false") listOf("Verdadeiro", "Falso") else listOf("", "", "", ""))).put("correct", -1).put("seconds", 30).put("explanation", ""))
+            if (layout == "poll") slide.getJSONObject("question").put("allowMultiple", false)
         }
         "blank" -> Unit
         "cover", "section", "closing" -> {
@@ -159,14 +160,21 @@ fun validateLesson(deck: JSONObject): String? {
     questions.forEach { s ->
         val q = s.optJSONObject("question") ?: return "Preencha a pergunta."
         val options = q.arr("options").strings()
-        if (q.str("text").isBlank() || options.any { it.isBlank() }) return "Preencha o enunciado e as alternativas de todas as perguntas."
-        if (q.optInt("correct", -1) !in options.indices) return "Marque a resposta correta de todas as perguntas."
-        if (options.map { it.trim().lowercase().replace(Regex("\\s+"), " ") }.distinct().size != options.size) return "Use alternativas diferentes."
+        val poll = q.str("kind") == "poll"
+        if (options.size !in 2..(if (poll) 8 else 4)) return if (poll) "Use de 2 a 8 opções na enquete." else "Use de 2 a 4 alternativas."
+        if (q.str("text").isBlank() || options.indices.any { options[it].isBlank() && !(poll && mediaUrl(q.arr("optionImages").optString(it)) != null) }) return "Preencha o enunciado e as opções com texto ou foto."
+        if (!poll && q.optInt("correct", -1) !in options.indices) return "Marque a resposta correta de todas as perguntas."
+        if (options.mapIndexed { i, option -> cloudWordKey(option.replace(Regex("\\s+"), " ")) + if (poll) "\u0000" + q.arr("optionImages").optString(i) else "" }.distinct().size != options.size) return "Use alternativas diferentes."
         if (q.str("kind") == "image" && q.str("image").isBlank()) return "Adicione a imagem da pergunta."
     }
     return null
 }
 
+fun validatedPollChoices(question: JSONObject, choices: List<Int>): List<Int> {
+    require(choices.isNotEmpty() && choices.distinct().size == choices.size && choices.all { it in 0 until question.arr("options").length() }) { "Marque pelo menos uma opção válida, sem repetições." }
+    require(question.optBoolean("allowMultiple") || choices.size == 1) { "Esta enquete permite apenas uma escolha." }
+    return choices.sorted()
+}
 data class LessonDraft(val deck: JSONObject, val revision: Int, val dirty: Boolean = false, val pending: JSONObject? = null) {
     val id: String get() = deck.str("id")
     fun toJson(): JSONObject = JSONObject().put("deck", deck).put("revision", revision).put("dirty", dirty).put("pending", pending ?: JSONObject.NULL)
@@ -184,6 +192,8 @@ data class RoomSnapshot(val raw: JSONObject) {
     val question get() = raw.optJSONObject("question")
     val presentation get() = raw.optJSONObject("presentation")
     val wordCloud get() = raw.optJSONObject("wordCloud")
+    val poll get() = raw.optJSONObject("poll")
+    val gradingTotal get() = raw.optInt("gradingTotal", total)
     val players get() = raw.arr("players").objects()
     val serverNow get() = raw.optLong("serverNow")
     val startsAt get() = raw.optLong("startsAt")
@@ -201,6 +211,7 @@ class RankingSpotlightSequence {
     var endsAt = 0L; private set
     fun observe(state: RoomSnapshot, now: Long): Long {
         if (room != state.code) { room = state.code; completed = -1; endsAt = 0 }
+        if (state.raw.optBoolean("lastRoundIsPoll")) { completed = maxOf(completed, state.index); endsAt = 0; return endsAt }
         val presentation = state.presentation
         if (presentation == null || presentation.optBoolean("blackout") || presentation.optBoolean("review") || state.status in listOf("lobby", "question", "wordcloud", "finished", "closed")) {
             endsAt = 0

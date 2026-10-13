@@ -72,12 +72,16 @@ private fun Context.activity(): Activity? = when (this) { is Activity -> this; i
             }
             state.status in listOf("finished", "closed") -> Column(Modifier.align(Alignment.Center).widthIn(max = 700.dp).padding(24.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
                 Text(if (state.status == "closed") "Sala encerrada" else "Aula concluída", color = Color.White, fontSize = 30.sp, fontWeight = FontWeight.Bold)
-                Podium(state.players)
+                if (state.gradingTotal > 0 || state.players.any { it.optInt("score") > 0 }) Podium(state.players)
             }
             state.wordCloud != null -> Column(Modifier.fillMaxSize().padding(18.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 Text(state.wordCloud!!.str("prompt"), color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Bold)
                 Text("100 pontos por palavra · ${state.wordCloud!!.arr("words").length()} palavras", color = EduLime)
                 AnimatedWordCloud(state.wordCloud!!.arr("words").objects(), Modifier.weight(1f).fillMaxWidth(), large = true)
+            }
+            state.poll != null && presentation?.optJSONObject("slide") != null -> {
+                val width = minOf(maxWidth, maxHeight * (16f / 9f))
+                SlideView(presentation.getJSONObject("slide"), Modifier.align(Alignment.Center).width(width), fullscreen = true, pollResults = state.poll)
             }
             state.status in listOf("question", "results") || presentation?.optBoolean("review") == true -> Surface(Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
                 LazyColumn(contentPadding = PaddingValues(20.dp), modifier = Modifier.fillMaxSize()) { item { QuestionPanel(vm, state, revealed = state.status != "question") } }
