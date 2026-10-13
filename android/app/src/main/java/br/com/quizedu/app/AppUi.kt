@@ -23,6 +23,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -150,6 +152,8 @@ fun openWeb(context: Context, path: String) {
 }
 @Composable fun StudentHome(vm: QuizViewModel) {
     var code by rememberSaveable { mutableStateOf("") }
+    val keyboard = LocalSoftwareKeyboardController.current
+    val focus = LocalFocusManager.current
     val scanner = rememberLauncherForActivityResult(ScanContract()) { result -> result.contents?.let(vm::acceptLink) }
     Column(Modifier.fillMaxSize().imePadding()) {
     LazyColumn(Modifier.weight(1f).fillMaxWidth().testTag("student-home-content"), contentPadding = PaddingValues(22.dp), verticalArrangement = Arrangement.spacedBy(22.dp)) {
@@ -173,7 +177,7 @@ fun openWeb(context: Context, path: String) {
     }
     Surface(color = Color.White, shadowElevation = 8.dp, modifier = Modifier.fillMaxWidth()) {
         Column(Modifier.padding(horizontal = 22.dp, vertical = 14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            Button(onClick = { vm.acceptLink(code) }, enabled = code.length == 6, modifier = Modifier.fillMaxWidth().height(54.dp)) { Text("Entrar na sala", fontWeight = FontWeight.Bold) }
+            Button(onClick = { focus.clearFocus(); keyboard?.hide(); vm.acceptLink(code) }, enabled = code.length == 6, modifier = Modifier.fillMaxWidth().height(54.dp)) { Text("Entrar na sala", fontWeight = FontWeight.Bold) }
             OutlinedButton(onClick = { scanner.launch(ScanOptions().setDesiredBarcodeFormats(ScanOptions.QR_CODE).setPrompt("Leia o QR code da sala Prativerso").setBeepEnabled(false).setOrientationLocked(false)) }, modifier = Modifier.fillMaxWidth().height(54.dp)) {
                 Icon(Icons.Default.QrCodeScanner, null); Spacer(Modifier.width(10.dp)); Text("Ler QR code")
             }

@@ -137,10 +137,10 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
     val context = LocalContext.current
     val canJoin = state.status == "lobby" || (state.presentation != null && state.status in listOf("slide", "wordcloud"))
     Column(Modifier.fillMaxSize().imePadding()) {
-        LazyColumn(Modifier.weight(1f).fillMaxWidth(), contentPadding = PaddingValues(22.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
+        LazyColumn(Modifier.weight(1f).fillMaxWidth().testTag("join-content"), contentPadding = PaddingValues(22.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
             item { Heading("Entrar na sala", state.title) }
             item { OutlinedTextField(name, { name = it.take(24) }, label = { Text("Como você quer aparecer?") }, singleLine = true,
-                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Done), keyboardActions = KeyboardActions(onDone = { keyboard?.hide() }), modifier = Modifier.fillMaxWidth()) }
+                keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Words, imeAction = ImeAction.Done), keyboardActions = KeyboardActions(onDone = { keyboard?.hide() }), modifier = Modifier.fillMaxWidth().testTag("student-name-input")) }
             item { Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) { Text("Escolha seu avatar", fontWeight = FontWeight.Bold); Text("Arraste para ver mais", color = EduMuted, fontSize = 12.sp) } }
             item { LazyRow(Modifier.fillMaxWidth().selectableGroup().testTag("avatar-carousel"), horizontalArrangement = Arrangement.spacedBy(10.dp), contentPadding = PaddingValues(vertical = 4.dp)) {
                 items(avatarOptions, key = { it.id }) { option ->

@@ -89,9 +89,10 @@ class NativeUiTest {
         compose.onNodeWithText("Entrar na sala").performClick()
         compose.waitUntil(10000) { vm.room != null }
         compose.onNodeWithText("Entrar na sala").assertIsDisplayed()
-        compose.onNodeWithText("Como você quer aparecer?").performTextInput("Luana")
+        compose.onNodeWithTag("join-content").performScrollToNode(hasTestTag("student-name-input"))
+        compose.onNodeWithTag("student-name-input").assertIsDisplayed().performTextInput("Luana")
         compose.onNodeWithTag("student-join-action").assertIsDisplayed()
-        compose.onNodeWithText("Como você quer aparecer?").performImeAction()
+        compose.onNodeWithTag("student-name-input").performImeAction()
         compose.onNodeWithContentDescription("Avatar Bia").performClick()
         compose.onNodeWithText("Entrar e participar").assertIsDisplayed().performClick()
         compose.waitUntil(10000) { vm.room?.me != null }
