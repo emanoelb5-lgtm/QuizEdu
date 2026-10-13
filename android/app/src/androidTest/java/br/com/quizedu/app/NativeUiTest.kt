@@ -328,18 +328,18 @@ class NativeUiTest {
         compose.waitUntil(10000) { vm.room?.version == "poll:1" }
         compose.onNodeWithTag("poll-option-0").performScrollTo().performClick().assertIsSelected()
         compose.onNodeWithTag("poll-option-1").performScrollTo().performClick().assertIsSelected()
-        compose.onNodeWithTag("poll-percent-0").assertDoesNotExist()
+        compose.onNodeWithTag("poll-percent-0", useUnmergedTree = true).assertDoesNotExist()
         compose.onNodeWithTag("poll-confirm").performScrollTo().performClick()
         compose.waitUntil(10000) { vm.room?.poll?.arr("myChoices")?.length() == 2 && !vm.busy }
         assertEquals(1, client.voteRequests); assertNull(vm.pollPending)
         compose.onNodeWithTag("poll-confirmed").performScrollTo().assertIsDisplayed()
-        compose.onNodeWithTag("poll-percent-0").assertDoesNotExist()
+        compose.onNodeWithTag("poll-percent-0", useUnmergedTree = true).assertDoesNotExist()
         val results = vm.room!!.raw.copy().put("status", "results").put("revision", 3).put("version", "poll:3")
         results.getJSONObject("poll").put("revealed", true).put("respondents", 2).put("counts", JSONArray(listOf(2, 1, 0))).put("percentages", JSONArray(listOf(100, 50, 0)))
         client.transition(results)
         compose.waitUntil(1500) { vm.room?.version == "poll:3" }
-        compose.onNodeWithTag("poll-percent-0").performScrollTo().assertTextEquals("100%")
-        compose.onNodeWithTag("poll-percent-1").performScrollTo().assertTextEquals("50%")
+        compose.onNodeWithTag("poll-percent-0", useUnmergedTree = true).performScrollTo().assertTextEquals("100%")
+        compose.onNodeWithTag("poll-percent-1", useUnmergedTree = true).performScrollTo().assertTextEquals("50%")
         compose.onNodeWithText("Resposta certa!").assertDoesNotExist()
         compose.onNodeWithTag("student-ranking").assertIsDisplayed()
         assertEquals(1500, vm.room!!.me!!.optInt("score"))
@@ -352,7 +352,6 @@ class NativeUiTest {
         compose.onNodeWithTag("add-poll").assertIsDisplayed().performClick()
         compose.onNodeWithTag("presentation-editor").performScrollToNode(hasTestTag("poll-prompt"))
         compose.onNodeWithTag("poll-prompt").performTextInput("Qual projeto vamos desenvolver?")
-        InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK)
         compose.onNodeWithTag("poll-multiple").performScrollTo().performClick()
         repeat(4) {
             compose.onNodeWithTag("presentation-editor").performScrollToNode(hasTestTag("poll-add-option"))

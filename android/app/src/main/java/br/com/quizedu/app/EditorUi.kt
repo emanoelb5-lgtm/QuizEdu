@@ -55,7 +55,7 @@ private val layouts = listOf("poll" to "Enquete", "question" to "Quiz", "wordclo
         uploadTarget = ImageTarget(id, question, background, optionIndex)
         photo.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
     }
-    LazyColumn(Modifier.fillMaxSize().testTag("presentation-editor"), contentPadding = PaddingValues(bottom = 28.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+    LazyColumn(Modifier.fillMaxSize().imePadding().testTag("presentation-editor"), contentPadding = PaddingValues(bottom = 28.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
         item { Column(Modifier.padding(horizontal = 18.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(5.dp)) {
                 Column(Modifier.weight(1f)) {
