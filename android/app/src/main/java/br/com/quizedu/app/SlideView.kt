@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -104,6 +105,7 @@ fun annotatedRichText(doc: JSONObject?, scale: Float, baseSize: Float): Annotate
         val scale = maxWidth.value / SLIDE_W
         val pixelScale = scale * density.density
         val textScale = scale / density.fontScale
+        val ink = if (hexColor(background.str("color", "#ffffff")).luminance() < .35f) Color.White else EduNavy
         if (background.str("color2").isNotBlank()) {
             val angle = background.optDouble("angle", 135.0) * PI / 180.0
             Box(Modifier.fillMaxSize().background(Brush.linearGradient(listOf(hexColor(background.str("color")), hexColor(background.str("color2"))),
@@ -116,7 +118,7 @@ fun annotatedRichText(doc: JSONObject?, scale: Float, baseSize: Float): Annotate
         if (slide.str("kind") == "wordcloud") Column(Modifier.fillMaxSize().padding((50 * scale).dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(Icons.Default.Cloud, null, tint = EduBlue, modifier = Modifier.size((80 * scale).dp))
             Spacer(Modifier.height((24 * scale).dp))
-            Text(slide.optJSONObject("wordCloud")?.str("prompt") ?: "Nuvem de palavras", fontSize = (44 * textScale).sp, lineHeight = (52 * textScale).sp, color = EduNavy, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+            Text(slide.optJSONObject("wordCloud")?.str("prompt") ?: "Nuvem de palavras", fontSize = (44 * textScale).sp, lineHeight = (52 * textScale).sp, color = ink, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
             Spacer(Modifier.height((24 * scale).dp))
             Text("Participe pelo celular · 100 pontos por palavra", fontSize = (24 * textScale).sp, color = EduBlue)
         }
@@ -124,7 +126,7 @@ fun annotatedRichText(doc: JSONObject?, scale: Float, baseSize: Float): Annotate
             val question = slide.optJSONObject("question")
             Column(Modifier.fillMaxSize().padding((50 * scale).dp), verticalArrangement = Arrangement.spacedBy((24 * scale).dp)) {
                 Text("PERGUNTA PARA A TURMA", fontSize = (20 * textScale).sp, color = EduBlue, fontWeight = FontWeight.Bold)
-                Text(question?.str("text")?.ifBlank { "Escreva sua pergunta" } ?: "Pergunta", fontSize = (43 * textScale).sp, color = hexColor(background.str("color"), Color.White).let { if (it == EduNavy) Color.White else EduNavy }, fontWeight = FontWeight.Bold, lineHeight = (51 * textScale).sp, maxLines = 3)
+                Text(question?.str("text")?.ifBlank { "Escreva sua pergunta" } ?: "Pergunta", fontSize = (43 * textScale).sp, color = ink, fontWeight = FontWeight.Bold, lineHeight = (51 * textScale).sp, maxLines = 3)
                 question?.arr("options")?.strings()?.chunked(2)?.forEachIndexed { row, options -> Row(horizontalArrangement = Arrangement.spacedBy((18 * scale).dp)) {
                     options.forEachIndexed { column, option -> Box(Modifier.weight(1f).background(Color(0xFFF0EDFF), RoundedCornerShape((8 * scale).dp)).padding((16 * scale).dp)) {
                         Text("${('A'.code + row * 2 + column).toChar()}  ${option.ifBlank { "Alternativa" }}", fontSize = (22 * textScale).sp, color = EduNavy, maxLines = 2)

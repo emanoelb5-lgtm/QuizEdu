@@ -73,6 +73,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
             Column(Modifier.weight(1f)) { Text(state.title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, maxLines = 2, overflow = TextOverflow.Ellipsis); Text("Sala ${state.code} · ${state.raw.str("teacher")}", color = EduMuted, fontSize = 13.sp) }
             if (!vm.roomTeacher) state.me?.let { PlayerAvatar(it.str("avatar"), 40.dp) }
         } }
+        if (state.presentation != null) item { FilledTonalButton(onClick = { vm.showFullscreen(true) }, modifier = Modifier.fillMaxWidth()) { Icon(Icons.Default.Fullscreen, null); Spacer(Modifier.width(8.dp)); Text("Apresentar em tela cheia") } }
         if (!vm.connected) item { InfoCard("Reconectando à sala. Sua participação e seus pontos foram preservados. As respostas precisam de conexão para serem enviadas.", true) }
         when (state.status) {
             "lobby" -> {
@@ -122,7 +123,6 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
                 }
             }
         }
-        if (state.presentation != null) item { FilledTonalButton(onClick = { vm.showFullscreen(true) }, modifier = Modifier.fillMaxWidth()) { Icon(Icons.Default.Fullscreen, null); Spacer(Modifier.width(8.dp)); Text("Apresentar em tela cheia") } }
         if (vm.roomTeacher) item { TextButton(onClick = { openWeb(context, "/sala/${state.code}/tela") }) { Icon(Icons.Default.OpenInBrowser, null); Spacer(Modifier.width(8.dp)); Text("Abrir tela da apresentação no navegador") } }
     }
     if (vm.roomTeacher && state.status != "finished") TeacherControls(vm, state, onClose = { closeConfirm = true })

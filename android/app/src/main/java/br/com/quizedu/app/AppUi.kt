@@ -152,7 +152,7 @@ fun openWeb(context: Context, path: String) {
     var code by rememberSaveable { mutableStateOf("") }
     val scanner = rememberLauncherForActivityResult(ScanContract()) { result -> result.contents?.let(vm::acceptLink) }
     Column(Modifier.fillMaxSize().imePadding()) {
-    LazyColumn(Modifier.weight(1f).fillMaxWidth(), contentPadding = PaddingValues(22.dp), verticalArrangement = Arrangement.spacedBy(22.dp)) {
+    LazyColumn(Modifier.weight(1f).fillMaxWidth().testTag("student-home-content"), contentPadding = PaddingValues(22.dp), verticalArrangement = Arrangement.spacedBy(22.dp)) {
         item { Heading("Entrar em uma sala") }
         item { Text("A aula acontece junto com a turma. No Prativerso, você participa pelo celular com perguntas, palavras e pontos ao vivo.", color = EduMuted) }
         item { Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
@@ -197,7 +197,7 @@ fun openWeb(context: Context, path: String) {
             Text("O acesso temporário dura 30 dias neste aparelho.", color = EduMuted)
         } }, confirmButton = { TextButton(onClick = { createAfterTrial = true; trialOpen = false; vm.temporary(name.trim()) }, enabled = name.trim().length >= 2 && !vm.busy) { Text("Continuar") } },
         dismissButton = { TextButton(onClick = { trialOpen = false }, enabled = !vm.busy) { Text("Cancelar") } })
-    LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(22.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
+    LazyColumn(Modifier.fillMaxSize().testTag("teacher-home-content"), contentPadding = PaddingValues(22.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
         item { Heading(if (vm.profile == null) "Criar uma atividade" else "Minhas apresentações") }
         item { ReadyLessonsButton(vm) }
         item { AppUpdateCard(vm) }

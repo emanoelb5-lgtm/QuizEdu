@@ -44,8 +44,10 @@ class NativeUiTest {
         compose.onNodeWithTag("home-room-code").assertIsDisplayed()
         compose.onNodeWithText("Ler QR code").assertIsDisplayed()
         compose.onNodeWithTag("trial-name").assertDoesNotExist()
-        compose.onNodeWithTag("home-create").performScrollTo().performClick()
-        compose.onNodeWithTag("home-trial").performScrollTo().performClick()
+        compose.onNodeWithTag("student-home-content").performScrollToNode(hasTestTag("home-create"))
+        compose.onNodeWithTag("home-create").assertIsDisplayed().performClick()
+        compose.onNodeWithTag("teacher-home-content").performScrollToNode(hasTestTag("home-trial"))
+        compose.onNodeWithTag("home-trial").assertIsDisplayed().performClick()
         compose.onNodeWithTag("trial-name").assertIsDisplayed()
         compose.onNodeWithText("Cancelar").performClick()
         compose.onNodeWithTag("trial-name").assertDoesNotExist()
@@ -177,10 +179,12 @@ class NativeUiTest {
         assertEquals(participantId, vm.room!!.me!!.str("id"))
     }
     @Test fun catalogCopiesAnIndependentLessonAndItsCloudRemainsEditable() {
-        compose.onNodeWithTag("ready-lessons").performScrollTo().performClick()
+        compose.onNodeWithTag("student-home-content").performScrollToNode(hasTestTag("ready-lessons"))
+        compose.onNodeWithTag("ready-lessons").assertIsDisplayed().performClick()
         compose.waitUntil(10000) { vm.readyCatalog != null && !vm.busy }
         compose.onNodeWithTag("lesson-search").performTextInput("opiniao")
-        compose.onNodeWithTag("ready-artigo-opiniao-9-ano-aula-1").performScrollTo().performClick()
+        compose.onNodeWithTag("lesson-catalog").performScrollToNode(hasTestTag("ready-artigo-opiniao-9-ano-aula-1"))
+        compose.onNodeWithTag("ready-artigo-opiniao-9-ano-aula-1").performClick()
         compose.waitUntil(10000) { vm.readyDetail != null && !vm.busy }
         compose.onNodeWithTag("use-ready-lesson").assertIsDisplayed().performClick()
         compose.waitUntil(10000) { vm.screen == AppScreen.Editor && !vm.busy }
@@ -189,7 +193,8 @@ class NativeUiTest {
         assertEquals("Artigo de opinião", vm.editor!!.deck.str("title"))
         val id = vm.editor!!.id
         compose.runOnIdle { vm.selectSlide(1) }
-        compose.onNodeWithTag("cloud-prompt").performScrollTo().performTextReplacement("Que palavras ajudam a argumentar?")
+        compose.onNodeWithTag("presentation-editor").performScrollToNode(hasTestTag("cloud-prompt"))
+        compose.onNodeWithTag("cloud-prompt").performTextReplacement("Que palavras ajudam a argumentar?")
         assertEquals("Que palavras ajudam a argumentar?", repository.local(id)!!.deck.arr("slides").getJSONObject(1).getJSONObject("wordCloud").str("prompt"))
         assertNotEquals("Que palavras ajudam a argumentar?", client.readySource.arr("slides").getJSONObject(1).getJSONObject("wordCloud").str("prompt"))
     }
@@ -233,7 +238,8 @@ class NativeUiTest {
         compose.runOnIdle { vm.showFullscreen(true) }
         compose.onNodeWithTag("fullscreen-presentation").assertIsDisplayed()
         compose.onNodeWithTag("ranking-spotlight").assertIsDisplayed()
-        Thread.sleep(6500)
+        compose.mainClock.advanceTimeBy(6500)
+        compose.waitForIdle()
         compose.onNodeWithTag("ranking-spotlight").assertDoesNotExist()
         compose.runOnIdle { vm.showFullscreen(false) }
         compose.onNodeWithTag("teacher-controls").assertIsDisplayed()
@@ -285,7 +291,8 @@ class NativeUiTest {
     @Test fun teacherLoadsSharedExamplesAsIndependentEditableDraftsAndCanReuseCachedContent() {
         compose.runOnIdle { vm.mode(true) }
         compose.waitUntil(10000) { !vm.busy && vm.teacher }
-        compose.onNodeWithTag("presentation-example").performScrollTo().performClick()
+        compose.onNodeWithTag("teacher-home-content").performScrollToNode(hasTestTag("presentation-example"))
+        compose.onNodeWithTag("presentation-example").assertIsDisplayed().performClick()
         compose.waitUntil(10000) { vm.screen == AppScreen.Editor && !vm.busy }
         val firstId = vm.editor!!.id
         val sourceQuestion = vm.editor!!.deck.arr("slides").getJSONObject(1).getJSONObject("question")
@@ -295,7 +302,8 @@ class NativeUiTest {
         compose.runOnIdle { vm.selectSlide(1); vm.changeSlide { it.getJSONObject("question").put("text", "Pergunta adaptada para a turma") }; vm.closeEditor() }
         compose.waitUntil(10000) { vm.screen == AppScreen.Home && !vm.busy }
         client.examplesUnavailable = true
-        compose.onNodeWithTag("quiz-example").performScrollTo().performClick()
+        compose.onNodeWithTag("teacher-home-content").performScrollToNode(hasTestTag("quiz-example"))
+        compose.onNodeWithTag("quiz-example").assertIsDisplayed().performClick()
         compose.waitUntil(10000) { vm.screen == AppScreen.Editor && !vm.busy }
         assertNotEquals(firstId, vm.editor!!.id)
         assertEquals(6, vm.editor!!.deck.arr("slides").length())
