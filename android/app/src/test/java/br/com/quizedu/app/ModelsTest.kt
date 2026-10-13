@@ -5,6 +5,14 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 class ModelsTest {
+    @Test fun onlyStartedUnexpiredPresentationsOfferControlsAndDiscoveryStaysBounded() {
+        val now = 1_000L
+        fun room(code: String, status: String = "slide", expires: Long = 2_000) = JSONObject().put("code", code).put("title", "Artigo de opinião").put("status", status).put("presentationId", uid()).put("expiresAt", expires)
+        val live = listOf("slide", "wordcloud", "question", "results").mapIndexed { index, status -> room("12345$index", status) }
+        val invalid = listOf(room("654320", "lobby"), room("654321", "finished"), room("654322", "closed"), room("654323", expires = now), room("badcode"), room("654324").put("presentationId", ""))
+        assertEquals(live, controllablePresentationRooms(JSONArray(live + invalid + live.first()), now))
+        assertEquals(5, controllablePresentationRooms(JSONArray((100000..100099).map { room("$it") }), now).size)
+    }
     @Test fun opinionLessonImagesAndPollCountsRemainBoundedAndReadable() {
         for (name in listOf("nescau", "toddy", "acai-acucar", "acai-sem-acucar", "livro", "filme")) assertEquals(BuildConfig.SITE_URL + "/lessons/artigo-opiniao/enquete-$name.jpg", mediaUrl("/lessons/artigo-opiniao/enquete-$name.jpg"))
         for (path in listOf("/lessons/artigo-opiniao/enquete-outra.jpg", "/lessons/artigo-opiniao/enquete-livro.jpg?x=1", "/lessons/../secret.jpg", "https://evil.test/lessons/artigo-opiniao/enquete-livro.jpg")) assertNull(mediaUrl(path))

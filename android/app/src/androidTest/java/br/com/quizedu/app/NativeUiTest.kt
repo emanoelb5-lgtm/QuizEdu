@@ -53,6 +53,38 @@ class NativeUiTest {
         compose.onNodeWithTag("trial-name").assertDoesNotExist()
         compose.onNodeWithTag("home-sign-in").assertIsDisplayed()
     }
+    @Test fun startedPresentationAppearsAutomaticallyAndOneTapControlsTheExistingRoom() {
+        val now = System.currentTimeMillis()
+        val state = JSONObject().put("code", "123456").put("title", "Artigo de opinião").put("teacher", "Clara").put("status", "slide").put("index", -1).put("total", 1).put("serverNow", now).put("version", "slide:1").put("revision", 1).put("isHost", true).put("players", JSONArray())
+            .put("presentation", JSONObject().put("index", 0).put("step", 0).put("total", 2).put("slide", newSlide("blank")))
+        client.transition(state)
+        client.startedPresentations = JSONArray().put(JSONObject().put("code", "123456").put("title", "Artigo de opinião").put("status", "slide").put("presentationId", uid()).put("expiresAt", now + 86400000))
+        compose.waitUntil(10000) { vm.livePresentations.size == 1 }
+        compose.onNodeWithTag("live-presentation-banner").assertIsDisplayed()
+        compose.onNodeWithText("Apresentação iniciada").assertIsDisplayed()
+        compose.onNodeWithText("Artigo de opinião").assertIsDisplayed()
+        compose.onNodeWithTag("control-live-presentation").assertIsDisplayed().performClick()
+        compose.waitUntil(10000) { vm.room?.isHost == true }
+        compose.runOnIdle { assertTrue(vm.roomTeacher); assertTrue(vm.teacher); assertEquals("123456", vm.currentCode); assertEquals(0, client.createdRooms) }
+        compose.onNodeWithTag("live-presentation-banner").assertDoesNotExist()
+        compose.onNodeWithTag("teacher-primary-action").performClick()
+        compose.waitUntil(5000) { client.lastControl?.str("action") == "next" }
+        assertEquals(0, client.lastControl!!.optInt("slideIndex"))
+    }
+    @Test fun presentationNoticeDisappearsAfterClosureOrSignOut() {
+        val now = System.currentTimeMillis()
+        val live = JSONObject().put("code", "123456").put("title", "Aula iniciada no computador").put("status", "question").put("presentationId", uid()).put("expiresAt", now + 86400000)
+        client.startedPresentations = JSONArray().put(live)
+        compose.waitUntil(10000) { vm.livePresentations.size == 1 }
+        compose.onNodeWithTag("live-presentation-banner").assertIsDisplayed()
+        client.startedPresentations = JSONArray().put(live.copy().put("status", "finished"))
+        compose.waitUntil(10000) { vm.livePresentations.isEmpty() }
+        compose.onNodeWithTag("live-presentation-banner").assertDoesNotExist()
+        client.startedPresentations = JSONArray().put(live)
+        compose.waitUntil(10000) { vm.livePresentations.size == 1 }
+        compose.runOnIdle { vm.signOut() }
+        compose.onNodeWithTag("live-presentation-banner").assertDoesNotExist()
+    }
     @Test fun liveSignalsAdvanceTheRoomAndOldSnapshotsCannotRollItBack() {
         val now = System.currentTimeMillis()
         val initial = JSONObject().put("code", "123456").put("title", "Aula ao vivo").put("teacher", "Clara").put("status", "slide").put("index", -1).put("total", 1).put("serverNow", now).put("version", "slide:1").put("revision", 1).put("isHost", false).put("players", JSONArray()).put("me", JSONObject().put("id", uid()).put("name", "Luana").put("avatar", "🦁"))
@@ -374,6 +406,9 @@ class NativeUiTest {
         assertEquals("", QuizRepository(app).secrets.get("test_session"))
     }
     private class FixtureClient : QuizClient {
+        @Volatile var startedPresentations = JSONArray()
+        @Volatile var lastControl: JSONObject? = null
+        @Volatile var createdRooms = 0
         @Volatile var voteRequests = 0
         @Volatile var loseFirstVoteAck = false
         @Volatile var cloudRequests = 0
@@ -398,6 +433,9 @@ class NativeUiTest {
         override fun clear() {}
         override suspend fun image(bytes: ByteArray): JSONObject = throw IllegalStateException("No network uploads in UI tests.")
         override suspend fun request(path: String, data: JSONObject?, method: String): JSONObject {
+            if (path == "/api/presentations/active") return JSONObject().put("ownerId", "11111111-1111-4111-8111-111111111111").put("serverNow", System.currentTimeMillis()).put("presentations", JSONArray(startedPresentations.toString()))
+            if (path == "/api/rooms" && data != null) { createdRooms++; return JSONObject().put("code", "123456") }
+            if (path.endsWith("/control")) { lastControl = data?.copy(); return liveRoom!!.copy() }
             if (path == "/api/lessons") return JSONObject().put("lessons", JSONArray().put(readyMetadata())).put("subjects", JSONArray().put(JSONObject().put("id", "portugues").put("name", "Português"))).put("grades", JSONArray().put(JSONObject().put("id", "9").put("name", "9º ano")))
             if (path == "/api/lessons/artigo-opiniao-9-ano-aula-1") return JSONObject().put("lesson", readyMetadata()).put("presentation", readySource.copy())
             if (path == "/api/presentations" && data != null) return JSONObject().put("presentation", JSONObject().put("deck", data.getJSONObject("deck").copy()).put("revision", 1).put("writeId", data.str("writeId")))

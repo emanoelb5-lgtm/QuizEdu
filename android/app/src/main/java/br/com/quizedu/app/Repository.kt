@@ -117,7 +117,7 @@ class QuizApi(private val secrets: SecretStore, private val teacher: Boolean) : 
         val connection = URL(BuildConfig.SITE_URL + path).openConnection() as HttpURLConnection
         try {
             connection.requestMethod = method
-            val live = path.startsWith("/api/rooms/") || path == "/api/ping"
+            val live = path.startsWith("/api/rooms/") || path == "/api/ping" || path == "/api/presentations/active"
             connection.connectTimeout = if (live) 5000 else 12000; connection.readTimeout = if (presentationName != null) 90000 else if (live) 6000 else 15000
             connection.instanceFollowRedirects = false
             connection.setRequestProperty("Accept", "application/json")

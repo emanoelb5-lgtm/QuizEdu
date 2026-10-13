@@ -34,6 +34,10 @@ class QuizViewModel(application: Application, val repository: QuizRepository, pr
     var lessons by mutableStateOf<List<JSONObject>>(emptyList()); private set
     var quizzes by mutableStateOf<List<JSONObject>>(emptyList()); private set
     var activeRooms by mutableStateOf<List<JSONObject>>(emptyList()); private set
+    private var detectedPresentations by mutableStateOf<List<JSONObject>>(emptyList())
+    private var detectedPresentationOwner by mutableStateOf("")
+    val livePresentations: List<JSONObject> get() = if (profile?.str("id") == detectedPresentationOwner) detectedPresentations else emptyList()
+    private val livePresentationRefresh = Mutex()
     var devices by mutableStateOf<List<JSONObject>>(emptyList()); private set
     var libraryOffline by mutableStateOf(false); private set
     var readyCatalog by mutableStateOf<JSONObject?>(null); private set
@@ -211,8 +215,24 @@ class QuizViewModel(application: Application, val repository: QuizRepository, pr
     fun signOut() {
         if (busy) return
         repository.teacherApi.clear(); repository.profile = null; profile = null
-        lessons = emptyList(); quizzes = emptyList(); activeRooms = emptyList(); screen = AppScreen.Home
+        lessons = emptyList(); quizzes = emptyList(); activeRooms = emptyList(); detectedPresentations = emptyList(); detectedPresentationOwner = ""; screen = AppScreen.Home
         repository.preferences.edit().remove("teacher_room").remove("device_id").apply()
+    }
+    suspend fun refreshLivePresentations() = livePresentationRefresh.withLock {
+        val owner = profile?.str("id") ?: run { detectedPresentations = emptyList(); detectedPresentationOwner = ""; return@withLock }
+        try {
+            val response = repository.teacherApi.request("/api/presentations/active")
+            if (profile?.str("id") != owner) return@withLock
+            detectedPresentationOwner = owner
+            detectedPresentations = if (response.str("ownerId") == owner) controllablePresentationRooms(response.arr("presentations"), response.optLong("serverNow", System.currentTimeMillis())) else emptyList()
+        } catch (e: CancellationException) { throw e }
+        catch (_: Exception) { if (profile?.str("id") == owner) detectedPresentations = emptyList() }
+    }
+    fun controlLivePresentation(code: String) {
+        if (busy || profile == null || livePresentations.none { it.str("code") == code }) return
+        editor?.takeIf { it.dirty }?.let(repository::store)
+        teacher = true; repository.preferences.edit().putBoolean("teacher_mode", true).apply()
+        openRoom(code, true)
     }
     fun refreshLibrary() = perform { loadLibrary() }
     private fun cachedSummaries(): List<JSONObject> = repository.localLessons().map { draft ->

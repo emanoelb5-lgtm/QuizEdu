@@ -18,6 +18,10 @@ fun JSONObject.arr(key: String): JSONArray = optJSONArray(key) ?: JSONArray()
 fun JSONArray.objects(): List<JSONObject> = (0 until length()).mapNotNull { optJSONObject(it) }
 fun JSONArray.strings(): List<String> = (0 until length()).map { optString(it, "") }
 fun jsonArray(items: List<*>): JSONArray = JSONArray(items)
+fun controllablePresentationRooms(rooms: JSONArray, serverNow: Long): List<JSONObject> = rooms.objects().filter {
+    it.str("code").matches(Regex("[0-9]{6}")) && it.str("presentationId").isNotBlank() &&
+        it.str("status") in listOf("slide", "wordcloud", "question", "results") && it.optLong("expiresAt") > serverNow
+}.distinctBy { it.str("code") }.take(5)
 fun cloudWordKey(value: String): String = java.text.Normalizer.normalize(value.trim().replace('’', '\''), java.text.Normalizer.Form.NFC).lowercase(java.util.Locale.forLanguageTag("pt-BR"))
 fun vmCanSendCloud(state: RoomSnapshot): Boolean = state.status == "wordcloud" && state.wordCloud?.optBoolean("accepting") == true && state.presentation?.optBoolean("blackout") != true
 fun randomToken(): String = ByteArray(32).also { SecureRandom().nextBytes(it) }.joinToString("") { "%02x".format(it.toInt() and 255) }

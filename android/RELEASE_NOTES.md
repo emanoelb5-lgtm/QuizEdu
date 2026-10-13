@@ -33,3 +33,7 @@ Prativerso Android 1.4.0 — aulas prontas e participação ao vivo.
 - Mesmas contas, pacote e assinatura: instale sobre a versão atual.
 
 Android 7 ou superior. A instalação da atualização precisa ser confirmada no Android.
+
+## 1.5.2 — Controle da apresentação com um toque
+
+Ao iniciar uma apresentação no computador, o aplicativo da mesma conta mostra “Apresentação iniciada” com o botão “Controlar”. O aviso é atualizado enquanto o app está aberto, permite escolher entre salas simultâneas e desaparece ao encerrar a aula ou trocar de conta. Um toque retoma a sala existente, preservando o rascunho local e os controles de slides, enquetes e nuvens. Mantém o pacote e a assinatura das versões anteriores.

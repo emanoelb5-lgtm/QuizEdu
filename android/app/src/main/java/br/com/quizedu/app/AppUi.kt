@@ -93,6 +93,12 @@ fun openWeb(context: Context, path: String) {
         if (vm.pendingPair.isBlank()) return@LaunchedEffect
         lifecycle.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) { while (isActive && vm.pendingPair.isNotBlank()) { vm.pollPairing(); delay(2500) } }
     }
+    LaunchedEffect(vm.profile?.str("id"), lifecycle) {
+        if (vm.profile == null) return@LaunchedEffect
+        lifecycle.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) {
+            while (isActive) { vm.refreshLivePresentations(); delay(3000) }
+        }
+    }
     BackHandler(enabled = vm.screen != AppScreen.Home) {
         if (!vm.busy) when (vm.screen) { AppScreen.Room -> if (vm.fullscreen) vm.showFullscreen(false) else exitConfirm = true; AppScreen.Editor -> vm.closeEditor(); AppScreen.Catalog -> if (vm.readyDetail != null) vm.closeReadyDetail() else vm.home(); else -> vm.home() }
     }
@@ -104,6 +110,8 @@ fun openWeb(context: Context, path: String) {
             } }, navigationIcon = { if (vm.screen != AppScreen.Home && !(vm.screen == AppScreen.Room && !vm.roomTeacher)) IconButton(onClick = { if (vm.screen == AppScreen.Room) exitConfirm = true else if (vm.screen == AppScreen.Editor) vm.closeEditor() else vm.home() }, enabled = !vm.busy) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Voltar") } },
                 actions = { if (vm.screen == AppScreen.Room && !vm.roomTeacher) TextButton(onClick = { exitConfirm = true }, enabled = !vm.busy, modifier = Modifier.testTag("student-exit")) { Icon(Icons.Default.Logout, null, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(5.dp)); Text("Sair") }; if (vm.screen == AppScreen.Home) { if (vm.profile == null) TextButton(onClick = signIn, enabled = !vm.busy, modifier = Modifier.testTag("home-sign-in")) { Text("Começar", fontWeight = FontWeight.Bold) } else TextButton(onClick = { vm.mode(!vm.teacher) }, enabled = !vm.busy) { Text(if (vm.teacher) "Participar" else "Minhas atividades") } } })
             if (vm.busy) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
+            val presentations = vm.livePresentations.filterNot { vm.screen == AppScreen.Room && vm.roomTeacher && it.str("code") == vm.currentCode }
+            if (vm.profile != null && presentations.isNotEmpty()) LivePresentationBanner(presentations, vm.busy, vm::controlLivePresentation)
         }
     }) { padding ->
         Box(Modifier.fillMaxSize().padding(padding).consumeWindowInsets(padding)) {
