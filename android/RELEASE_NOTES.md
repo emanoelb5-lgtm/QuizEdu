@@ -1,3 +1,10 @@
+Prativerso Android 1.5.1 — artigo de opinião ilustrado.
+
+- Suporte às seis novas imagens das enquetes da aula de Português.
+- Aulas prontas mostram as quantidades de perguntas e enquetes separadamente.
+- Aula de artigo de opinião com letras maiores, leitura em trechos menores, três enquetes iniciais e avaliação final.
+- Mesmas contas, pacote e assinatura: instale sobre a versão atual.
+
 Prativerso Android 1.5.0 — enquetes ao vivo.
 
 - Enquetes de escolha única ou múltipla nas aulas e quizzes.

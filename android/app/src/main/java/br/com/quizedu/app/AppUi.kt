@@ -265,7 +265,7 @@ fun openWeb(context: Context, path: String) {
                     }
                     Row(Modifier.padding(15.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Column(Modifier.weight(1f)) {
-                            Text("${lesson.optInt("slideCount")} slides · ${lesson.optInt("questionCount")} perguntas", color = EduMuted)
+                            Text(lessonActivitySummary(lesson), color = EduMuted)
                             if (lesson.optBoolean("localDirty")) Text("Rascunho neste aparelho", color = EduBlue, fontSize = 12.sp, fontWeight = FontWeight.Medium)
                         }
                         IconButton(onClick = { confirmDelete = lesson }, enabled = !vm.busy) { Icon(Icons.Default.DeleteOutline, "Excluir aula") }

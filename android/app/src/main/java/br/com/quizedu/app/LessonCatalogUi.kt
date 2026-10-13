@@ -64,7 +64,7 @@ fun filterReadyLessons(lessons: List<JSONObject>, subject: String, grade: String
                 Text(lesson.str("title"), fontSize = 24.sp, fontWeight = FontWeight.Bold)
                 Text(lesson.str("unit"), color = EduMuted)
                 Text(lesson.str("description"))
-                Text("${lesson.optInt("slideCount")} slides · ${lesson.optInt("questionCount")} perguntas" + if (lesson.optInt("cloudCount") > 0) " · ${lesson.optInt("cloudCount")} nuvem" else "", color = EduMuted, style = MaterialTheme.typography.bodySmall)
+                Text(lessonActivitySummary(lesson), color = EduMuted, style = MaterialTheme.typography.bodySmall)
                 Row(verticalAlignment = Alignment.CenterVertically) { Text("Conhecer esta aula", color = EduBlue, fontWeight = FontWeight.Bold); Icon(Icons.Default.ChevronRight, null, tint = EduBlue) }
             }
         } }

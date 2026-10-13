@@ -33,7 +33,7 @@ fun roomCode(value: String, site: String = BuildConfig.SITE_URL): String? {
         Regex("^/participar/([0-9]{6})/?$").matchEntire(uri.path)?.groupValues?.get(1)
     } catch (_: Exception) { null }
 }
-fun mediaUrl(path: String): String? = if (path.matches(Regex("/api/media/[a-f0-9-]{36}")) || path.matches(Regex("/examples/(solo|palhada|erosao|minhoca|cultivo|plantio)\\.jpg")) || path.matches(Regex("/lessons/artigo-opiniao/ilustracao-[1-4]\\.jpg"))) BuildConfig.SITE_URL + path else null
+fun mediaUrl(path: String): String? = if (path.matches(Regex("/api/media/[a-f0-9-]{36}")) || path.matches(Regex("/examples/(solo|palhada|erosao|minhoca|cultivo|plantio)\\.jpg")) || path.matches(Regex("/lessons/artigo-opiniao/(ilustracao-[1-4]|enquete-(nescau|toddy|acai-acucar|acai-sem-acucar|livro|filme))\\.jpg"))) BuildConfig.SITE_URL + path else null
 fun videoId(value: String): String? {
     if (value.matches(Regex("[\\w-]{11}"))) return value
     return try {
@@ -221,3 +221,10 @@ class RankingSpotlightSequence {
         return endsAt
     }
 }
+
+fun lessonActivitySummary(lesson: JSONObject): String = buildList {
+    add("${lesson.optInt("slideCount")} slides")
+    add("${lesson.optInt("questionCount")} perguntas")
+    if (lesson.optInt("pollCount") > 0) add("${lesson.optInt("pollCount")} enquetes")
+    if (lesson.optInt("cloudCount") > 0) add("${lesson.optInt("cloudCount")} ${if (lesson.optInt("cloudCount") == 1) "nuvem" else "nuvens"}")
+}.joinToString(" · ")

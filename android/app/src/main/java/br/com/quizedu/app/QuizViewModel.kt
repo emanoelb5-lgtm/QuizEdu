@@ -218,7 +218,7 @@ class QuizViewModel(application: Application, val repository: QuizRepository, pr
     private fun cachedSummaries(): List<JSONObject> = repository.localLessons().map { draft ->
         JSONObject().put("id", draft.id).put("title", draft.deck.str("title")).put("subject", draft.deck.str("subject")).put("topic", draft.deck.str("topic"))
             .put("theme", draft.deck.str("theme")).put("slideCount", draft.deck.arr("slides").length())
-            .put("questionCount", draft.deck.arr("slides").objects().count { it.str("kind") == "question" }).put("revision", draft.revision).put("localDirty", draft.dirty)
+            .put("questionCount", draft.deck.arr("slides").objects().count { it.str("kind") == "question" && it.optJSONObject("question")?.str("kind") != "poll" }).put("pollCount", draft.deck.arr("slides").objects().count { it.str("kind") == "question" && it.optJSONObject("question")?.str("kind") == "poll" }).put("revision", draft.revision).put("localDirty", draft.dirty)
     }
     private suspend fun loadLibrary() {
         if (profile == null) return

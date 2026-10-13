@@ -5,6 +5,13 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 class ModelsTest {
+    @Test fun opinionLessonImagesAndPollCountsRemainBoundedAndReadable() {
+        for (name in listOf("nescau", "toddy", "acai-acucar", "acai-sem-acucar", "livro", "filme")) assertEquals(BuildConfig.SITE_URL + "/lessons/artigo-opiniao/enquete-$name.jpg", mediaUrl("/lessons/artigo-opiniao/enquete-$name.jpg"))
+        for (path in listOf("/lessons/artigo-opiniao/enquete-outra.jpg", "/lessons/artigo-opiniao/enquete-livro.jpg?x=1", "/lessons/../secret.jpg", "https://evil.test/lessons/artigo-opiniao/enquete-livro.jpg")) assertNull(mediaUrl(path))
+        val lesson = JSONObject().put("slideCount", 36).put("questionCount", 7).put("pollCount", 4).put("cloudCount", 1)
+        assertEquals("36 slides · 7 perguntas · 4 enquetes · 1 nuvem", lessonActivitySummary(lesson))
+        lesson.remove("pollCount"); assertEquals("36 slides · 7 perguntas · 1 nuvem", lessonActivitySummary(lesson))
+    }
     @Test fun pollsAcceptPhotosAndEightOptionsWithoutACorrectAnswerAndRejectInvalidVotes() {
         val slide = newSlide("poll")
         val q = slide.getJSONObject("question").put("text", "O que você prefere?").put("options", JSONArray(listOf("", ""))).put("optionImages", JSONArray(listOf("/examples/solo.jpg", "/examples/erosao.jpg")))
