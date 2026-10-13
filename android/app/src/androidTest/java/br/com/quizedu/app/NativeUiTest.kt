@@ -352,11 +352,11 @@ class NativeUiTest {
         compose.onNodeWithTag("add-poll").assertIsDisplayed().performClick()
         compose.onNodeWithTag("presentation-editor").performScrollToNode(hasTestTag("poll-prompt"))
         compose.onNodeWithTag("poll-prompt").performTextInput("Qual projeto vamos desenvolver?")
-        androidx.test.espresso.Espresso.closeSoftKeyboard()
+        InstrumentationRegistry.getInstrumentation().sendKeyDownUpSync(android.view.KeyEvent.KEYCODE_BACK)
         compose.onNodeWithTag("poll-multiple").performScrollTo().performClick()
         repeat(4) {
             compose.onNodeWithTag("presentation-editor").performScrollToNode(hasTestTag("poll-add-option"))
-            compose.onNodeWithTag("poll-add-option").performClick()
+            compose.onNodeWithTag("poll-add-option").performScrollTo().performClick()
         }
         compose.onNodeWithTag("poll-add-option").assertIsNotEnabled()
         compose.runOnIdle {
