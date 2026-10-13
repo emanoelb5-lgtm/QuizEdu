@@ -19,7 +19,7 @@ import android.util.Base64
 
 @Composable fun ImportPresentationButton(vm: QuizViewModel, modifier: Modifier = Modifier) {
     val picker = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri -> if (uri != null) vm.prepareImport(uri) }
-    OutlinedButton(onClick = { picker.launch(arrayOf("*/*")) }, enabled = !vm.busy, modifier = modifier) { Icon(Icons.Default.FileUpload, null); Spacer(Modifier.width(7.dp)); Text("Importar apresentação") }
+    OutlinedButton(onClick = { picker.launch(arrayOf("*/*")) }, enabled = !vm.busy, modifier = modifier) { Icon(Icons.Default.FileUpload, null); Spacer(Modifier.width(7.dp)); Text("Abrir PPT ou importar arquivo") }
 }
 @Composable fun PresentationImportPreview(vm: QuizViewModel) {
     val result = vm.pendingImport ?: return
@@ -27,8 +27,8 @@ import android.util.Base64
     var selected by remember(result) { mutableStateOf(slides.indices.toSet()) }
     var preview by remember(result) { mutableStateOf(0) }
     val images = remember(result) { result.assets.associate { "/api/media/${it.str("id")}" to Base64.decode(it.str("data"), Base64.NO_WRAP) } }
-    val remaining = 150 - (vm.editor?.deck?.arr("slides")?.length() ?: 0)
-    val remainingQuestions = 50 - (vm.editor?.deck?.arr("slides")?.objects()?.count { it.str("kind") == "question" } ?: 0)
+    val remaining = 150
+    val remainingQuestions = 50
     val overflow = selected.size > remaining || selected.count { slides[it].str("kind") == "question" } > remainingQuestions
     Dialog(onDismissRequest = { if (!vm.busy) vm.cancelImport() }, properties = DialogProperties(usePlatformDefaultWidth = false)) {
         Surface(modifier = Modifier.fillMaxWidth().fillMaxHeight(.94f).padding(12.dp), shape = MaterialTheme.shapes.large) {

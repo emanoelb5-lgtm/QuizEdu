@@ -4,7 +4,7 @@ Cliente **nativo**, sem WebView, em Kotlin e Jetpack Compose. Compartilha salas,
 
 ## Instalar
 
-Baixe `Prativerso-Android-1.3.1.apk` na [última versão do GitHub Releases](https://github.com/emanoelb5-lgtm/QuizEdu/releases/latest), abra o arquivo no Android e permita a instalação pelo navegador ou gerenciador de arquivos quando solicitado. Requer Android 7.0 ou superior. No app, entre na sala por código/QR code ou toque em **Entrar** no canto superior para vincular a conta e acessar suas atividades.
+Baixe `Prativerso-Android-1.4.0.apk` na [última versão do GitHub Releases](https://github.com/emanoelb5-lgtm/QuizEdu/releases/latest), abra o arquivo no Android e permita a instalação pelo navegador ou gerenciador de arquivos quando solicitado. Requer Android 7.0 ou superior. No app, entre na sala por código/QR code ou toque em **Começar** no canto superior para vincular a conta e acessar suas atividades.
 
 ## Compilar no GitHub
 
@@ -29,3 +29,11 @@ Para compilar localmente com Android Studio, abra esta pasta e sincronize o Grad
 JSON dos slides é o mesmo do editor web, preservando objetos/atributos ao editar outras partes da aula. Rascunhos são gravados atomicamente por conta em armazenamento interno. Salvar usa revisão e writeId; respostas de salvamento perdidas são reconciliadas antes de repetir. Conflitos mostram erro e preservam a cópia local; o usuário pode exportar, duplicar ou abrir a versão da conta.
 
 Salas guardam uma cópia da aula na abertura, como no site. Editar a biblioteca não altera uma rodada já aberta. Polling para ao colocar o app em segundo plano; reconexão conserva cookies, sala e participante. Vídeos do YouTube abrem no aplicativo/navegador externo.
+
+## Acompanhar novidades
+
+Aulas prontas são carregadas do catálogo do site, por disciplina, ano e assunto. Novos conteúdos entram sem precisar atualizar o APK. Uma cópia é salva com revisão/writeId e aberta no editor; acesso temporário sem senha também pode usá-la. Conteúdo já consultado fica disponível para prévia offline.
+
+Nuvens de palavras podem ser criadas no editor e usadas nas mesmas salas do site: cada palavra aceita vale 100 pontos, duplicatas recebem aviso e a identificação do envio é preservada durante falhas de conexão. O ranking fica fixo no celular do aluno. O professor pode apresentar em tela cheia, com nuvem animada e ranking de seis segundos após cada pergunta.
+
+Na tela inicial, o app consulta as publicações do repositório para avisar sobre um APK mais recente; “Verificar atualização” permite uma consulta manual. O Android exige confirmar a instalação do APK. A compilação/publicação continua automática após alterações Android em main; a versão dos arquivos e da release é lida do Gradle.

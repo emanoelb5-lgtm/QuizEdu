@@ -54,7 +54,13 @@ fun openWeb(context: Context, path: String) {
     try { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) } catch (_: Exception) { }
 }
 @Composable fun QuizEduApp(vm: QuizViewModel) {
-    if (vm.pendingImport != null) PresentationImportPreview(vm)
+    if (vm.pendingImport != null && !vm.importOpening) PresentationImportPreview(vm)
+    if (vm.importOpening) AlertDialog(onDismissRequest = {}, title = { Text("Abrindo apresentação") }, text = {
+        Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            LinearProgressIndicator(Modifier.fillMaxWidth())
+            Text("Preparando slides e imagens para abrir direto na edição…")
+        }
+    }, confirmButton = {})
     val snack = remember { SnackbarHostState() }
     val context = LocalContext.current
     var openPairingBrowser by remember { mutableStateOf(false) }
@@ -78,20 +84,23 @@ fun openWeb(context: Context, path: String) {
             vm.observeRoom()
         }
     }
+    LaunchedEffect(vm.screen, lifecycle) {
+        if (vm.screen == AppScreen.Home) lifecycle.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) { vm.checkForUpdates() }
+    }
     LaunchedEffect(vm.pendingPair, lifecycle) {
         if (vm.pendingPair.isBlank()) return@LaunchedEffect
         lifecycle.lifecycle.repeatOnLifecycle(Lifecycle.State.STARTED) { while (isActive && vm.pendingPair.isNotBlank()) { vm.pollPairing(); delay(2500) } }
     }
     BackHandler(enabled = vm.screen != AppScreen.Home) {
-        if (!vm.busy) when (vm.screen) { AppScreen.Room -> exitConfirm = true; AppScreen.Editor -> vm.closeEditor(); else -> vm.home() }
+        if (!vm.busy) when (vm.screen) { AppScreen.Room -> if (vm.fullscreen) vm.showFullscreen(false) else exitConfirm = true; AppScreen.Editor -> vm.closeEditor(); AppScreen.Catalog -> if (vm.readyDetail != null) vm.closeReadyDetail() else vm.home(); else -> vm.home() }
     }
-    Scaffold(snackbarHost = { SnackbarHost(snack) }, topBar = {
-        Column {
+    Scaffold(snackbarHost = { SnackbarHost(snack) }, contentWindowInsets = if (vm.fullscreen) WindowInsets(0, 0, 0, 0) else ScaffoldDefaults.contentWindowInsets, topBar = {
+        if (!vm.fullscreen) Column {
             TopAppBar(title = { Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(9.dp)) {
                 Image(painterResource(R.drawable.ic_prativerso), contentDescription = null, modifier = Modifier.size(34.dp))
                 Text("Prativerso", fontSize = 20.sp, fontWeight = FontWeight.ExtraBold, color = EduNavy, maxLines = 1)
             } }, navigationIcon = { if (vm.screen != AppScreen.Home && !(vm.screen == AppScreen.Room && !vm.roomTeacher)) IconButton(onClick = { if (vm.screen == AppScreen.Room) exitConfirm = true else if (vm.screen == AppScreen.Editor) vm.closeEditor() else vm.home() }, enabled = !vm.busy) { Icon(Icons.AutoMirrored.Filled.ArrowBack, "Voltar") } },
-                actions = { if (vm.screen == AppScreen.Room && !vm.roomTeacher) TextButton(onClick = { exitConfirm = true }, enabled = !vm.busy, modifier = Modifier.testTag("student-exit")) { Icon(Icons.Default.Logout, null, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(5.dp)); Text("Sair") }; if (vm.screen == AppScreen.Home) { if (vm.profile == null) TextButton(onClick = signIn, enabled = !vm.busy, modifier = Modifier.testTag("home-sign-in")) { Text("Entrar", fontWeight = FontWeight.Bold) } else TextButton(onClick = { vm.mode(!vm.teacher) }, enabled = !vm.busy) { Text(if (vm.teacher) "Participar" else "Minhas atividades") } } })
+                actions = { if (vm.screen == AppScreen.Room && !vm.roomTeacher) TextButton(onClick = { exitConfirm = true }, enabled = !vm.busy, modifier = Modifier.testTag("student-exit")) { Icon(Icons.Default.Logout, null, modifier = Modifier.size(18.dp)); Spacer(Modifier.width(5.dp)); Text("Sair") }; if (vm.screen == AppScreen.Home) { if (vm.profile == null) TextButton(onClick = signIn, enabled = !vm.busy, modifier = Modifier.testTag("home-sign-in")) { Text("Começar", fontWeight = FontWeight.Bold) } else TextButton(onClick = { vm.mode(!vm.teacher) }, enabled = !vm.busy) { Text(if (vm.teacher) "Participar" else "Minhas atividades") } } })
             if (vm.busy) LinearProgressIndicator(modifier = Modifier.fillMaxWidth())
         }
     }) { padding ->
@@ -101,6 +110,7 @@ fun openWeb(context: Context, path: String) {
                 AppScreen.Editor -> EditorScreen(vm)
                 AppScreen.Room -> RoomScreen(vm)
                 AppScreen.Devices -> DevicesScreen(vm)
+                AppScreen.Catalog -> LessonCatalogScreen(vm, signIn)
             }
         }
     }
@@ -116,6 +126,22 @@ fun openWeb(context: Context, path: String) {
         }
     }
 }
+@Composable private fun ReadyLessonsButton(vm: QuizViewModel) {
+    FilledTonalButton(onClick = vm::browseReadyLessons, enabled = !vm.busy, modifier = Modifier.fillMaxWidth().heightIn(min = 54.dp).testTag("ready-lessons")) {
+        Icon(Icons.Default.MenuBook, null); Spacer(Modifier.width(10.dp)); Text("Explorar aulas por disciplina")
+    }
+}
+@Composable private fun AppUpdateCard(vm: QuizViewModel) {
+    val context = LocalContext.current
+    val update = vm.appUpdate
+    if (update != null) OutlinedCard { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text("Prativerso ${update.version} disponível", fontWeight = FontWeight.Bold)
+        Text("Instale a nova versão para acompanhar as novidades.", color = EduMuted)
+        Button(onClick = { openWeb(context, update.url) }, modifier = Modifier.fillMaxWidth()) { Icon(Icons.Default.SystemUpdate, null); Spacer(Modifier.width(8.dp)); Text("Atualizar aplicativo") }
+    } } else TextButton(onClick = { vm.checkForUpdates(manual = true) }, enabled = !vm.checkingUpdate, modifier = Modifier.fillMaxWidth()) {
+        Text(if (vm.checkingUpdate) "Verificando atualização…" else "Versão ${BuildConfig.VERSION_NAME} · Verificar atualização", color = EduMuted, style = MaterialTheme.typography.bodySmall)
+    }
+}
 @Composable fun Heading(title: String, description: String? = null) {
     Column(verticalArrangement = Arrangement.spacedBy(9.dp)) {
         Text(title, fontSize = 30.sp, fontWeight = FontWeight.ExtraBold, lineHeight = 35.sp)
@@ -128,6 +154,7 @@ fun openWeb(context: Context, path: String) {
     Column(Modifier.fillMaxSize().imePadding()) {
     LazyColumn(Modifier.weight(1f).fillMaxWidth(), contentPadding = PaddingValues(22.dp), verticalArrangement = Arrangement.spacedBy(22.dp)) {
         item { Heading("Entrar em uma sala") }
+        item { Text("A aula acontece junto com a turma. No Prativerso, você participa pelo celular com perguntas, palavras e pontos ao vivo.", color = EduMuted) }
         item { Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             OutlinedTextField(value = code, onValueChange = { code = it.filter(Char::isDigit).take(6) }, singleLine = true,
                 label = { Text("Código da sala") }, placeholder = { Text("000000") }, keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
@@ -137,6 +164,8 @@ fun openWeb(context: Context, path: String) {
         if (vm.profile == null) item { TextButton(onClick = { vm.mode(true) }, modifier = Modifier.testTag("home-create")) {
             Icon(Icons.Default.PresentToAll, null); Spacer(Modifier.width(8.dp)); Text("Criar uma atividade")
         } }
+        item { ReadyLessonsButton(vm) }
+        item { AppUpdateCard(vm) }
         val previous = vm.repository.preferences.getString("student_room", "") ?: ""
         if (previous.matches(Regex("[0-9]{6}"))) item { OutlinedCard(onClick = { vm.openRoom(previous, false) }) {
             Row(Modifier.padding(18.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Default.Restore, null, tint = EduBlue); Spacer(Modifier.width(12.dp)); Column { Text("Retomar minha sala", fontWeight = FontWeight.Bold); Text("Código $previous", color = EduMuted) } }
@@ -170,6 +199,8 @@ fun openWeb(context: Context, path: String) {
         dismissButton = { TextButton(onClick = { trialOpen = false }, enabled = !vm.busy) { Text("Cancelar") } })
     LazyColumn(Modifier.fillMaxSize(), contentPadding = PaddingValues(22.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
         item { Heading(if (vm.profile == null) "Criar uma atividade" else "Minhas apresentações") }
+        item { ReadyLessonsButton(vm) }
+        item { AppUpdateCard(vm) }
         if (vm.pendingPair.isNotBlank()) item { ElevatedCard {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
                 Text("Entrar na conta", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)

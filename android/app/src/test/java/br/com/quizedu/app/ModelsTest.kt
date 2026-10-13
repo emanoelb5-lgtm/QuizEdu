@@ -5,6 +5,55 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 class ModelsTest {
+    @Test fun cloudsPreserveAccentsAndValidateTheirPromptAcrossCopies() {
+        assertEquals(cloudWordKey("  OPINIÃO  "), cloudWordKey("opinia\u0303o"))
+        assertNotEquals(cloudWordKey("pôr"), cloudWordKey("por"))
+        assertEquals(cloudWordKey("d’água"), cloudWordKey("d'água"))
+        val slide = newSlide("wordcloud")
+        val deck = newDeck().put("slides", JSONArray().put(slide))
+        assertNull(validateLesson(deck))
+        val copy = duplicateDeck(deck)
+        copy.arr("slides").getJSONObject(0).getJSONObject("wordCloud").put("prompt", "Tema da outra turma")
+        assertNotEquals("Tema da outra turma", slide.getJSONObject("wordCloud").str("prompt"))
+        slide.getJSONObject("wordCloud").put("prompt", " "); assertNotNull(validateLesson(deck))
+        val state = RoomSnapshot(JSONObject().put("status", "wordcloud").put("wordCloud", JSONObject().put("accepting", true)))
+        assertTrue(vmCanSendCloud(state))
+        assertFalse(vmCanSendCloud(RoomSnapshot(state.raw.copy().put("presentation", JSONObject().put("blackout", true)))))
+    }
+    @Test fun readyLessonSearchFindsAccentedSubjectsAndCombinesYearAndTerms() {
+        val opinion = JSONObject().put("title", "Artigo de opinião").put("subject", "Português").put("subjectId", "portugues").put("grade", "9").put("gradeLabel", "9º ano").put("tags", JSONArray(listOf("argumentação", "tese")))
+        val stories = opinion.copy().put("title", "Contos em diálogo").put("grade", "7").put("tags", JSONArray())
+        assertEquals(listOf(opinion), filterReadyLessons(listOf(opinion, stories), "portugues", "9", "opiniao tese"))
+        assertEquals(2, filterReadyLessons(listOf(opinion, stories), "", "", "PORTUGUES").size)
+        assertTrue(filterReadyLessons(listOf(opinion), "portugues", "7", "").isEmpty())
+    }
+    @Test fun rankingAppearsOnceForEachCompletedQuestionAndHidesForReviewOrBlackout() {
+        fun state(status: String, index: Int, code: String = "123456", review: Boolean = false, blackout: Boolean = false) = RoomSnapshot(JSONObject().put("code", code).put("status", status).put("index", index).put("presentation", JSONObject().put("review", review).put("blackout", blackout)))
+        val sequence = RankingSpotlightSequence()
+        assertEquals(0L, sequence.observe(state("question", 0), 100))
+        assertEquals(6200L, sequence.observe(state("results", 0), 200))
+        assertEquals(6200L, sequence.observe(state("results", 0), 1500))
+        assertEquals(6200L, sequence.observe(state("slide", 0), 6201))
+        assertEquals(0L, sequence.observe(state("slide", 0, review = true), 7000))
+        assertEquals(0L, sequence.observe(state("slide", 0), 7100))
+        assertEquals(14000L, sequence.observe(state("slide", 1), 8000))
+        assertEquals(0L, sequence.observe(state("slide", 1, blackout = true), 8100))
+        assertEquals(0L, sequence.observe(state("wordcloud", 1), 8200))
+        assertEquals(0L, sequence.observe(state("finished", 1), 9000))
+        assertEquals(16000L, sequence.observe(state("results", 0, code = "654321"), 10000))
+    }
+    @Test fun updateChecksRequireANewerBuildAndAnUploadedApkFromTheExactRepository() {
+        val tag = "android-v1.4.0-build.20"
+        val asset = JSONObject().put("state", "uploaded").put("size", 100).put("browser_download_url", "$ANDROID_RELEASES/download/$tag/Prativerso-Android-1.4.0.apk")
+        val release = JSONObject().put("tag_name", tag).put("assets", JSONArray().put(asset))
+        assertEquals(AppUpdate("1.4.0", 10020, asset.str("browser_download_url")), availableUpdate(release, 10019))
+        assertNull(availableUpdate(release, 10020))
+        assertNull(availableUpdate(release.copy().put("prerelease", true), 10019))
+        assertNull(availableUpdate(release.copy().put("draft", true), 10019))
+        assertNull(availableUpdate(release.copy().put("tag_name", "android-v1.4.0-build.2147483647"), 10019))
+        asset.put("browser_download_url", "https://evil.test/app.apk"); assertNull(availableUpdate(release, 10019))
+        asset.put("browser_download_url", "$ANDROID_RELEASES/download/$tag/Prativerso-Android-1.4.0.apk").put("state", "new"); assertNull(availableUpdate(release, 10019))
+    }
     @Test fun roomClocksCompensateTransitAndIgnoreDeviceWallTime() {
         val quick = LiveClock.sample(100040, 500, 580)
         val slow = LiveClock.sample(100400, 9000, 9800)
@@ -53,7 +102,7 @@ class ModelsTest {
         assertNull(validateLesson(copy))
     }
     @Test fun allThemesAndLayoutsFitTheSharedSixteenByNineCanvas() {
-        for (theme in deckThemes) for (layout in listOf("cover", "title", "columns", "image", "quote", "section", "table", "chart", "closing", "blank", "question", "true_false")) {
+        for (theme in deckThemes) for (layout in listOf("cover", "title", "columns", "image", "quote", "section", "table", "chart", "closing", "blank", "question", "true_false", "wordcloud")) {
             val slide = newSlide(layout, theme.id)
             assertEquals(theme.background, slide.getJSONObject("background").str("color"))
             for (e in slide.arr("elements").objects()) { assertTrue(e.optDouble("x") >= 0); assertTrue(e.optDouble("y") >= 0); assertTrue(e.optDouble("w") >= 12); assertTrue(e.optDouble("h") >= 8); assertTrue(e.optDouble("x") + e.optDouble("w") <= 1000.1); assertTrue(e.optDouble("y") + e.optDouble("h") <= 562.6) }
@@ -93,6 +142,8 @@ class ModelsTest {
         assertEquals("ba7816bf8f01cfea414140de5dae2223b00361a396177a9cb410ff61f20015ad", sha256("abc"))
         assertNotNull(mediaUrl("/api/media/" + uid())); assertNull(mediaUrl("https://evil.test/image.jpg")); assertNull(mediaUrl("/api/media/../../private"))
         assertEquals(BuildConfig.SITE_URL + "/examples/palhada.jpg", mediaUrl("/examples/palhada.jpg"))
+        for (index in 1..4) assertNotNull(mediaUrl("/lessons/artigo-opiniao/ilustracao-$index.jpg"))
+        for (path in listOf("/lessons/artigo-opiniao/ilustracao-5.jpg", "/lessons/../../private", "/lessons/artigo-opiniao/ilustracao-1.jpg?redirect=1")) assertNull(mediaUrl(path))
         for (path in listOf("/examples/anything.jpg", "/examples/../../private", "/examples/solo.jpg?redirect=1")) assertNull(mediaUrl(path))
         assertEquals("dQw4w9WgXcQ", videoId("https://www.youtube.com/watch?v=dQw4w9WgXcQ")); assertNull(videoId("https://evil.test/watch?v=dQw4w9WgXcQ"))
     }

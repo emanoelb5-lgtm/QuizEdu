@@ -97,10 +97,10 @@ fun annotatedRichText(doc: JSONObject?, scale: Float, baseSize: Float): Annotate
 }
 
 @Composable fun SlideView(slide: JSONObject, modifier: Modifier = Modifier, step: Int = Int.MAX_VALUE,
-    selected: String? = null, editable: Boolean = false, onSelect: (String?) -> Unit = {}, onDrag: (String, Float, Float) -> Unit = { _, _, _ -> }, onResize: (String, Float, Float) -> Unit = { _, _, _ -> }, selectedIds: Set<String> = emptySet(), imageOverrides: Map<String, ByteArray> = emptyMap()) {
+    selected: String? = null, editable: Boolean = false, onSelect: (String?) -> Unit = {}, onDrag: (String, Float, Float) -> Unit = { _, _, _ -> }, onResize: (String, Float, Float) -> Unit = { _, _, _ -> }, selectedIds: Set<String> = emptySet(), imageOverrides: Map<String, ByteArray> = emptyMap(), fullscreen: Boolean = false) {
     val density = LocalDensity.current
     val background = slide.optJSONObject("background") ?: JSONObject()
-    BoxWithConstraints(modifier.aspectRatio(16f / 9f).clip(RoundedCornerShape(10.dp)).background(hexColor(background.str("color", "#ffffff")))) {
+    BoxWithConstraints(modifier.aspectRatio(16f / 9f).clip(RoundedCornerShape(if (fullscreen) 0.dp else 10.dp)).background(hexColor(background.str("color", "#ffffff")))) {
         val scale = maxWidth.value / SLIDE_W
         val pixelScale = scale * density.density
         val textScale = scale / density.fontScale
@@ -113,6 +113,13 @@ fun annotatedRichText(doc: JSONObject?, scale: Float, baseSize: Float): Annotate
         val overlay = background.optDouble("overlay", 0.0).toFloat().coerceIn(0f, 90f) / 100f
         if (overlay > 0f) Box(Modifier.fillMaxSize().background(Color.Black.copy(alpha = overlay)))
         if (editable) Box(Modifier.fillMaxSize().clickable { onSelect(null) })
+        if (slide.str("kind") == "wordcloud") Column(Modifier.fillMaxSize().padding((50 * scale).dp), verticalArrangement = Arrangement.Center, horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(Icons.Default.Cloud, null, tint = EduBlue, modifier = Modifier.size((80 * scale).dp))
+            Spacer(Modifier.height((24 * scale).dp))
+            Text(slide.optJSONObject("wordCloud")?.str("prompt") ?: "Nuvem de palavras", fontSize = (44 * textScale).sp, lineHeight = (52 * textScale).sp, color = EduNavy, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center)
+            Spacer(Modifier.height((24 * scale).dp))
+            Text("Participe pelo celular · 100 pontos por palavra", fontSize = (24 * textScale).sp, color = EduBlue)
+        }
         if (slide.str("kind") == "question") {
             val question = slide.optJSONObject("question")
             Column(Modifier.fillMaxSize().padding((50 * scale).dp), verticalArrangement = Arrangement.spacedBy((24 * scale).dp)) {

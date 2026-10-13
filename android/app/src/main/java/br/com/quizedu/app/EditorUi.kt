@@ -29,7 +29,7 @@ import org.json.JSONArray
 import org.json.JSONObject
 import kotlin.math.roundToInt
 
-private val layouts = listOf("cover" to "Capa", "title" to "Título e texto", "columns" to "Duas colunas", "image" to "Texto e imagem", "quote" to "Citação", "section" to "Seção", "table" to "Tabela", "chart" to "Gráfico", "closing" to "Encerramento", "blank" to "Em branco", "question" to "Quiz", "true_false" to "Verdadeiro ou falso")
+private val layouts = listOf("question" to "Quiz", "wordcloud" to "Nuvem de palavras", "true_false" to "Verdadeiro ou falso", "cover" to "Capa", "title" to "Título e texto", "columns" to "Duas colunas", "image" to "Texto e imagem", "quote" to "Citação", "section" to "Seção", "table" to "Tabela", "chart" to "Gráfico", "closing" to "Encerramento", "blank" to "Em branco")
 @Composable fun EditorScreen(vm: QuizViewModel) {
     val draft = vm.editor ?: return
     val slide = vm.slide ?: return
@@ -77,6 +77,10 @@ private val layouts = listOf("cover" to "Capa", "title" to "Título e texto", "c
                 Text("${vm.selection.size} selecionados", color = EduMuted, style = MaterialTheme.typography.labelSmall)
             }
             ImportPresentationButton(vm, Modifier.fillMaxWidth())
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                item { FilledTonalButton(onClick = { vm.addSlide("question") }, enabled = !vm.busy) { Icon(Icons.Default.Quiz, null); Spacer(Modifier.width(6.dp)); Text("Pergunta interativa") } }
+                item { FilledTonalButton(onClick = { vm.addSlide("wordcloud") }, enabled = !vm.busy, modifier = Modifier.testTag("add-word-cloud")) { Icon(Icons.Default.Cloud, null); Spacer(Modifier.width(6.dp)); Text("Nuvem de palavras") } }
+            }
             if (vm.selection.size > 1) {
                 Row { TextButton(onClick = vm::groupSelection) { Text("Agrupar") }; TextButton(onClick = vm::ungroupSelection) { Text("Desagrupar") } }
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -111,6 +115,11 @@ private val layouts = listOf("cover" to "Capa", "title" to "Título e texto", "c
             if (slide.str("kind") != "question") Text("Toque para editar. Arraste para mover e use a alça para redimensionar. Selecione vários objetos pela lista abaixo.", style = MaterialTheme.typography.bodySmall, color = EduMuted)
         } }
         if (slide.str("kind") == "question") item { EditorCard { QuestionInspector(vm, slide.getJSONObject("question"), onImage = { chooseImage(question = true) }) } }
+        else if (slide.str("kind") == "wordcloud") item { EditorCard {
+            Text("Nuvem de palavras ao vivo", fontWeight = FontWeight.Bold, style = MaterialTheme.typography.titleMedium)
+            OutlinedTextField(slide.getJSONObject("wordCloud").str("prompt"), { value -> vm.changeSlide { it.getJSONObject("wordCloud").put("prompt", value.take(300)) } }, label = { Text("Tema ou pergunta da nuvem") }, modifier = Modifier.fillMaxWidth().testTag("cloud-prompt"), enabled = !vm.busy, minLines = 2)
+            Text("Cada palavra aceita vale 100 pontos para qualquer aluno. Todos podem enviar várias palavras; palavras repetidas recebem um aviso.", color = EduMuted)
+        } }
         else {
             val selected = slide.arr("elements").objects().find { it.str("id") == vm.selectedElement }
             if (selected != null) item { EditorCard { ObjectInspector(vm, selected, onImage = { chooseImage(selected.str("id")) }) } }

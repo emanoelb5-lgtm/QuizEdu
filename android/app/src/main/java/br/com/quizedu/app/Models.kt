@@ -18,6 +18,8 @@ fun JSONObject.arr(key: String): JSONArray = optJSONArray(key) ?: JSONArray()
 fun JSONArray.objects(): List<JSONObject> = (0 until length()).mapNotNull { optJSONObject(it) }
 fun JSONArray.strings(): List<String> = (0 until length()).map { optString(it, "") }
 fun jsonArray(items: List<*>): JSONArray = JSONArray(items)
+fun cloudWordKey(value: String): String = java.text.Normalizer.normalize(value.trim().replace('’', '\''), java.text.Normalizer.Form.NFC).lowercase(java.util.Locale.forLanguageTag("pt-BR"))
+fun vmCanSendCloud(state: RoomSnapshot): Boolean = state.status == "wordcloud" && state.wordCloud?.optBoolean("accepting") == true && state.presentation?.optBoolean("blackout") != true
 fun randomToken(): String = ByteArray(32).also { SecureRandom().nextBytes(it) }.joinToString("") { "%02x".format(it.toInt() and 255) }
 fun sha256(value: String): String = MessageDigest.getInstance("SHA-256").digest(value.toByteArray()).joinToString("") { "%02x".format(it.toInt() and 255) }
 
@@ -31,7 +33,7 @@ fun roomCode(value: String, site: String = BuildConfig.SITE_URL): String? {
         Regex("^/participar/([0-9]{6})/?$").matchEntire(uri.path)?.groupValues?.get(1)
     } catch (_: Exception) { null }
 }
-fun mediaUrl(path: String): String? = if (path.matches(Regex("/api/media/[a-f0-9-]{36}")) || path.matches(Regex("/examples/(solo|palhada|erosao|minhoca|cultivo|plantio)\\.jpg"))) BuildConfig.SITE_URL + path else null
+fun mediaUrl(path: String): String? = if (path.matches(Regex("/api/media/[a-f0-9-]{36}")) || path.matches(Regex("/examples/(solo|palhada|erosao|minhoca|cultivo|plantio)\\.jpg")) || path.matches(Regex("/lessons/artigo-opiniao/ilustracao-[1-4]\\.jpg"))) BuildConfig.SITE_URL + path else null
 fun videoId(value: String): String? {
     if (value.matches(Regex("[\\w-]{11}"))) return value
     return try {
@@ -100,6 +102,8 @@ fun newSlide(layout: String = "title", theme: String = "prativerso"): JSONObject
         .put("background", JSONObject().put("color", t.background)).put("transition", "fade").put("elements", JSONArray())
     val elements = mutableListOf<JSONObject>()
     when (layout) {
+        "wordcloud" -> slide.put("kind", "wordcloud").put("title", "Nuvem de palavras")
+            .put("wordCloud", JSONObject().put("prompt", "Que palavras vêm à sua mente sobre este tema?"))
         "question", "true_false" -> {
             slide.put("kind", "question").put("title", "Pergunta para a turma")
             slide.put("question", JSONObject().put("id", uid()).put("kind", if (layout == "true_false") "true_false" else "multiple")
@@ -146,6 +150,10 @@ fun boundedGeometry(e: JSONObject, x: Float, y: Float, w: Float = e.optDouble("w
 fun validateLesson(deck: JSONObject): String? {
     if (deck.str("title").isBlank()) return "Dê um título à aula."
     if (deck.arr("slides").length() !in 1..150) return "Use de 1 a 150 slides."
+    deck.arr("slides").objects().filter { it.str("kind") == "wordcloud" }.forEach {
+        val prompt = it.optJSONObject("wordCloud")?.str("prompt") ?: ""
+        if (prompt.isBlank() || prompt.length > 300) return "Escreva o tema de cada nuvem de palavras (até 300 caracteres)."
+    }
     val questions = deck.arr("slides").objects().filter { it.str("kind") == "question" }
     if (questions.size > 50) return "Use até 50 perguntas por aula."
     questions.forEach { s ->
@@ -175,6 +183,7 @@ data class RoomSnapshot(val raw: JSONObject) {
     val me get() = raw.optJSONObject("me")
     val question get() = raw.optJSONObject("question")
     val presentation get() = raw.optJSONObject("presentation")
+    val wordCloud get() = raw.optJSONObject("wordCloud")
     val players get() = raw.arr("players").objects()
     val serverNow get() = raw.optLong("serverNow")
     val startsAt get() = raw.optLong("startsAt")
@@ -184,4 +193,20 @@ data class RoomSnapshot(val raw: JSONObject) {
         .put("slideIndex", presentation?.optInt("index", -1) ?: -1).put("step", presentation?.optInt("step") ?: 0)
     fun pulse(update: JSONObject): RoomSnapshot = RoomSnapshot(raw.copy().put("serverNow", update.optLong("serverNow", serverNow))
         .put("answeredCount", update.optInt("answeredCount", raw.optInt("answeredCount"))))
+}
+
+class RankingSpotlightSequence {
+    private var room = ""
+    private var completed = -1
+    var endsAt = 0L; private set
+    fun observe(state: RoomSnapshot, now: Long): Long {
+        if (room != state.code) { room = state.code; completed = -1; endsAt = 0 }
+        val presentation = state.presentation
+        if (presentation == null || presentation.optBoolean("blackout") || presentation.optBoolean("review") || state.status in listOf("lobby", "question", "wordcloud", "finished", "closed")) {
+            endsAt = 0
+        } else if (state.status in listOf("results", "slide") && state.index > completed) {
+            completed = state.index; endsAt = now + 6000
+        }
+        return endsAt
+    }
 }

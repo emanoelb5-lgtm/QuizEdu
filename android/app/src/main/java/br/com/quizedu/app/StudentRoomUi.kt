@@ -2,6 +2,8 @@ package br.com.quizedu.app
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -15,7 +17,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 
 @Composable fun StudentRoomScreen(vm: QuizViewModel, state: RoomSnapshot) {
-    Column(Modifier.fillMaxSize()) {
+    Column(Modifier.fillMaxSize().imePadding()) {
         StudentOverview(state)
         if (!vm.connected) Text("Reconectando… Aguarde para responder.", color = EduMuted, fontSize = 14.sp, modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp))
         LazyColumn(Modifier.weight(1f).fillMaxWidth().testTag("student-room-content"), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -30,23 +32,26 @@ import coil.compose.AsyncImage
                     val presentation = state.presentation
                     val slide = presentation?.optJSONObject("slide")
                     if (presentation != null) item { Text("Slide ${presentation.optInt("index") + 1} de ${presentation.optInt("total")}${if (presentation.optBoolean("review")) " · Revisão" else ""}", color = EduMuted, fontSize = 14.sp) }
-                    if (presentation?.optBoolean("blackout") == true) item {
+                    if (state.wordCloud != null) item { WordCloudPanel(vm, state) }
+                    else if (presentation?.optBoolean("blackout") == true) item {
                         Surface(color = Color.Black, modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f)) { Box(contentAlignment = Alignment.Center) { Text("Aguarde o professor continuar.", color = Color.White) } }
                     } else if (slide != null) item { SlideView(slide, Modifier.fillMaxWidth(), step = presentation.optInt("step")) }
                     if (state.question != null && presentation?.optBoolean("review") == true) item { StudentRoundResult(state, review = true) }
                 }
                 "question" -> item { QuestionPanel(vm, state, revealed = false) }
+                "wordcloud" -> item { WordCloudPanel(vm, state) }
                 "results" -> item { StudentRoundResult(state) }
                 "finished" -> {
                     item { Text(if (state.presentation != null) "Aula concluída" else "Quiz concluído", fontWeight = FontWeight.Bold, fontSize = 22.sp) }
                     if (state.total > 0) {
                         state.me?.let { me -> item { Text("${me.optInt("correctCount")} acertos de ${state.total} perguntas", color = EduMuted) } }
-                        if (state.players.isNotEmpty()) item { Podium(state.players) }
                     }
+                    if (state.players.isNotEmpty()) item { Podium(state.players) }
                 }
                 "closed" -> item { Text("Sala encerrada. Obrigado por participar.", color = EduMuted) }
             }
         }
+        StudentRankingDock(state)
     }
 }
 
@@ -57,9 +62,34 @@ import coil.compose.AsyncImage
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                 PlayerAvatar(me.str("avatar"), 32.dp)
                 Text(me.str("name"), fontSize = 16.sp, color = EduMuted, maxLines = 1, overflow = TextOverflow.Ellipsis, modifier = Modifier.weight(1f))
-                if (state.total > 0) Column(horizontalAlignment = Alignment.End) {
+                Column(horizontalAlignment = Alignment.End) {
                     Text("${points(me.optInt("score"))} pontos", fontWeight = FontWeight.Bold, color = EduBlue, fontSize = 18.sp, modifier = Modifier.testTag("student-current-score"))
                     if (state.status != "lobby" && me.optInt("position") > 0) Text("${me.optInt("position")}º lugar", fontSize = 13.sp, color = EduMuted)
+                }
+            }
+        }
+    }
+}
+
+@Composable private fun StudentRankingDock(state: RoomSnapshot) {
+    Surface(shadowElevation = 8.dp, color = Color.White, modifier = Modifier.fillMaxWidth().testTag("student-ranking")) {
+        Column(Modifier.padding(vertical = 10.dp), verticalArrangement = Arrangement.spacedBy(7.dp)) {
+            Row(Modifier.fillMaxWidth().padding(horizontal = 20.dp), horizontalArrangement = Arrangement.SpaceBetween) {
+                Text("Ranking ao vivo", fontWeight = FontWeight.Bold, fontSize = 13.sp, color = EduBlue)
+                Text("${state.players.size} participantes · Arraste", fontSize = 12.sp, color = EduMuted)
+            }
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(horizontal = 14.dp)) {
+                items(state.players, key = { it.str("id") }) { player ->
+                    Surface(color = if (player.str("id") == state.me?.str("id")) Color(0xFFF0EDFF) else Color(0xFFF8F7FC), shape = MaterialTheme.shapes.small) {
+                        Row(Modifier.width(175.dp).padding(9.dp), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(7.dp)) {
+                            Text("#${player.optInt("position")}", fontWeight = FontWeight.Bold, color = EduBlue, fontSize = 13.sp)
+                            PlayerAvatar(player.str("avatar"), 27.dp)
+                            Column(Modifier.weight(1f)) {
+                                Text(player.str("name"), fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                Text("${points(player.optInt("score"))} pts", fontSize = 12.sp, color = EduMuted)
+                            }
+                        }
+                    }
                 }
             }
         }

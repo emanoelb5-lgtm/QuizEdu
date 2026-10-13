@@ -23,8 +23,8 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.io.IOException
 
-enum class AppScreen { Home, Editor, Room, Devices }
-class QuizViewModel(application: Application, val repository: QuizRepository) : AndroidViewModel(application) {
+enum class AppScreen { Home, Editor, Room, Devices, Catalog }
+class QuizViewModel(application: Application, val repository: QuizRepository, private val updateChecker: suspend () -> AppUpdate? = ::latestAppUpdate) : AndroidViewModel(application) {
     constructor(application: Application) : this(application, QuizRepository(application))
     var teacher by mutableStateOf(repository.preferences.getBoolean("teacher_mode", false)); private set
     var screen by mutableStateOf(AppScreen.Home); private set
@@ -36,11 +36,23 @@ class QuizViewModel(application: Application, val repository: QuizRepository) : 
     var activeRooms by mutableStateOf<List<JSONObject>>(emptyList()); private set
     var devices by mutableStateOf<List<JSONObject>>(emptyList()); private set
     var libraryOffline by mutableStateOf(false); private set
+    var readyCatalog by mutableStateOf<JSONObject?>(null); private set
+    var readyDetail by mutableStateOf<JSONObject?>(null); private set
+    var catalogOffline by mutableStateOf(false); private set
+    var appUpdate by mutableStateOf<AppUpdate?>(null); private set
+    var checkingUpdate by mutableStateOf(false); private set
+    private var lastUpdateCheck = 0L
+    private var pendingReadyUse = repository.preferences.getString("pending_ready_use", "") ?: ""
+    var fullscreen by mutableStateOf(false); private set
+    var cloudPending by mutableStateOf<JSONObject?>(try { repository.preferences.getString("cloud_pending", null)?.let(::JSONObject) } catch (_: Exception) { null }); private set
+    var cloudNotice by mutableStateOf<String?>(null); private set
+    var cloudNoticeError by mutableStateOf(false); private set
     var editor by mutableStateOf<LessonDraft?>(null); private set
     var slideIndex by mutableStateOf(0); private set
     var selectedElement by mutableStateOf<String?>(null); private set
     var selection by mutableStateOf<Set<String>>(emptySet()); private set
     var importError by mutableStateOf<String?>(null); private set
+    var importOpening by mutableStateOf(false); private set
     var pendingImport by mutableStateOf<PresentationImport?>(null); private set
     var canUndo by mutableStateOf(false); private set
     var canRedo by mutableStateOf(false); private set
@@ -79,17 +91,67 @@ class QuizViewModel(application: Application, val repository: QuizRepository) : 
         viewModelScope.launch {
             busy = true
             try { work() }
+            catch (e: CancellationException) { throw e }
             catch (e: Exception) { message = e.message ?: "Não foi possível concluir. Sua edição foi preservada."; if (pendingImport != null) importError = message }
             finally { busy = false }
         }
     }
     fun mode(educator: Boolean) {
         if (busy) return
-        teacher = educator; repository.preferences.edit().putBoolean("teacher_mode", educator).apply()
+        fullscreen = false; teacher = educator; repository.preferences.edit().putBoolean("teacher_mode", educator).apply()
         screen = AppScreen.Home; room = null; currentCode = ""; roomError = null
         if (educator && profile != null) refreshLibrary()
     }
-    fun home() { if (busy) return; screen = AppScreen.Home; currentCode = ""; room = null; if (teacher && profile != null) refreshLibrary() }
+    fun home() { if (busy) return; fullscreen = false; screen = AppScreen.Home; currentCode = ""; room = null; if (teacher && profile != null) refreshLibrary() }
+    fun showFullscreen(value: Boolean) { fullscreen = value && roomTeacher && room?.presentation != null }
+    fun checkForUpdates(manual: Boolean = false) {
+        if (checkingUpdate || (!manual && lastUpdateCheck > 0 && SystemClock.elapsedRealtime() - lastUpdateCheck < 60 * 60 * 1000)) return
+        viewModelScope.launch {
+            checkingUpdate = true; lastUpdateCheck = SystemClock.elapsedRealtime()
+            try { appUpdate = updateChecker(); if (manual && appUpdate == null) notify("Você está usando a versão mais recente disponível.") }
+            catch (e: CancellationException) { throw e }
+            catch (_: Exception) { if (manual) notify("Não foi possível verificar a atualização. Tente novamente com internet.") }
+            finally { checkingUpdate = false }
+        }
+    }
+    fun browseReadyLessons() = perform {
+        teacher = true; repository.preferences.edit().putBoolean("teacher_mode", true).apply()
+        readyDetail = null; screen = AppScreen.Catalog
+        readyCatalog = try {
+            repository.teacherApi.request("/api/lessons").also { repository.preferences.edit().putString("ready_catalog", it.toString()).apply(); catalogOffline = false }
+        } catch (e: IOException) {
+            catalogOffline = true
+            repository.preferences.getString("ready_catalog", null)?.let(::JSONObject) ?: throw e
+        }
+    }
+    private suspend fun loadReadyDetail(id: String) {
+        require(id.matches(Regex("[a-z0-9-]{1,100}")))
+        readyDetail = try {
+            repository.teacherApi.request("/api/lessons/$id").also { repository.preferences.edit().putString("ready_lesson_$id", it.toString()).apply(); catalogOffline = false }
+        } catch (e: IOException) {
+            catalogOffline = true
+            repository.preferences.getString("ready_lesson_$id", null)?.let(::JSONObject) ?: throw e
+        }
+    }
+    fun previewReadyLesson(id: String) = perform { loadReadyDetail(id) }
+    fun closeReadyDetail() { if (!busy) readyDetail = null }
+    fun markReadyUse() {
+        pendingReadyUse = readyDetail?.optJSONObject("lesson")?.str("id") ?: ""
+        repository.preferences.edit().putString("pending_ready_use", pendingReadyUse).apply()
+    }
+    private suspend fun copyReadyLesson() {
+        if (profile == null) throw IOException("Comece com sua conta ou com um acesso temporário.")
+        val source = readyDetail?.optJSONObject("presentation") ?: throw IOException("Abra a aula antes de usar.")
+        val deck = duplicateDeck(source).put("title", source.str("title"))
+        validateLesson(deck)?.let { throw IOException(it) }
+        clearHistory(); editor = LessonDraft(deck, 0, true); repository.store(editor!!)
+        slideIndex = 0; selectedElement = null; screen = AppScreen.Editor
+        pendingReadyUse = ""; repository.preferences.edit().remove("pending_ready_use").apply()
+        // Opening first keeps the local copy and its writeId available if saving loses a response.
+        syncEditor(); notify("Sua cópia está pronta para editar e apresentar.")
+    }
+    fun useReadyLesson() = perform { copyReadyLesson() }
+    fun temporaryAndUseReadyLesson(name: String) = perform { createTemporary(name); copyReadyLesson() }
     fun leaveRoom() {
         repository.preferences.edit().remove(if (roomTeacher) "teacher_room" else "student_room").apply()
         home()
@@ -100,12 +162,13 @@ class QuizViewModel(application: Application, val repository: QuizRepository) : 
         teacher = false; repository.preferences.edit().putBoolean("teacher_mode", false).apply()
         openRoom(code, false)
     }
-    fun temporary(name: String) = perform {
+    private suspend fun createTemporary(name: String) {
         repository.teacherApi.clear()
         val response = repository.teacherApi.request("/api/profile", JSONObject().put("name", name))
         profile = response.getJSONObject("profile"); repository.profile = profile
         loadLibrary()
     }
+    fun temporary(name: String) = perform { createTemporary(name) }
     fun startPairing() = perform {
         val verifier = randomToken()
         val response = repository.teacherApi.request("/api/native/start", JSONObject().put("challenge", sha256(verifier)).put("deviceName", "${Build.MANUFACTURER} ${Build.MODEL}".take(80)))
@@ -114,6 +177,9 @@ class QuizViewModel(application: Application, val repository: QuizRepository) : 
         repository.preferences.edit().putString("pair_id", pendingPair).putLong("pair_expires", pairExpires).apply()
     }
     fun cancelPairing() {
+        clearPairing(); pendingReadyUse = ""; repository.preferences.edit().remove("pending_ready_use").apply()
+    }
+    private fun clearPairing() {
         pendingPair = ""; repository.secrets.set("pair_verifier", "")
         repository.preferences.edit().remove("pair_id").remove("pair_expires").apply()
     }
@@ -130,8 +196,12 @@ class QuizViewModel(application: Application, val repository: QuizRepository) : 
                 repository.preferences.edit().putString("device_id", id).apply()
                 profile = response.getJSONObject("profile"); repository.profile = profile
                 if (oldProfile?.str("id") != profile?.str("id")) old.forEach { repository.store(LessonDraft(duplicateDeck(it.deck), 0, true)) }
-                cancelPairing(); notify("Conta vinculada. Suas aulas estão disponíveis aqui.")
+                clearPairing(); notify("Conta vinculada. Suas aulas estão disponíveis aqui.")
                 loadLibrary()
+                if (pendingReadyUse.isNotBlank()) {
+                    val pendingId = pendingReadyUse
+                    perform { loadReadyDetail(pendingId); copyReadyLesson() }
+                }
             }
         } catch (e: ApiError) { if (e.status in listOf(401, 410)) { cancelPairing(); notify(e.message) } }
         catch (_: IOException) { /* Browser approval can continue while reconnecting. */ }
@@ -237,18 +307,27 @@ class QuizViewModel(application: Application, val repository: QuizRepository) : 
             items.forEach { e -> when (axis) { "left" -> e.put("x", left); "center" -> e.put("x", (left + right - e.optDouble("w")) / 2); "right" -> e.put("x", right - e.optDouble("w")); "top" -> e.put("y", top); "middle" -> e.put("y", (top + bottom - e.optDouble("h")) / 2); "bottom" -> e.put("y", bottom - e.optDouble("h")) } }
         }
     }
-    fun prepareImport(uri: Uri) = perform { importError = null; pendingImport = readPresentation(repository.context, repository.teacherApi, uri); importedImages.clear() }
+    fun prepareImport(uri: Uri) = perform {
+        importError = null; importOpening = true; importedImages.clear()
+        try {
+            pendingImport = readPresentation(repository.context, repository.teacherApi, uri)
+            applyImport(pendingImport!!.deck.arr("slides").objects().indices.toSet())
+        } finally { importOpening = false }
+    }
     fun cancelImport() { if (!busy) { pendingImport = null; importedImages.clear() } }
     fun acceptImport(indices: Set<Int>) = perform {
-        val source = pendingImport ?: return@perform; val selected = source.deck.arr("slides").objects().filterIndexed { index, _ -> index in indices }.map(::duplicateSlide)
+        importOpening = true
+        try { applyImport(indices) } finally { importOpening = false }
+    }
+    private suspend fun applyImport(indices: Set<Int>) {
+        val source = pendingImport ?: return; val selected = source.deck.arr("slides").objects().filterIndexed { index, _ -> index in indices }.map(::duplicateSlide)
         if (selected.isEmpty()) throw IOException("Selecione pelo menos um slide.")
-        val existing = editor?.deck; if ((existing?.arr("slides")?.length() ?: 0) + selected.size > 150) throw IOException("A aula pode ter até 150 slides.")
-        if ((existing?.arr("slides")?.objects()?.count { it.str("kind") == "question" } ?: 0) + selected.count { it.str("kind") == "question" } > 50) throw IOException("Use até 50 perguntas na aula.")
+        if (selected.size > 150) throw IOException("A aula pode ter até 150 slides.")
+        if (selected.count { it.str("kind") == "question" } > 50) throw IOException("Use até 50 perguntas na aula.")
         val used = selected.flatMap { s -> listOf(s.optJSONObject("background")?.str("image") ?: "") + s.arr("elements").objects().map { it.str("src") } }.toSet()
         for (asset in source.assets.filter { "/api/media/${it.str("id")}" in used }) if (!importedImages.containsKey(asset.str("id"))) importedImages[asset.str("id")] = repository.uploadImportImage(asset)
         selected.forEach { s -> s.optJSONObject("background")?.let { bg -> importedImages[bg.str("image").removePrefix("/api/media/")]?.let { bg.put("image", it) } }; s.arr("elements").objects().forEach { e -> importedImages[e.str("src").removePrefix("/api/media/")]?.let { e.put("src", it) } } }
-        if (existing == null) { clearHistory(); editor = LessonDraft(source.deck.copy().put("id", uid()).put("slides", jsonArray(selected)), 0, true); slideIndex = 0 }
-        else { val old = editor!!; undoHistory.add(old.deck.toString()); val deck = existing.copy(); val slides = deck.arr("slides").objects().toMutableList(); slides.addAll(slideIndex + 1, selected); deck.put("slides", jsonArray(slides)); editor = old.copy(deck = deck, dirty = true); slideIndex++; canUndo = true; redoHistory.clear(); canRedo = false }
+        clearHistory(); editor = LessonDraft(source.deck.copy().put("id", uid()).put("slides", jsonArray(selected)), 0, true); slideIndex = 0
         repository.store(editor!!); selectedElement = null; selection = emptySet(); pendingImport = null; importedImages.clear(); screen = AppScreen.Editor; notify("${selected.size} slides importados. Salve para sincronizar com a conta.")
     }
     fun addElement(type: String) {
@@ -327,6 +406,7 @@ class QuizViewModel(application: Application, val repository: QuizRepository) : 
     }
     fun openRoom(code: String, asTeacher: Boolean) {
         roomGeneration++; liveClock = null
+        fullscreen = false; cloudNotice = null
         currentCode = code; roomTeacher = asTeacher; room = null; screen = AppScreen.Room; roomError = null; connected = true; lastHeartbeat = 0; lastFullRoom = 0
         repository.preferences.edit().putString(if (asTeacher) "teacher_room" else "student_room", code).apply()
     }
@@ -425,6 +505,30 @@ class QuizViewModel(application: Application, val repository: QuizRepository) : 
     fun answer(option: Int) = perform {
         val snapshot = room ?: return@perform
         try { repository.studentApi.request("/api/rooms/${snapshot.code}/answer", JSONObject().put("index", snapshot.index).put("option", option)) }
+        finally { refreshRoom(force = true) }
+    }
+    fun dismissPendingWord() { if (!busy) { cloudPending = null; repository.preferences.edit().remove("cloud_pending").apply(); cloudNotice = null } }
+    fun sendCloudWord(value: String) = perform {
+        val state = room ?: return@perform
+        val cloud = state.wordCloud ?: return@perform
+        val player = state.me?.str("id") ?: return@perform
+        val previous = cloudPending?.takeIf { it.str("room") == state.code && it.str("player") == player && it.str("slideId") == cloud.str("slideId") }
+        val word = previous?.str("word") ?: java.text.Normalizer.normalize(value.trim().replace('’', '\''), java.text.Normalizer.Form.NFC)
+        cloudNoticeError = true
+        if (word.isBlank() || word.length > 40 || word.any(Char::isWhitespace)) { cloudNotice = "Envie uma palavra por vez, com até 40 caracteres."; return@perform }
+        if (previous == null && cloud.arr("words").objects().any { cloudWordKey(it.str("word")) == cloudWordKey(word) }) { cloudNotice = "“$word” já está na nuvem. Tente outra palavra para ganhar 100 pontos."; return@perform }
+        if (!vmCanSendCloud(state) && previous == null) { cloudNotice = "A nuvem está pausada. Aguarde o professor continuar."; return@perform }
+        val pending = previous ?: JSONObject().put("room", state.code).put("player", player).put("slideId", cloud.str("slideId")).put("word", word).put("writeId", uid())
+        cloudPending = pending; repository.preferences.edit().putString("cloud_pending", pending.toString()).commit()
+        try {
+            val result = repository.studentApi.request("/api/rooms/${state.code}/word", pending)
+            cloudPending = null; repository.preferences.edit().remove("cloud_pending").apply()
+            cloudNoticeError = false
+            cloudNotice = if (result.optBoolean("added")) "“$word” entrou na nuvem! +${result.optInt("pointsAwarded", 100)} pontos." else "“$word” já teve seu envio confirmado. Seus pontos foram preservados."
+        } catch (e: ApiError) {
+            if (e.status != 429 && e.status < 500) { cloudPending = null; repository.preferences.edit().remove("cloud_pending").apply() }
+            cloudNotice = e.message
+        } catch (e: IOException) { cloudNotice = "Não foi possível confirmar “$word”. Toque em tentar novamente; o mesmo envio não soma pontos duas vezes." }
         finally { refreshRoom(force = true) }
     }
     fun control(action: String, target: Int? = null, playerId: String? = null) = perform {

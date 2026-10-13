@@ -35,7 +35,7 @@ class NativeUiTest {
         client = FixtureClient()
         repository = QuizRepository(app, client, client)
         repository.profile = JSONObject().put("id", "11111111-1111-4111-8111-111111111111").put("name", "Professora Clara").put("permanent", true)
-        vm = QuizViewModel(app, repository)
+        vm = QuizViewModel(app, repository) { null }
         compose.setContent { QuizEduTheme { Box(Modifier.sizeIn(maxWidth = 360.dp, maxHeight = 560.dp)) { QuizEduApp(vm) } } }
     }
     @Test fun guestCanJoinOrOpenCreationWithoutAnInlineRegistrationForm() {
@@ -122,12 +122,13 @@ class NativeUiTest {
         compose.onNodeWithContentDescription("Avatar Luz").assertIsSelected()
         compose.onNodeWithTag("student-join-action").assertIsDisplayed()
     }
-    @Test fun studentKeepsCurrentScoreAcrossQuestionResultAndPresentationWithoutClassroomLists() {
+    @Test fun studentKeepsCurrentScoreAndPinnedRankingAcrossQuestionResultAndPresentation() {
         val initial = studentQuestion()
         client.transition(initial)
         compose.runOnIdle { vm.openRoom("123456", false) }
         compose.waitUntil(10000) { vm.room?.version == "question:1" }
         compose.onNodeWithTag("student-current-score").assertTextEquals("1.500 pontos").assertIsDisplayed()
+        compose.onNodeWithTag("student-ranking").assertIsDisplayed()
         compose.onNodeWithText("2º lugar").assertIsDisplayed()
         compose.onNodeWithText("Pergunta 1 de 3").assertIsDisplayed()
         compose.onNodeWithText("Quanto é 2 + 2?").assertIsDisplayed()
@@ -135,7 +136,7 @@ class NativeUiTest {
         compose.onNodeWithTag("student-current-score").assertIsDisplayed()
         compose.onNodeWithTag("student-exit").assertIsDisplayed()
         compose.onNodeWithText("Aluno 100").assertDoesNotExist()
-        compose.onNodeWithText("Classificação").assertDoesNotExist()
+        compose.onNodeWithTag("student-ranking").assertIsDisplayed()
 
         val results = initial.copy().put("status", "results").put("version", "results:2").put("revision", 2).put("correct", 1).put("explanation", "Somar duas unidades a duas unidades resulta em quatro.")
         results.getJSONObject("me").put("score", 2200).put("answered", true).put("roundCorrect", true).put("roundPoints", 700)
@@ -144,7 +145,7 @@ class NativeUiTest {
         compose.onNodeWithTag("student-current-score").assertTextEquals("2.200 pontos").assertIsDisplayed()
         compose.onNodeWithText("Resposta certa!").performScrollTo().assertIsDisplayed()
         compose.onNodeWithText("+700 pontos nesta rodada").assertIsDisplayed()
-        compose.onNodeWithText("Classificação").assertDoesNotExist()
+        compose.onNodeWithTag("student-ranking").assertIsDisplayed()
 
         val slide = newSlide("blank").put("title", "Números e quantidades")
         slide.arr("elements").put(newElement("text", "azul").put("x", 40).put("y", 40).put("w", 1000).put("h", 180).put("doc", richText("Números e quantidades")))
@@ -174,6 +175,68 @@ class NativeUiTest {
         compose.waitUntil(10000) { vm.room?.me != null }
         compose.onNodeWithTag("student-current-score").assertTextEquals("1.500 pontos").assertIsDisplayed()
         assertEquals(participantId, vm.room!!.me!!.str("id"))
+    }
+    @Test fun catalogCopiesAnIndependentLessonAndItsCloudRemainsEditable() {
+        compose.onNodeWithTag("ready-lessons").performScrollTo().performClick()
+        compose.waitUntil(10000) { vm.readyCatalog != null && !vm.busy }
+        compose.onNodeWithTag("lesson-search").performTextInput("opiniao")
+        compose.onNodeWithTag("ready-artigo-opiniao-9-ano-aula-1").performScrollTo().performClick()
+        compose.waitUntil(10000) { vm.readyDetail != null && !vm.busy }
+        compose.onNodeWithTag("use-ready-lesson").assertIsDisplayed().performClick()
+        compose.waitUntil(10000) { vm.screen == AppScreen.Editor && !vm.busy }
+        assertEquals(1, vm.editor!!.revision)
+        assertNotEquals(client.readySource.str("id"), vm.editor!!.id)
+        assertEquals("Artigo de opinião", vm.editor!!.deck.str("title"))
+        val id = vm.editor!!.id
+        compose.runOnIdle { vm.selectSlide(1) }
+        compose.onNodeWithTag("cloud-prompt").performScrollTo().performTextReplacement("Que palavras ajudam a argumentar?")
+        assertEquals("Que palavras ajudam a argumentar?", repository.local(id)!!.deck.arr("slides").getJSONObject(1).getJSONObject("wordCloud").str("prompt"))
+        assertNotEquals("Que palavras ajudam a argumentar?", client.readySource.arr("slides").getJSONObject(1).getJSONObject("wordCloud").str("prompt"))
+    }
+    @Test fun cloudRetriesLostAcknowledgementsWithoutDoublePointsAndWarnsAboutDuplicateWords() {
+        val initial = studentQuestion().put("status", "wordcloud").put("version", "cloud:1").put("revision", 1)
+            .put("presentation", JSONObject().put("index", 1).put("total", 2).put("slide", newSlide("wordcloud")))
+            .put("wordCloud", JSONObject().put("slideId", uid()).put("prompt", "Uma palavra para argumentar").put("accepting", true).put("pointsPerWord", 100).put("words", JSONArray()).put("myWords", JSONArray()))
+        initial.getJSONObject("me").put("score", 0)
+        client.transition(initial); client.loseFirstWordAck = true
+        compose.runOnIdle { vm.openRoom("123456", false) }
+        compose.waitUntil(10000) { vm.room?.status == "wordcloud" }
+        compose.onNodeWithTag("student-ranking").assertIsDisplayed()
+        compose.runOnIdle { vm.sendCloudWord("Tese") }
+        compose.waitUntil(10000) { !vm.busy && vm.cloudPending != null && vm.room?.me?.optInt("score") == 100 }
+        val writeId = vm.cloudPending!!.str("writeId")
+        assertEquals(writeId, JSONObject(repository.preferences.getString("cloud_pending", "{}")!!).str("writeId"))
+        compose.onNodeWithTag("cloud-send").performScrollTo().assertIsDisplayed().assertTextContains("Tentar novamente").performClick()
+        compose.waitUntil(10000) { !vm.busy && vm.cloudPending == null }
+        assertEquals(100, vm.room!!.me!!.optInt("score")); assertEquals(2, client.cloudRequests)
+        compose.onNodeWithTag("student-ranking").assertIsDisplayed()
+        compose.runOnIdle { vm.sendCloudWord("TESE") }
+        compose.waitUntil(10000) { !vm.busy && vm.cloudNotice?.contains("já está na nuvem") == true }
+        assertEquals(2, client.cloudRequests)
+        compose.runOnIdle { vm.sendCloudWord("Opinião") }
+        compose.waitUntil(10000) { !vm.busy && vm.room?.me?.optInt("score") == 200 }
+        assertEquals(2, vm.room!!.wordCloud!!.arr("myWords").length())
+        compose.onNodeWithTag("student-current-score").assertTextEquals("200 pontos").assertIsDisplayed()
+        val paused = vm.room!!.raw.copy().put("status", "slide").put("version", "cloud:4").put("revision", 4)
+        paused.getJSONObject("wordCloud").put("accepting", false)
+        client.transition(paused)
+        compose.waitUntil(10000) { vm.room?.version == "cloud:4" }
+        compose.onNodeWithTag("cloud-send").performScrollTo().assertIsNotEnabled()
+        compose.onNodeWithTag("student-ranking").assertIsDisplayed()
+    }
+    @Test fun teacherFullscreenShowsAndThenRemovesTheBriefRanking() {
+        val state = studentQuestion().put("isHost", true).put("status", "results").put("version", "results:8").put("revision", 8)
+            .put("presentation", JSONObject().put("index", 1).put("step", 0).put("total", 3).put("slide", newSlide("blank")))
+        client.transition(state)
+        compose.runOnIdle { vm.openRoom("123456", true) }
+        compose.waitUntil(10000) { vm.room?.version == "results:8" }
+        compose.runOnIdle { vm.showFullscreen(true) }
+        compose.onNodeWithTag("fullscreen-presentation").assertIsDisplayed()
+        compose.onNodeWithTag("ranking-spotlight").assertIsDisplayed()
+        Thread.sleep(6500)
+        compose.onNodeWithTag("ranking-spotlight").assertDoesNotExist()
+        compose.runOnIdle { vm.showFullscreen(false) }
+        compose.onNodeWithTag("teacher-controls").assertIsDisplayed()
     }
     private fun studentQuestion(): JSONObject {
         val now = System.currentTimeMillis()
@@ -255,6 +318,11 @@ class NativeUiTest {
         assertEquals("", QuizRepository(app).secrets.get("test_session"))
     }
     private class FixtureClient : QuizClient {
+        @Volatile var cloudRequests = 0
+        @Volatile var loseFirstWordAck = false
+        private val wordWrites = mutableSetOf<String>()
+        val readySource = newDeck().put("title", "Artigo de opinião").put("slides", JSONArray().put(newSlide("cover")).put(newSlide("wordcloud")))
+        private fun readyMetadata() = JSONObject().put("id", "artigo-opiniao-9-ano-aula-1").put("title", "Artigo de opinião").put("subject", "Português").put("subjectId", "portugues").put("grade", "9").put("gradeLabel", "9º ano").put("unit", "Aula 1").put("description", "Tese e argumentos").put("slideCount", 2).put("questionCount", 0).put("cloudCount", 1).put("objectives", JSONArray(listOf("Reconhecer opiniões"))).put("tags", JSONArray(listOf("tese")))
         @Volatile var examplesUnavailable = false
         private var participant: JSONObject? = null
         @Volatile private var liveRoom: JSONObject? = null
@@ -272,6 +340,26 @@ class NativeUiTest {
         override fun clear() {}
         override suspend fun image(bytes: ByteArray): JSONObject = throw IllegalStateException("No network uploads in UI tests.")
         override suspend fun request(path: String, data: JSONObject?, method: String): JSONObject {
+            if (path == "/api/lessons") return JSONObject().put("lessons", JSONArray().put(readyMetadata())).put("subjects", JSONArray().put(JSONObject().put("id", "portugues").put("name", "Português"))).put("grades", JSONArray().put(JSONObject().put("id", "9").put("name", "9º ano")))
+            if (path == "/api/lessons/artigo-opiniao-9-ano-aula-1") return JSONObject().put("lesson", readyMetadata()).put("presentation", readySource.copy())
+            if (path == "/api/presentations" && data != null) return JSONObject().put("presentation", JSONObject().put("deck", data.getJSONObject("deck").copy()).put("revision", 1).put("writeId", data.str("writeId")))
+            if (path.endsWith("/word")) {
+                cloudRequests++
+                val payload = data!!
+                val added = wordWrites.add(payload.str("writeId"))
+                if (added) {
+                    val next = liveRoom!!.copy(); val cloud = next.getJSONObject("wordCloud")
+                    val entry = JSONObject().put("id", payload.str("writeId")).put("word", payload.str("word"))
+                    cloud.arr("words").put(entry); cloud.arr("myWords").put(entry.copy())
+                    val me = next.getJSONObject("me"); me.put("score", me.optInt("score") + 100)
+                    val player = next.arr("players").objects().find { it.str("id") == me.str("id") }
+                    if (player == null) next.arr("players").put(me.copy()) else player.put("score", me.optInt("score"))
+                    next.put("revision", next.optInt("revision") + 1).put("version", "cloud:${next.optInt("revision")}")
+                    transition(next)
+                }
+                if (loseFirstWordAck) { loseFirstWordAck = false; throw java.io.IOException("Lost acknowledgement") }
+                return JSONObject().put("accepted", true).put("added", added).put("pointsAwarded", if (added) 100 else 0)
+            }
             if (path == "/api/examples") {
                 if (examplesUnavailable) throw java.io.IOException("Offline example fixture")
                 val questions = JSONArray((0..5).map { index -> JSONObject().put("id", uid()).put("kind", listOf("multiple", "true_false", "image", "scenario", "multiple", "multiple")[index])

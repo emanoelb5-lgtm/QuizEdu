@@ -65,6 +65,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
     }
     if (!vm.roomTeacher && state.me == null && state.status !in listOf("finished", "closed")) { JoinScreen(vm, state); return }
     if (!vm.roomTeacher) { StudentRoomScreen(vm, state); return }
+    if (vm.fullscreen) { FullscreenPresentation(vm, state); return }
     val context = LocalContext.current
     Column(Modifier.fillMaxSize()) {
     LazyColumn(Modifier.weight(1f).fillMaxWidth().testTag("room-content"), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
@@ -87,13 +88,15 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
             "slide" -> {
                 val presentation = state.presentation
                 val slide = presentation?.optJSONObject("slide")
-                if (presentation?.optBoolean("blackout") == true) item { Surface(color = Color.Black, shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f)) { Box(contentAlignment = Alignment.Center) { Text("Atenção à explicação do professor", color = Color.White) } } }
+                if (state.wordCloud != null) item { WordCloudPanel(vm, state) }
+                else if (presentation?.optBoolean("blackout") == true) item { Surface(color = Color.Black, shape = RoundedCornerShape(12.dp), modifier = Modifier.fillMaxWidth().aspectRatio(16f / 9f)) { Box(contentAlignment = Alignment.Center) { Text("Atenção à explicação do professor", color = Color.White) } } }
                 else if (slide != null) item { SlideView(slide, Modifier.fillMaxWidth(), step = presentation.optInt("step")) }
                 if (presentation != null) item { Text("Slide ${presentation.optInt("index") + 1} de ${presentation.optInt("total")}${if (presentation.optBoolean("review")) " · Revisão" else ""}", color = EduMuted) }
                 if (state.question != null && presentation?.optBoolean("review") == true) item { QuestionPanel(vm, state, revealed = true) }
                 if (!vm.roomTeacher) item { InfoCard("Acompanhe a explicação. As perguntas aparecem aqui quando o professor avançar a aula.") }
             }
             "question" -> item { QuestionPanel(vm, state, revealed = false) }
+            "wordcloud" -> item { WordCloudPanel(vm, state) }
             "results" -> {
                 item { Heading("Resultado da rodada", "Os pontos somam ao longo de toda a aula.") }
                 item { QuestionPanel(vm, state, revealed = true) }
@@ -105,7 +108,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
             }
         }
         if (vm.roomTeacher) state.presentation?.optJSONObject("slide")?.str("notes")?.takeIf { it.isNotBlank() }?.let { notes -> item { OutlinedCard { Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) { Text("Anotações privadas", fontWeight = FontWeight.Bold); Text(notes, color = EduMuted) } } } }
-        if (state.status in listOf("slide", "question", "results", "finished")) {
+        if (state.status in listOf("slide", "wordcloud", "question", "results", "finished")) {
             item { Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) { Text("Classificação", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold, modifier = Modifier.weight(1f)); if (state.question != null && state.status != "finished") Text("${state.raw.optInt("answeredCount")}/${state.players.size} respostas", color = EduMuted, fontSize = 12.sp) } }
             val ranked = if (state.status == "finished") state.players.drop(2) else state.players
             itemsIndexed(ranked, key = { _, p -> p.str("id") }) { _, player -> PlayerRow(player, state.me?.str("id")) }
@@ -114,11 +117,12 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
             item { Text("Roteiro da aula", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold) }
             itemsIndexed(outline, key = { _, s -> "outline-${s.str("id")}" }) { index, s ->
                 OutlinedButton(onClick = { vm.control("goto", target = index) }, enabled = !vm.busy && vm.connected && state.status in listOf("slide", "results"), modifier = Modifier.fillMaxWidth()) {
-                    Icon(if (s.str("kind") == "question") Icons.Default.Quiz else Icons.Default.AutoAwesomeMotion, null)
+                    Icon(when (s.str("kind")) { "question" -> Icons.Default.Quiz; "wordcloud" -> Icons.Default.Cloud; else -> Icons.Default.AutoAwesomeMotion }, null)
                     Spacer(Modifier.width(9.dp)); Text("${index + 1}. ${s.str("title")}", modifier = Modifier.weight(1f), maxLines = 2, overflow = TextOverflow.Ellipsis)
                 }
             }
         }
+        if (state.presentation != null) item { FilledTonalButton(onClick = { vm.showFullscreen(true) }, modifier = Modifier.fillMaxWidth()) { Icon(Icons.Default.Fullscreen, null); Spacer(Modifier.width(8.dp)); Text("Apresentar em tela cheia") } }
         if (vm.roomTeacher) item { TextButton(onClick = { openWeb(context, "/sala/${state.code}/tela") }) { Icon(Icons.Default.OpenInBrowser, null); Spacer(Modifier.width(8.dp)); Text("Abrir tela da apresentação no navegador") } }
     }
     if (vm.roomTeacher && state.status != "finished") TeacherControls(vm, state, onClose = { closeConfirm = true })
@@ -131,7 +135,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
     var avatar by rememberSaveable(state.code) { mutableStateOf(avatarOption(vm.repository.preferences.getString("student_avatar", "") ?: "").id) }
     val keyboard = LocalSoftwareKeyboardController.current
     val context = LocalContext.current
-    val canJoin = state.status == "lobby" || (state.presentation != null && state.status == "slide")
+    val canJoin = state.status == "lobby" || (state.presentation != null && state.status in listOf("slide", "wordcloud"))
     Column(Modifier.fillMaxSize().imePadding()) {
         LazyColumn(Modifier.weight(1f).fillMaxWidth(), contentPadding = PaddingValues(22.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
             item { Heading("Entrar na sala", state.title) }
@@ -176,7 +180,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
         InfoCard("No computador, abra esta sala no Prativerso com a mesma conta. O celular passa a controlar a apresentação e o placar.")
     } }
 }
-@Composable private fun TeacherControls(vm: QuizViewModel, state: RoomSnapshot, onClose: () -> Unit) {
+@Composable internal fun TeacherControls(vm: QuizViewModel, state: RoomSnapshot, onClose: () -> Unit) {
     val enabled = !vm.busy && vm.connected && state.isHost
     Surface(color = Color.White, shadowElevation = 8.dp, modifier = Modifier.fillMaxWidth().testTag("teacher-controls")) {
         Column(Modifier.padding(horizontal = 20.dp, vertical = 12.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
@@ -185,14 +189,15 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
                 Button(onClick = { vm.control("start") }, enabled = enabled && (state.players.isNotEmpty() || state.presentation != null), modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp).testTag("teacher-primary-action")) { Icon(Icons.Default.PlayArrow, null); Spacer(Modifier.width(8.dp)); Text(if (state.presentation != null) "Iniciar apresentação" else "Iniciar quiz") }
             } else {
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (state.presentation != null) OutlinedButton(onClick = { vm.control("previous") }, enabled = enabled && (state.presentation!!.optInt("index") > 0 || state.presentation!!.optInt("step") > 0) && state.status != "question", modifier = Modifier.weight(1f).heightIn(min = 52.dp)) { Icon(Icons.Default.SkipPrevious, null); Text("Anterior") }
-                    Button(onClick = { vm.control(if (state.status == "question") "end_round" else "next") }, enabled = enabled, modifier = Modifier.weight(1f).heightIn(min = 52.dp).testTag("teacher-primary-action")) { Text(if (state.status == "question") "Revelar resultado" else "Próximo"); Spacer(Modifier.width(5.dp)); Icon(Icons.Default.SkipNext, null) }
+                    if (state.presentation != null) OutlinedButton(onClick = { vm.control("previous") }, enabled = enabled && (state.presentation!!.optInt("index") > 0 || state.presentation!!.optInt("step") > 0) && state.status in listOf("slide", "results"), modifier = Modifier.weight(1f).heightIn(min = 52.dp)) { Icon(Icons.Default.SkipPrevious, null); Text("Anterior") }
+                    Button(onClick = { vm.control(when (state.status) { "question" -> "end_round"; "wordcloud" -> "end_cloud"; else -> "next" }) }, enabled = enabled, modifier = Modifier.weight(1f).heightIn(min = 52.dp).testTag("teacher-primary-action")) { Text(when (state.status) { "question" -> "Revelar resultado"; "wordcloud" -> "Concluir nuvem"; else -> "Próximo" }); Spacer(Modifier.width(5.dp)); Icon(Icons.Default.SkipNext, null) }
                 }
             }
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween) {
-                if (state.presentation != null && state.status != "lobby") TextButton(onClick = { vm.control("blackout") }, enabled = enabled && state.status in listOf("slide", "results")) { Icon(if (state.presentation!!.optBoolean("blackout")) Icons.Default.Visibility else Icons.Default.VisibilityOff, null); Spacer(Modifier.width(6.dp)); Text(if (state.presentation!!.optBoolean("blackout")) "Mostrar telão" else "Pausar telão", fontSize = 13.sp) }
+                if (state.presentation != null && state.status != "lobby") TextButton(onClick = { vm.control("blackout") }, enabled = enabled && state.status in listOf("slide", "wordcloud", "results")) { Icon(if (state.presentation!!.optBoolean("blackout")) Icons.Default.Visibility else Icons.Default.VisibilityOff, null); Spacer(Modifier.width(6.dp)); Text(if (state.presentation!!.optBoolean("blackout")) "Mostrar telão" else "Pausar telão", fontSize = 13.sp) }
                 TextButton(onClick = onClose, enabled = enabled) { Text("Encerrar sala", fontSize = 13.sp) }
             }
+            if (state.wordCloud != null && state.status == "slide" && state.presentation?.optBoolean("blackout") != true) TextButton(onClick = { vm.control("resume_cloud") }, enabled = enabled) { Text("Retomar envios da nuvem") }
         }
     }
 }
