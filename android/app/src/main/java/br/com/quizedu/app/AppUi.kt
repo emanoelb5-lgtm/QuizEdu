@@ -214,13 +214,19 @@ fun openWeb(context: Context, path: String) {
         text = { Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
             OutlinedTextField(value = name, onValueChange = { name = it.take(30) }, label = { Text("Seu nome") }, singleLine = true, modifier = Modifier.fillMaxWidth().testTag("trial-name"))
             Text("O acesso temporário dura 30 dias neste aparelho.", color = EduMuted)
-        } }, confirmButton = { TextButton(onClick = { createAfterTrial = true; trialOpen = false; vm.temporary(name.trim()) }, enabled = name.trim().length >= 2 && !vm.busy) { Text("Continuar") } },
+            Row(verticalAlignment = Alignment.CenterVertically) { Checkbox(vm.acceptedTerms, vm::acceptTerms); Text("Aceito os termos de uso e vou respeitar a turma.", Modifier.weight(1f)) }
+            TextButton(onClick = { openWeb(context, "/termos") }) { Text("Ler os termos de uso") }
+        } }, confirmButton = { TextButton(onClick = { createAfterTrial = true; trialOpen = false; vm.temporary(name.trim()) }, enabled = vm.acceptedTerms && name.trim().length >= 2 && !vm.busy) { Text("Continuar") } },
         dismissButton = { TextButton(onClick = { trialOpen = false }, enabled = !vm.busy) { Text("Cancelar") } })
     LazyColumn(Modifier.fillMaxSize().testTag("teacher-home-content"), contentPadding = PaddingValues(22.dp), verticalArrangement = Arrangement.spacedBy(18.dp)) {
         item { Heading(if (vm.profile == null) "Criar uma atividade" else "Minhas apresentações") }
         item { ReadyLessonsButton(vm) }
         item { AppUpdateCard(vm) }
         item { PrivacyLinks() }
+        if (vm.profile != null && !vm.acceptedTerms) item { OutlinedCard { Column(Modifier.padding(16.dp)) {
+            Text("Antes de publicar conteúdos, leia os termos de uso.")
+            Row(verticalAlignment = Alignment.CenterVertically) { Checkbox(vm.acceptedTerms, vm::acceptTerms); Text("Aceito os termos e vou respeitar a turma.", Modifier.weight(1f)) }
+        } } }
         if (vm.pendingPair.isNotBlank()) item { ElevatedCard {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
                 Text("Entrar na conta", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)

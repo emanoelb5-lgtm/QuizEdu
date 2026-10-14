@@ -419,6 +419,7 @@ class QuizViewModel(application: Application, val repository: QuizRepository, pr
     }
     fun saveLesson() = perform { syncEditor(); notify("Aula salva na sua conta.") }
     private suspend fun syncEditor() {
+        if (!acceptedTerms) throw IOException("Leia e aceite os termos de uso na tela inicial antes de publicar conteúdos.")
         val draft = editor ?: return
         try { editor = repository.sync(draft) }
         catch (e: Exception) { editor = repository.local(draft.id) ?: draft; throw e }
@@ -439,6 +440,7 @@ class QuizViewModel(application: Application, val repository: QuizRepository, pr
         repository.removeLocal(id); loadLibrary(); notify("Aula excluída.")
     }
     fun uploadImage(uri: Uri, elementId: String? = null, question: Boolean = false, background: Boolean = false, optionIndex: Int? = null) = perform {
+        if (!acceptedTerms) throw IOException("Leia e aceite os termos de uso antes de enviar imagens.")
         val path = repository.upload(uri)
         // Changes are applied after the upload without discarding the current deck.
         busy = false

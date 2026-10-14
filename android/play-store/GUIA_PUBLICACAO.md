@@ -233,7 +233,7 @@ Prativerso is a classroom interaction app for teachers and students.
 
 Teacher access (no existing account or password required):
 1. In the Android app choose "Criar uma atividade" or "Começar", then
-   "Experimentar sem conta". Enter "Play Review" and choose "Continuar".
+   "Experimentar sem conta". Enter "Play Review", accept the terms checkbox and choose "Continuar".
    This creates a fresh review session; do not use a previously supplied login.
 2. Use "Explorar aulas por disciplina" to open the Portuguese lesson
    "Artigo de opinião" and choose the option to use/copy the lesson.

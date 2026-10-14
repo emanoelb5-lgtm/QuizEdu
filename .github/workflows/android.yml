@@ -51,16 +51,16 @@ jobs:
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         run: node scripts/android/sign.mjs
       - name: Compilar e verificar modelos, código e testes de interface
-        run: gradle -p android --no-daemon :app:testDirectDebugUnitTest :app:testPlayDebugUnitTest :app:lintDebug :app:assembleDirectDebug :app:assembleDirectDebugAndroidTest
+        run: gradle -p android --no-daemon :app:testDirectDebugUnitTest :app:testPlayDebugUnitTest :app:lintDirectDebug :app:lintPlayDebug :app:assembleDirectDebug :app:assembleDirectDebugAndroidTest
       - name: Permitir aceleração do emulador
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
           sudo udevadm control --reload-rules
           sudo udevadm trigger --name-match=kvm
-      - name: Testar interface nativa no Android 15
+      - name: Testar interface nativa no Android 16
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d
         with:
-          api-level: 35
+          api-level: 36
           arch: x86_64
           target: google_apis
           profile: pixel_2
@@ -74,7 +74,7 @@ jobs:
             adb pull /sdcard/Android/data/br.com.quizedu.app/files/store-screenshots/. android/store-screenshots/
       - name: Compilar APK direto e AAB da Google Play assinados
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-        run: gradle -p android --no-daemon :app:assembleDirectRelease :app:bundlePlayRelease :app:lintRelease
+        run: gradle -p android --no-daemon :app:assembleDirectRelease :app:bundlePlayRelease :app:lintDirectRelease :app:lintPlayRelease
       - name: Preparar ferramenta oficial de validação do AAB
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         run: curl --fail --location --retry 2 https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar --output /tmp/prativerso-bundletool.jar
