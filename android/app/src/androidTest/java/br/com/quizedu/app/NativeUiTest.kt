@@ -36,6 +36,7 @@ class NativeUiTest {
         repository = QuizRepository(app, client, client)
         repository.profile = JSONObject().put("id", "11111111-1111-4111-8111-111111111111").put("name", "Professora Clara").put("permanent", true)
         vm = QuizViewModel(app, repository) { null }
+        vm.acceptTerms(true)
         compose.setContent { QuizEduTheme { Box(Modifier.sizeIn(maxWidth = 360.dp, maxHeight = 560.dp)) { QuizEduApp(vm) } } }
     }
     @Test fun guestCanJoinOrOpenCreationWithoutAnInlineRegistrationForm() {
@@ -131,6 +132,16 @@ class NativeUiTest {
         compose.onNodeWithText("Você está na sala!").performScrollTo().assertIsDisplayed()
         assertEquals("Luana", vm.room!!.me!!.str("name")); assertEquals("adventurer-02", vm.room!!.me!!.str("avatar"))
         assertEquals("123456", repository.preferences.getString("student_room", ""))
+    }
+    @Test fun studentCanJoinAQuestionAlreadyInProgressAndGetsTheCurrentSlide() {
+        val now = System.currentTimeMillis()
+        client.transition(JSONObject().put("code", "123456").put("title", "Aula em andamento").put("teacher", "Clara").put("status", "question").put("index", 2).put("total", 5).put("serverNow", now).put("version", "question:2").put("revision", 2).put("isHost", false).put("players", JSONArray()).put("startsAt", now - 1000).put("endsAt", now + 60000).put("question", JSONObject().put("text", "O que caracteriza uma opinião?").put("options", JSONArray(listOf("Um ponto de vista", "Uma medida"))).put("seconds", 60)))
+        compose.runOnIdle { vm.openRoom("123456", false) }
+        compose.waitUntil(10000) { vm.room?.status == "question" }
+        compose.runOnIdle { vm.join("Aluno novo", "adventurer-01") }
+        compose.waitUntil(10000) { vm.room?.me != null }
+        compose.onNodeWithText("O que caracteriza uma opinião?").assertIsDisplayed()
+        compose.runOnIdle { assertEquals("question", vm.room!!.status); assertEquals(2, vm.room!!.index); assertEquals(0, vm.room!!.me!!.optInt("score")) }
     }
     @Test fun illustratedAssetsDecodeLocallyAndLegacyChoicesStillResolve() = runBlocking {
         val loader = ImageLoader(app)
@@ -480,7 +491,7 @@ class NativeUiTest {
             if (path == "/api/ping") return JSONObject().put("serverNow", System.currentTimeMillis())
             if (path == "/api/dashboard") return JSONObject().put("profile", JSONObject().put("id", "11111111-1111-4111-8111-111111111111").put("name", "Professora Clara").put("permanent", true)).put("quizzes", JSONArray()).put("rooms", JSONArray())
             if (path == "/api/presentations") return JSONObject().put("presentations", JSONArray())
-            if (path.endsWith("/join")) { participant = JSONObject().put("id", uid()).put("name", data!!.str("name")).put("avatar", data.str("avatar")).put("score", 0).put("position", 1); return JSONObject().put("joined", true) }
+            if (path.endsWith("/join")) { participant = JSONObject().put("id", uid()).put("name", data!!.str("name")).put("avatar", data.str("avatar")).put("score", 0).put("position", 1); liveRoom = liveRoom?.copy()?.put("me", participant)?.put("players", JSONArray().put(participant))?.put("revision", liveRoom!!.optInt("revision") + 1); return JSONObject().put("joined", true) }
             if (path.endsWith("/heartbeat")) return JSONObject().put("ok", true)
             if (path.startsWith("/api/rooms/")) { roomRequests++; return liveRoom?.copy() ?: JSONObject().put("code", "123456").put("title", "Aula de ciências").put("teacher", "Clara").put("status", "lobby").put("index", -1).put("total", 1).put("isHost", false).put("serverNow", System.currentTimeMillis()).put("version", "lobby:-1:0").put("players", if (participant == null) JSONArray() else JSONArray().put(participant)).put("me", participant ?: JSONObject.NULL) }
             throw IllegalStateException("Unexpected fixture route: $path")

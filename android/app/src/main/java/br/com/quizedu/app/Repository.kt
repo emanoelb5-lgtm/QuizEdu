@@ -65,6 +65,7 @@ class SecretStore(context: Context) {
 
 interface QuizClient {
     fun clear()
+    fun forgetRoom(code: String) {}
     suspend fun request(path: String, data: JSONObject? = null, method: String = if (data == null) "GET" else "POST"): JSONObject
     suspend fun image(bytes: ByteArray): JSONObject
     suspend fun presentation(bytes: ByteArray, name: String): JSONObject = throw IOException("Importação indisponível neste acesso.")
@@ -75,6 +76,10 @@ interface QuizClient {
 class QuizApi(private val secrets: SecretStore, private val teacher: Boolean) : QuizClient {
     private val cookieKey = if (teacher) "teacher_cookies" else "student_cookies"
     override fun clear() { secrets.set(cookieKey, ""); if (teacher) secrets.set("teacher_token", "") }
+    override fun forgetRoom(code: String) {
+        val cookies = try { JSONObject(secrets.get(cookieKey).ifEmpty { "{}" }) } catch (_: Exception) { JSONObject() }
+        cookies.remove("qe_player_$code"); cookies.remove("qe_resume_$code"); secrets.set(cookieKey, cookies.toString())
+    }
     override suspend fun request(path: String, data: JSONObject?, method: String): JSONObject =
         exchange(path, method, data?.toString()?.toByteArray(), "application/json")
     override suspend fun image(bytes: ByteArray): JSONObject = exchange("/api/media", "POST", bytes, "image/jpeg")
@@ -169,6 +174,7 @@ class QuizRepository(val context: Context, teacherClient: QuizClient? = null, st
     }
     @Synchronized fun local(id: String): LessonDraft? = try { LessonDraft.fromJson(JSONObject(file(id).openRead().use { String(it.readBytes()) })) } catch (_: Exception) { null }
     @Synchronized fun localLessons(): List<LessonDraft> = directory().listFiles()?.filter { it.extension == "json" }?.mapNotNull { local(it.nameWithoutExtension) } ?: emptyList()
+    @Synchronized fun eraseAccountDrafts() { directory().deleteRecursively() }
     @Synchronized fun removeLocal(id: String) { file(id).delete() }
     suspend fun load(id: String): LessonDraft {
         val local = local(id)

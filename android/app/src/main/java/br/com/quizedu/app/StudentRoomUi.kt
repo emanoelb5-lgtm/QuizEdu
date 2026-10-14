@@ -21,6 +21,7 @@ import coil.compose.AsyncImage
         StudentOverview(state)
         if (!vm.connected) Text("Reconectando… Aguarde para responder.", color = EduMuted, fontSize = 14.sp, modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp))
         LazyColumn(Modifier.weight(1f).fillMaxWidth().testTag("student-room-content"), contentPadding = PaddingValues(20.dp), verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            item { StudentSafetyActions(vm) }
             when (state.status) {
                 "lobby" -> item {
                     Column(Modifier.fillMaxWidth().padding(vertical = 32.dp), horizontalAlignment = Alignment.CenterHorizontally, verticalArrangement = Arrangement.spacedBy(10.dp)) {

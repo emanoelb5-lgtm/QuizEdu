@@ -1,3 +1,14 @@
+Prativerso Android 1.6.0 — edição preparada para a Google Play.
+
+- Alunos podem entrar durante slides, nuvens, perguntas e resultados; recebem a etapa atual.
+- Entrada atualiza o estado completo da sala e mantém os pontos já registrados.
+- Privacidade, termos de uso e contato acessíveis no aplicativo.
+- Exclusão de conta e de participação com remoção dos dados associados.
+- Avisos privados ao professor, ocultação de palavras e remoção de participantes durante a aula.
+- APK direto e AAB da Google Play assinados com o certificado existente.
+- A edição da Google Play usa a loja para atualizações.
+- Android alvo 16 (API 36); Android mínimo 7 (API 24).
+
 Prativerso Android 1.5.1 — artigo de opinião ilustrado.
 
 - Suporte às seis novas imagens das enquetes da aula de Português.

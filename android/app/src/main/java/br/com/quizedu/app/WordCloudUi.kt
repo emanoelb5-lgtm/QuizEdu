@@ -115,9 +115,15 @@ private data class CloudLayout(val words: List<CloudPlacement>, val height: Floa
         if (state.presentation?.optBoolean("blackout") != true) AnimatedWordCloud(cloud.arr("words").objects(), Modifier.fillMaxWidth().height(260.dp).testTag("word-cloud"))
         else InfoCard("A nuvem está pausada no telão. Aguarde o professor continuar.")
         if (!vm.roomTeacher && state.me != null) {
+            val context = LocalContext.current
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Checkbox(vm.acceptedTerms, vm::acceptTerms)
+                Text("Vou respeitar os colegas e a atividade.", modifier = Modifier.weight(1f))
+            }
+            TextButton(onClick = { openWeb(context, "/termos") }) { Text("Ler os combinados da sala") }
             OutlinedTextField(pending?.str("word") ?: word, { word = it.take(40) }, label = { Text("Sua palavra") }, singleLine = true, enabled = !vm.busy && pending == null,
-                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send), keyboardActions = KeyboardActions(onSend = { if (!vm.busy && vm.connected && vmCanSendCloud(state)) vm.sendCloudWord(word) }), modifier = Modifier.fillMaxWidth().testTag("cloud-word-input"))
-            Button(onClick = { vm.sendCloudWord(word) }, enabled = !vm.busy && vm.connected && (pending != null || vmCanSendCloud(state)) && (pending != null || word.isNotBlank()), modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp).testTag("cloud-send")) {
+                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Send), keyboardActions = KeyboardActions(onSend = { if (!vm.busy && vm.connected && vm.acceptedTerms && vmCanSendCloud(state)) vm.sendCloudWord(word) }), modifier = Modifier.fillMaxWidth().testTag("cloud-word-input"))
+            Button(onClick = { vm.sendCloudWord(word) }, enabled = vm.acceptedTerms && !vm.busy && vm.connected && (pending != null || vmCanSendCloud(state)) && (pending != null || word.isNotBlank()), modifier = Modifier.fillMaxWidth().heightIn(min = 50.dp).testTag("cloud-send")) {
                 Icon(Icons.Default.Send, null); Spacer(Modifier.width(8.dp)); Text(if (pending != null) "Tentar novamente" else "Enviar palavra · +100")
             }
             if (pending != null) TextButton(onClick = vm::dismissPendingWord, enabled = !vm.busy) { Text("Digitar outra palavra") }

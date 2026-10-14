@@ -143,6 +143,10 @@ fun openWeb(context: Context, path: String) {
 }
 @Composable private fun AppUpdateCard(vm: QuizViewModel) {
     val context = LocalContext.current
+    if (BuildConfig.PLAY_DISTRIBUTION) {
+        TextButton(onClick = { openWeb(context, "https://play.google.com/store/apps/details?id=${BuildConfig.APPLICATION_ID}") }, modifier = Modifier.fillMaxWidth()) { Text("Versão ${BuildConfig.VERSION_NAME} · Google Play", color = EduMuted) }
+        return
+    }
     val update = vm.appUpdate
     if (update != null) OutlinedCard { Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text("Prativerso ${update.version} disponível", fontWeight = FontWeight.Bold)
@@ -178,6 +182,7 @@ fun openWeb(context: Context, path: String) {
         } }
         item { ReadyLessonsButton(vm) }
         item { AppUpdateCard(vm) }
+        item { PrivacyLinks() }
         val previous = vm.repository.preferences.getString("student_room", "") ?: ""
         if (previous.matches(Regex("[0-9]{6}"))) item { OutlinedCard(onClick = { vm.openRoom(previous, false) }) {
             Row(Modifier.padding(18.dp).fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) { Icon(Icons.Default.Restore, null, tint = EduBlue); Spacer(Modifier.width(12.dp)); Column { Text("Retomar minha sala", fontWeight = FontWeight.Bold); Text("Código $previous", color = EduMuted) } }
@@ -198,6 +203,8 @@ fun openWeb(context: Context, path: String) {
     var name by rememberSaveable { mutableStateOf("") }
     var expanded by remember { mutableStateOf(false) }
     var confirmDelete by remember { mutableStateOf<JSONObject?>(null) }
+    var deleteAccountOpen by remember { mutableStateOf(false) }
+    if (deleteAccountOpen) DeleteAccountDialog(vm) { deleteAccountOpen = false }
     var trialOpen by remember { mutableStateOf(false) }
     var createAfterTrial by remember { mutableStateOf(false) }
     LaunchedEffect(vm.profile, vm.busy) {
@@ -213,6 +220,7 @@ fun openWeb(context: Context, path: String) {
         item { Heading(if (vm.profile == null) "Criar uma atividade" else "Minhas apresentações") }
         item { ReadyLessonsButton(vm) }
         item { AppUpdateCard(vm) }
+        item { PrivacyLinks() }
         if (vm.pendingPair.isNotBlank()) item { ElevatedCard {
             Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(13.dp)) {
                 Text("Entrar na conta", style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
@@ -243,6 +251,7 @@ fun openWeb(context: Context, path: String) {
                         DropdownMenuItem(text = { Text("Vincular ou trocar conta") }, onClick = { expanded = false; onSignIn() })
                         DropdownMenuItem(text = { Text("Aparelhos vinculados") }, onClick = { expanded = false; vm.showDevices() })
                         DropdownMenuItem(text = { Text("Abrir Prativerso no navegador") }, onClick = { expanded = false; openWeb(context, "/aulas") })
+                        DropdownMenuItem(text = { Text("Excluir conta e dados") }, onClick = { expanded = false; deleteAccountOpen = true })
                         DropdownMenuItem(text = { Text("Sair desta conta") }, onClick = { expanded = false; vm.signOut() })
                     }
                 }

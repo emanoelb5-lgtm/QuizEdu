@@ -25,6 +25,7 @@ fun availableUpdate(release: JSONObject, installedCode: Int): AppUpdate? {
 }
 
 suspend fun latestAppUpdate(): AppUpdate? = withContext(Dispatchers.IO) {
+    if (BuildConfig.PLAY_DISTRIBUTION) return@withContext null
     val connection = URL("https://api.github.com/repos/emanoelb5-lgtm/QuizEdu/releases/latest").openConnection() as HttpURLConnection
     try {
         connection.connectTimeout = 7000; connection.readTimeout = 7000

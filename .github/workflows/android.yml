@@ -1,4 +1,4 @@
-name: Prativerso Android — compilar, testar e publicar APK
+name: Prativerso Android — compilar, testar e publicar APK e AAB
 
 on:
   push:
@@ -51,7 +51,7 @@ jobs:
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         run: node scripts/android/sign.mjs
       - name: Compilar e verificar modelos, código e testes de interface
-        run: gradle -p android --no-daemon :app:testDebugUnitTest :app:lintDebug :app:assembleDebug :app:assembleDebugAndroidTest
+        run: gradle -p android --no-daemon :app:testDirectDebugUnitTest :app:testPlayDebugUnitTest :app:lintDebug :app:assembleDirectDebug :app:assembleDirectDebugAndroidTest
       - name: Permitir aceleração do emulador
         run: |
           echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
@@ -66,23 +66,31 @@ jobs:
           profile: pixel_2
           disable-animations: true
           emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -camera-back none -camera-front none
-          script: gradle -p android --no-daemon :app:connectedDebugAndroidTest
-      - name: Compilar APK de distribuição assinado
+          script: |
+            adb shell wm size 1080x1920
+            adb shell wm density 420
+            gradle -p android --no-daemon :app:connectedDirectDebugAndroidTest
+            mkdir -p android/store-screenshots
+            adb pull /sdcard/Android/data/br.com.quizedu.app/files/store-screenshots/. android/store-screenshots/
+      - name: Compilar APK direto e AAB da Google Play assinados
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
-        run: gradle -p android --no-daemon :app:assembleRelease :app:lintRelease
+        run: gradle -p android --no-daemon :app:assembleDirectRelease :app:bundlePlayRelease :app:lintRelease
+      - name: Preparar ferramenta oficial de validação do AAB
+        if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+        run: curl --fail --location --retry 2 https://github.com/google/bundletool/releases/download/1.18.3/bundletool-all-1.18.3.jar --output /tmp/prativerso-bundletool.jar
       - name: Verificar assinatura e preparar arquivos
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         run: node scripts/android/package.mjs
-      - name: Publicar APK no GitHub Releases
+      - name: Publicar aplicativo e pacote para a loja
         if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           tag="android-v${{ steps.version.outputs.version }}-build.${{ github.run_number }}"
           if gh release view "$tag" >/dev/null 2>&1; then
-            gh release upload "$tag" "release-assets/${{ steps.version.outputs.apk }}" release-assets/SHA256SUMS.txt --clobber
+            gh release upload "$tag" release-assets/* --clobber
           else
-            gh release create "$tag" "release-assets/${{ steps.version.outputs.apk }}" release-assets/SHA256SUMS.txt --target "$GITHUB_SHA" --title 'Prativerso Android ${{ steps.version.outputs.version }}' --notes-file android/RELEASE_NOTES.md --latest
+            gh release create "$tag" release-assets/* --target "$GITHUB_SHA" --title 'Prativerso Android ${{ steps.version.outputs.version }}' --notes-file android/RELEASE_NOTES.md --latest
           fi
       - name: Guardar resultados dos testes
         if: always()
@@ -98,7 +106,7 @@ jobs:
         if: success() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
-          name: Prativerso-Android-APK
+          name: Prativerso-Android-Publicacao
           path: release-assets/
           retention-days: 30
       - name: Remover assinatura do runner

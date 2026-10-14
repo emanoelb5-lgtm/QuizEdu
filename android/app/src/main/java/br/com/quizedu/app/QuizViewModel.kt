@@ -111,6 +111,7 @@ class QuizViewModel(application: Application, val repository: QuizRepository, pr
     fun home() { if (busy) return; fullscreen = false; screen = AppScreen.Home; currentCode = ""; room = null; if (teacher && profile != null) refreshLibrary() }
     fun showFullscreen(value: Boolean) { fullscreen = value && roomTeacher && room?.presentation != null }
     fun checkForUpdates(manual: Boolean = false) {
+        if (BuildConfig.PLAY_DISTRIBUTION) return
         if (checkingUpdate || (!manual && lastUpdateCheck > 0 && SystemClock.elapsedRealtime() - lastUpdateCheck < 60 * 60 * 1000)) return
         viewModelScope.launch {
             checkingUpdate = true; lastUpdateCheck = SystemClock.elapsedRealtime()
@@ -212,8 +213,30 @@ class QuizViewModel(application: Application, val repository: QuizRepository, pr
         } catch (e: ApiError) { if (e.status in listOf(401, 410)) { cancelPairing(); notify(e.message) } }
         catch (_: IOException) { /* Browser approval can continue while reconnecting. */ }
     }
-    fun signOut() {
-        if (busy) return
+    fun deleteAccount(confirmation: String) = perform {
+        repository.teacherApi.request("/api/account/delete", JSONObject().put("confirmation", confirmation))
+        repository.eraseAccountDrafts()
+        editor = null; selectedElement = null; clearHistory(); pendingReadyUse = ""
+        currentCode = ""; room = null; roomGeneration++
+        clearAccount()
+        notify("Conta e dados excluídos do Prativerso.")
+    }
+    fun deleteParticipation() = perform {
+        repository.studentApi.request("/api/rooms/$currentCode/delete-participation", JSONObject().put("confirmation", "EXCLUIR"))
+        repository.studentApi.forgetRoom(currentCode); repository.preferences.edit().remove("student_room").remove("student_name").remove("student_avatar").remove("cloud_pending").remove("poll_pending").apply()
+        cloudPending = null; pollPending = null; roomGeneration++; currentCode = ""; room = null; screen = AppScreen.Home
+        notify("Sua participação foi excluída.")
+    }
+    fun reportClassroom(message: String) = perform {
+        repository.studentApi.request("/api/rooms/$currentCode/report", JSONObject().put("message", message))
+        notify("Aviso enviado ao professor de forma privada.")
+    }
+    fun moderate(action: String, id: String) = perform {
+        repository.teacherApi.request("/api/rooms/$currentCode/moderate", JSONObject().put("action", action).put("id", id))
+        refreshRoom(force = true)
+    }
+    fun signOut() { if (!busy) clearAccount() }
+    private fun clearAccount() {
         repository.teacherApi.clear(); repository.profile = null; profile = null
         lessons = emptyList(); quizzes = emptyList(); activeRooms = emptyList(); detectedPresentations = emptyList(); detectedPresentationOwner = ""; screen = AppScreen.Home
         repository.preferences.edit().remove("teacher_room").remove("device_id").apply()
@@ -526,7 +549,7 @@ class QuizViewModel(application: Application, val repository: QuizRepository, pr
     fun join(name: String, avatar: String) = perform {
         repository.studentApi.request("/api/rooms/$currentCode/join", JSONObject().put("name", name).put("avatar", avatar))
         repository.preferences.edit().putString("student_name", name).putString("student_avatar", avatar).apply()
-        room = null; refreshRoom()
+        room = null; refreshRoom(force = true)
     }
     fun answer(option: Int) = perform {
         val snapshot = room ?: return@perform
@@ -555,7 +578,10 @@ class QuizViewModel(application: Application, val repository: QuizRepository, pr
         finally { refreshRoom(force = true) }
     }
     fun dismissPendingWord() { if (!busy) { cloudPending = null; repository.preferences.edit().remove("cloud_pending").apply(); cloudNotice = null } }
+    var acceptedTerms by mutableStateOf(repository.preferences.getBoolean("accepted_terms_20261014", false)); private set
+    fun acceptTerms(accepted: Boolean) { acceptedTerms = accepted; repository.preferences.edit().putBoolean("accepted_terms_20261014", accepted).apply() }
     fun sendCloudWord(value: String) = perform {
+        if (!acceptedTerms) { cloudNotice = "Leia e aceite os combinados da sala antes de enviar."; return@perform }
         val state = room ?: return@perform
         val cloud = state.wordCloud ?: return@perform
         val player = state.me?.str("id") ?: return@perform

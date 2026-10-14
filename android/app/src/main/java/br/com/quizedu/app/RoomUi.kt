@@ -49,7 +49,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
 @Composable fun RoomScreen(vm: QuizViewModel) {
     val state = vm.room
     var closeConfirm by remember { mutableStateOf(false) }
-    if (state == null || (vm.roomTeacher && (!state.isHost || vm.roomError != null))) {
+    if (state == null || vm.roomError != null || (vm.roomTeacher && !state.isHost)) {
         Column(Modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.spacedBy(18.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Spacer(Modifier.height(25.dp))
             if (vm.roomError == null) CircularProgressIndicator()
@@ -75,6 +75,7 @@ fun points(value: Int): String = NumberFormat.getIntegerInstance(Locale("pt", "B
         } }
         if (state.presentation != null) item { FilledTonalButton(onClick = { vm.showFullscreen(true) }, modifier = Modifier.fillMaxWidth()) { Icon(Icons.Default.Fullscreen, null); Spacer(Modifier.width(8.dp)); Text("Apresentar em tela cheia") } }
         if (!vm.connected) item { InfoCard("Reconectando à sala. Sua participação e seus pontos foram preservados. As respostas precisam de conexão para serem enviadas.", true) }
+        item { ModerationPanel(vm, state) }
         when (state.status) {
             "lobby" -> {
                 if (vm.roomTeacher) item { LobbyInvite(state.code) }
