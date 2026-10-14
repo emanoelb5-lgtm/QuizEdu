@@ -88,9 +88,9 @@ jobs:
         run: |
           tag="android-v${{ steps.version.outputs.version }}-build.${{ github.run_number }}"
           if gh release view "$tag" >/dev/null 2>&1; then
-            gh release upload "$tag" release-assets/* --clobber
+            gh release upload "$tag" release-assets/*.apk release-assets/*.aab release-assets/*.zip release-assets/*.txt release-assets/*.md release-assets/*.png release-assets/*.pem --clobber
           else
-            gh release create "$tag" release-assets/* --target "$GITHUB_SHA" --title 'Prativerso Android ${{ steps.version.outputs.version }}' --notes-file android/RELEASE_NOTES.md --latest
+            gh release create "$tag" release-assets/*.apk release-assets/*.aab release-assets/*.zip release-assets/*.txt release-assets/*.md release-assets/*.png release-assets/*.pem --target "$GITHUB_SHA" --title 'Prativerso Android ${{ steps.version.outputs.version }}' --notes-file android/RELEASE_NOTES.md --latest
           fi
       - name: Guardar resultados dos testes
         if: always()
@@ -101,6 +101,13 @@ jobs:
             android/app/build/reports/
             android/app/build/outputs/androidTest-results/
             android/app/build/test-results/
+          if-no-files-found: ignore
+      - name: Guardar capturas reais para a ficha da loja
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: capturas-prativerso-loja
+          path: android/store-screenshots/
           if-no-files-found: ignore
       - name: Guardar APK assinado e checksum
         if: success() && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
