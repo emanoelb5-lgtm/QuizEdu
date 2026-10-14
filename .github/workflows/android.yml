@@ -69,7 +69,7 @@ jobs:
           script: |
             adb shell wm size 1080x1920
             adb shell wm density 420
-            gradle -p android --no-daemon :app:connectedDirectDebugAndroidTest
+            gradle -p android --no-daemon :app:connectedDirectDebugAndroidTest -Pandroid.injected.androidTest.leaveApksInstalledAfterRun=true
             mkdir -p android/store-screenshots
             adb pull /sdcard/Android/data/br.com.quizedu.app/files/store-screenshots/. android/store-screenshots/
       - name: Compilar APK direto e AAB da Google Play assinados
