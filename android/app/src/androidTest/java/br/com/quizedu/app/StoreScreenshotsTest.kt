@@ -39,13 +39,14 @@ class StoreScreenshotsTest {
         save("01-entrar-na-aula.png")
     }
     @Test fun captureNativeEditor() {
-        compose.runOnIdle { vm.mode(true) }
-        compose.waitUntil(10000) { !vm.busy }
+        compose.runOnIdle { vm.acceptTerms(true); vm.temporary("Professora Clara") }
+        compose.waitUntil(10000) { !vm.busy && vm.profile != null }
         compose.runOnIdle {
             vm.newLesson()
             vm.changeDeck { it.put("title", "Artigo de opinião") }
             vm.changeSlide { s -> s.put("title", "Minha voz, meus argumentos") }
         }
+        compose.waitUntil(10000) { vm.screen == AppScreen.Editor }
         compose.waitForIdle(); save("02-editor-de-apresentacoes.png")
     }
     private fun baseState(status: String): JSONObject {
@@ -68,11 +69,16 @@ class StoreScreenshotsTest {
     }
     private class ScreenshotClient : QuizClient {
         @Volatile var state: JSONObject? = null
+        @Volatile var profile: JSONObject? = null
         override fun clear() {}
         override suspend fun image(bytes: ByteArray): JSONObject = error("No uploads in screenshots")
         override suspend fun request(path: String, data: JSONObject?, method: String): JSONObject = when {
             path.startsWith("/api/rooms/") -> state!!.copy()
-            path == "/api/dashboard" -> JSONObject().put("profile", JSONObject.NULL).put("quizzes", JSONArray()).put("rooms", JSONArray())
+            path == "/api/profile" -> {
+                profile = JSONObject().put("id", "11111111-1111-4111-8111-111111111111").put("name", data!!.str("name")).put("permanent", false)
+                JSONObject().put("profile", profile)
+            }
+            path == "/api/dashboard" -> JSONObject().put("profile", profile ?: JSONObject.NULL).put("quizzes", JSONArray()).put("rooms", JSONArray())
             path == "/api/presentations/active" -> JSONObject().put("ownerId", "").put("presentations", JSONArray())
             path == "/api/presentations" -> JSONObject().put("presentations", JSONArray())
             else -> JSONObject().put("serverNow", System.currentTimeMillis())
