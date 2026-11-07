@@ -1,0 +1,47 @@
+name: Verificar migracao Cloudflare do Prativerso
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - "app/**"
+      - "lib/**"
+      - "db/**"
+      - "drizzle/**"
+      - "vite.config.ts"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "scripts/**"
+      - "build/**"
+      - ".github/workflows/cloudflare-web-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  web-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Baixar codigo
+        uses: actions/checkout@v4
+
+      - name: Instalar pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.25.0
+
+      - name: Preparar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22.18.0"
+          cache: "pnpm"
+
+      - name: Instalar dependencias
+        run: pnpm install --frozen-lockfile
+
+      - name: Verificar tipos
+        run: pnpm typecheck
+
+      - name: Compilar web e API para Cloudflare
+        run: pnpm build
