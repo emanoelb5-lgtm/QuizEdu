@@ -2,7 +2,9 @@
 
 O Prativerso (repositório histórico QuizEdu) pode operar em uma conta Cloudflare própria, usando Workers para site e API, D1 para registros e R2 para arquivos de imagem. Não aponte o Android nem o domínio definitivo para o novo Worker antes de concluir os testes e a importação dos dados. Confira as quotas e condições dos planos gratuitos antes de habilitar recursos.
 
-**Atenção aos dados atuais:** criar o D1 vazio não migra aulas, professores, respostas nem imagens da hospedagem do ChatGPT. Faça exportação e restauração verificáveis dos dados e objetos do R2 da origem antes da troca. Não invente sessão de usuário a partir de cookies ou cabeçalhos transportados do ambiente antigo.\n\n**Contas permanentes:** o login do ChatGPT desta versão pertence ao gateway da hospedagem gerenciada. Uma publicação independente funciona com acesso temporário. Para oferecer login permanente, integre um provedor de identidade e valide as sessões no servidor antes de substituir `platformIdentity()`. Nunca aceite identidade a partir de cabeçalhos arbitrários do cliente. As rotas `/signin-with-chatgpt`, `/signout-with-chatgpt` e `/callback` não são implementadas neste Worker.
+**Atenção aos dados atuais:** criar o D1 vazio não migra aulas, professores, respostas nem imagens da hospedagem do ChatGPT. Faça exportação e restauração verificáveis dos dados e objetos do R2 da origem antes da troca. Não invente sessão de usuário a partir de cookies ou cabeçalhos transportados do ambiente antigo.
+
+**Contas permanentes:** o login do ChatGPT desta versão pertence ao gateway da hospedagem gerenciada. Uma publicação independente funciona com acesso temporário. Para oferecer login permanente, integre um provedor de identidade e valide as sessões no servidor antes de substituir `platformIdentity()`. Nunca aceite identidade a partir de cabeçalhos arbitrários do cliente. As rotas `/signin-with-chatgpt`, `/signout-with-chatgpt` e `/callback` não são implementadas neste Worker.
 
 1. Crie uma conta Cloudflare e selecione os recursos gratuitos disponíveis. Não é necessário comprar domínio.
 2. Clone este repositório, use Node 22.18+ (recomendado para a CLI `cf`) e execute `pnpm install --frozen-lockfile`. O repositório usa Next.js 16 + vinext e não exige Laravel/PHP.
@@ -12,7 +14,7 @@ O Prativerso (repositório histórico QuizEdu) pode operar em uma conta Cloudfla
 
 ```json
 {
-  "name": "quizedu",
+  "name": "prativerso",
   "main": "dist/server/index.js",
   "compatibility_date": "2026-05-15",
   "compatibility_flags": ["nodejs_compat"],
@@ -22,12 +24,12 @@ O Prativerso (repositório histórico QuizEdu) pode operar em uma conta Cloudfla
   "assets": {"directory": "dist/client"},
   "d1_databases": [{
     "binding": "DB",
-    "database_name": "quizedu",
+    "database_name": "prativerso",
     "database_id": "SUBSTITUA-PELO-ID-REAL"
   }],
   "r2_buckets": [{
     "binding": "BUCKET",
-    "bucket_name": "quizedu-imagens"
+    "bucket_name": "prativerso-imagens"
   }]
 }
 ```
