@@ -13,7 +13,12 @@ android {
         versionCode = 10000 + (System.getenv("QUIZEDU_BUILD_NUMBER")?.toIntOrNull() ?: 1)
         versionName = "1.6.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "SITE_URL", "\"https://quizedu-emanuel.emanuelb5.chatgpt.site\"")
+        val siteUrl = (System.getenv("PRATIVERSO_SITE_URL")
+            ?: "https://quizedu-emanuel.emanuelb5.chatgpt.site").trim().trimEnd('/')
+        require(siteUrl.startsWith("https://") && !siteUrl.any { it.isWhitespace() || it == '"' }) {
+            "PRATIVERSO_SITE_URL deve ser um endereco HTTPS valido."
+        }
+        buildConfigField("String", "SITE_URL", "\"$siteUrl\"")
     }
     flavorDimensions += "distribution"
     productFlavors {
