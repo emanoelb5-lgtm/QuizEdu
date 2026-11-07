@@ -4,7 +4,13 @@ import { INSTALL_BOOTSTRAP } from "@/lib/app-install";
 import "./globals.css";
 import "./player-app.css";
 import "./presentation.css";
+import "./presentation-workspace.css";
+import "./word-cloud.css";
+import "./poll.css";
+import "./presentation-display.css";
+import "./lesson-catalog.css";
 import "./home.css";
+import "./account.css";
 
 export const metadata: Metadata = {
   title: "Prativerso · Conhecimento em prática",

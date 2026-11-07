@@ -6,8 +6,9 @@ import {Tabs,TabsList,TabsTrigger} from "@/components/ui/tabs";
 import {Progress} from "@/components/ui/progress";
 import {GameMode,LETTERS,points,Question,scoreFor} from "@/lib/quiz";
 import {AnswerOptions,QuestionHeading} from "./question-view";
+import {PollTest} from "./poll-test";
 
-export function QuestionTest({question,mode,untimed,onClose}:{question:Question;mode:GameMode;untimed:boolean;onClose:()=>void}) {
+function GradedQuestionTest({question,mode,untimed,onClose}:{question:Question;mode:GameMode;untimed:boolean;onClose:()=>void}) {
   const [view,setView]=useState("player");const [started,setStarted]=useState(()=>Date.now());const [now,setNow]=useState(()=>Date.now());const [chosen,setChosen]=useState<number|null>(null);const [elapsed,setElapsed]=useState(0);const [result,setResult]=useState(false);
   const seconds=Math.max(0,Math.ceil((started+question.seconds*1000-now)/1000));
   useEffect(()=>{if(result)return;const timer=setInterval(()=>setNow(Date.now()),250);return()=>clearInterval(timer);},[result,started]);
@@ -28,3 +29,5 @@ export function QuestionTest({question,mode,untimed,onClose}:{question:Question;
     </div></div>
   </DialogContent></Dialog>;
 }
+
+export function QuestionTest(props:{question:Question;mode:GameMode;untimed:boolean;onClose:()=>void}){return props.question.kind==="poll"?<PollTest question={props.question} onClose={props.onClose}/>:<GradedQuestionTest {...props}/>;}

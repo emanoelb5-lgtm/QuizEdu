@@ -1,10 +1,13 @@
+import { readAccountSession } from "./account-session";
 import { AVATARS } from "./avatars";
 import { env } from "cloudflare:workers";
 import { DURATIONS, MAX_POINTS, mediaPath, Question, QUESTION_TEMPLATES, Quiz, quizError, RoomState, scoreFor } from "./quiz";
 import { playerManifest } from "./player-app";
 import {deckQuestions,questionIndexAt,RoomPresentation,SlideDeck,slideSteps,validateDeck} from "./presentation";
+import {cloudWord,MAX_CLOUD_WORDS,WORD_CLOUD_POINTS} from "./word-cloud";
 import {movePresentation} from "./presentation-flow";
 import {roomEventStream,roomVersion} from "./room-events";
+import {pollChoices,pollSummary} from "./poll";
 
 export class HttpError extends Error { constructor(public status: number, message: string) { super(message); } }
 export const db = () => { if (!env.DB) throw new HttpError(503, "O serviço está indisponível. Tente novamente em alguns instantes."); return env.DB; };
@@ -14,15 +17,9 @@ export function sessionCookie(request: Request, name: string, secret: string, se
 export async function hash(secret: string) { return Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(secret)))).map(n => n.toString(16).padStart(2, "0")).join(""); }
 export function secret() { return Array.from(crypto.getRandomValues(new Uint8Array(32))).map(n => n.toString(16).padStart(2, "0")).join(""); }
 export type Educator = { id: string; name: string; expires_at: number; auth_id: string | null };
-export function platformIdentity(request: Request) {
-  // Sites dispatch strips visitor-supplied identity headers before forwarding.
-  // Other hosting origins must supply their own verified identity integration.
-  if (!new URL(request.url).hostname.endsWith(".chatgpt.site")) return null;
-  const id = request.headers.get("oai-authenticated-user-id"); const email = request.headers.get("oai-authenticated-user-email");
-  if (!id || !email || id.length > 200 || email.length > 254) return null;
-  let name = request.headers.get("oai-authenticated-user-full-name") || email.split("@")[0];
-  if (request.headers.get("oai-authenticated-user-full-name-encoding") === "percent-encoded-utf-8") { try { name = decodeURIComponent(name); } catch { name = email.split("@")[0]; } }
-  return { id, email, name: name.trim().slice(0,30) || "Educador" };
+export async function platformIdentity(request: Request) {
+  const account = await readAccountSession(request.headers);
+  return account ? { id: account.id, email: account.email, name: account.name } : null;
 }
 export async function temporaryEducator(request: Request) {
   const token = cookieValue(request, "qe_host");
@@ -36,7 +33,7 @@ export async function educator(request: Request, required = true) {
     if (!user && required) throw new HttpError(401,"Vincule novamente sua conta no aplicativo.");
     return user;
   }
-  const identity = platformIdentity(request);
+  const identity = await platformIdentity(request);
   const permanent = identity ? await db().prepare("SELECT id, name, expires_at, auth_id FROM educators WHERE auth_id = ?").bind(identity.id).first<Educator>() : null;
   const user = permanent || await temporaryEducator(request);
   if (!user && required) throw new HttpError(401, "Entre como educador para continuar."); return user;
@@ -53,10 +50,10 @@ export async function body(request: Request,limit=65536) {
 export function cleanName(value: unknown, max = 30) { if (typeof value !== "string") throw new HttpError(400, "Digite seu nome."); const name = value.trim().replace(/\s+/g, " ").replace(/[\u0000-\u001f\u007f]/g, ""); if (name.length < 2 || name.length > max) throw new HttpError(400, `Use um nome de 2 a ${max} caracteres.`); return name; }
 export function validateQuiz(raw: any, draft = false): Quiz {
   if (!raw || typeof raw.id !== "string" || !/^[a-f0-9-]{36}$/.test(raw.id) || typeof raw.title !== "string" || raw.title.length > 100 || !Array.isArray(raw.questions) || !raw.questions.length || raw.questions.length > 50) throw new HttpError(400, "O quiz está em um formato inválido.");
-  if (raw.questions.some((q: any) => !q || typeof q.text !== "string" || q.text.length > 400 || !Array.isArray(q.options) || q.options.length < 2 || q.options.length > 4 || q.options.some((o: any) => typeof o !== "string" || o.length > 180) || typeof q.explanation !== "string" || q.explanation.length > 500 || !Number.isInteger(q.correct) || q.correct < (draft ? -1 : 0) || q.correct >= q.options.length || !DURATIONS.includes(q.seconds) || (q.kind !== undefined && !QUESTION_TEMPLATES.some(t => t.kind === q.kind)) || (q.image && !mediaPath(q.image)) || (q.imageAlt !== undefined && (typeof q.imageAlt !== "string" || q.imageAlt.length > 180)) || (q.optionImages && (!Array.isArray(q.optionImages) || q.optionImages.length !== q.options.length || q.optionImages.some((v: unknown) => typeof v !== "string" || (v && !mediaPath(v))))))) throw new HttpError(400, "Verifique o formato das perguntas e das imagens.");
+  if (raw.questions.some((q: any) => !q || typeof q.text !== "string" || q.text.length > 400 || !Array.isArray(q.options) || q.options.length < 2 || q.options.length > (q.kind === "poll" ? 8 : 4) || q.options.some((o: any) => typeof o !== "string" || o.length > 180) || typeof q.explanation !== "string" || q.explanation.length > 500 || !Number.isInteger(q.correct) || q.correct < (draft || q.kind === "poll" ? -1 : 0) || q.correct >= q.options.length || !DURATIONS.includes(q.seconds) || (q.allowMultiple !== undefined && typeof q.allowMultiple !== "boolean") || (q.kind !== undefined && !QUESTION_TEMPLATES.some(t => t.kind === q.kind)) || (q.image && !mediaPath(q.image)) || (q.imageAlt !== undefined && (typeof q.imageAlt !== "string" || q.imageAlt.length > 180)) || (q.optionImages && (!Array.isArray(q.optionImages) || q.optionImages.length !== q.options.length || q.optionImages.some((v: unknown) => typeof v !== "string" || (v && !mediaPath(v))))))) throw new HttpError(400, "Verifique o formato das perguntas e das imagens.");
   if ((raw.mode !== undefined && !["speed", "accuracy"].includes(raw.mode)) || (raw.untimed !== undefined && typeof raw.untimed !== "boolean") || (raw.untimed && raw.mode !== "accuracy")) throw new HttpError(400, "Escolha um modo de jogo válido. O tempo livre é do modo aprendizagem.");
   if ([raw.subject, raw.topic].some(v => v !== undefined && (typeof v !== "string" || v.length > 60))) throw new HttpError(400, "Use até 60 caracteres para disciplina e assunto.");
-  const quiz: Quiz = { id: raw.id, title: draft ? raw.title : raw.title.trim(), mode: raw.mode || "speed", untimed: !!raw.untimed, subject: (raw.subject || "").trim(), topic: (raw.topic || "").trim(), questions: raw.questions.map((q: any) => ({ id: typeof q.id === "string" ? q.id.slice(0,64) : crypto.randomUUID(), text: draft ? q.text : q.text.trim(), options: q.options.map((o: string) => draft ? o : o.trim()), correct: q.correct, seconds: q.seconds, explanation: draft ? q.explanation : q.explanation.trim(), ...(q.kind ? {kind:q.kind} : {}), ...(q.image ? { image: q.image, imageAlt: q.imageAlt || "Imagem da pergunta" } : {}), ...(q.optionImages ? { optionImages: q.optionImages } : {}) })) };
+  const quiz: Quiz = { id: raw.id, title: draft ? raw.title : raw.title.trim(), mode: raw.mode || "speed", untimed: !!raw.untimed, subject: (raw.subject || "").trim(), topic: (raw.topic || "").trim(), questions: raw.questions.map((q: any) => ({ id: typeof q.id === "string" ? q.id.slice(0,64) : crypto.randomUUID(), text: draft ? q.text : q.text.trim(), options: q.options.map((o: string) => draft ? o : o.trim()), correct: q.correct, seconds: q.seconds, explanation: draft ? q.explanation : q.explanation.trim(), ...(q.kind ? {kind:q.kind} : {}), ...(q.kind === "poll" ? {allowMultiple:!!q.allowMultiple,correct:-1} : {}), ...(q.image ? { image: q.image, imageAlt: q.imageAlt || "Imagem da pergunta" } : {}), ...(q.optionImages ? { optionImages: q.optionImages } : {}) })) };
   if (!draft) { const error = quizError(quiz); if (error) throw new HttpError(400, error); } return quiz;
 }
 export function quizFromRow(row: any): Quiz { return { id: row.id, title: row.title, questions: JSON.parse(row.questions), updatedAt: row.updated_at, mode: row.mode || "speed", untimed: !!row.untimed, subject: row.subject || "", topic: row.topic || "" }; }
@@ -69,14 +66,14 @@ export async function profile(request: Request) {
   return json({ profile: publicProfile(created!) }, 201, sessionCookie(request, "qe_host", token, 30 * 86400));
 }
 export async function dashboard(request: Request) {
-  const [user, temporary] = await Promise.all([educator(request, false), temporaryEducator(request)]); const identity = platformIdentity(request);
+  const [user, temporary] = await Promise.all([educator(request, false), temporaryEducator(request)]); const identity = await platformIdentity(request);
   if (!user) return json({ profile: null, identity: identity ? { name: identity.name, email: identity.email } : null, quizzes: [], rooms: [], drafts: [], history: [], importAvailable: false });
   const [q, r, d] = await db().batch([
     db().prepare("SELECT * FROM quizzes WHERE owner = ? ORDER BY updated_at DESC").bind(user.id),
     db().prepare("SELECT code, title, status, created_at, expires_at, player_count, question_index FROM rooms WHERE owner = ? ORDER BY created_at DESC LIMIT 100").bind(user.id),
     db().prepare("SELECT id, quiz, updated_at, revision, write_id FROM drafts WHERE owner = ? ORDER BY updated_at DESC LIMIT 100").bind(user.id)
   ]);
-  const active = (row: any) => ['lobby','slide','question','results'].includes(row.status) && row.expires_at > Date.now();
+  const active = (row: any) => ['lobby','slide','wordcloud','question','results'].includes(row.status) && row.expires_at > Date.now();
   return json({ profile: publicProfile(user), identity: identity ? { name: identity.name, email: identity.email } : null, quizzes: q.results.map(quizFromRow), rooms: r.results.filter(active), history: r.results.filter(row => !active(row)).map((row: any) => ({ ...row, status: row.expires_at <= Date.now() && row.status !== "finished" ? "closed" : row.status })), drafts: d.results.map((row: any) => ({ id: row.id, quiz: JSON.parse(row.quiz), updatedAt: row.updated_at, revision: row.revision, writeId: row.write_id })), importAvailable: !!temporary && !!user.auth_id && temporary.id !== user.id, temporaryId:temporary?.id });
 }
 export async function saveQuiz(request: Request) {
@@ -100,7 +97,7 @@ export async function createRoom(request: Request) {
   if(data.presentationId){const row=await db().prepare("SELECT document FROM presentations WHERE id = ? AND owner = ?").bind(String(data.presentationId),user.id).first<{document:string}>();if(!row)throw new HttpError(404,"Salve a aula antes de abrir a sala.");try{presentation=validateDeck(JSON.parse(row.document),true);}catch(e){throw new HttpError(400,(e as Error).message);}quiz={title:presentation.title,questions:JSON.stringify(deckQuestions(presentation)),mode:presentation.mode,untimed:presentation.untimed?1:0};}
   else quiz=await db().prepare("SELECT * FROM quizzes WHERE id = ? AND owner = ?").bind(String(data.quizId || ""), user.id).first<any>();
   if (!quiz) throw new HttpError(404, "Salve seu quiz antes de abrir a sala.");
-  const count = await db().prepare("SELECT COUNT(*) n FROM rooms WHERE owner = ? AND status IN ('lobby','slide','question','results') AND expires_at > ?").bind(user.id, Date.now()).first<{ n: number }>();
+  const count = await db().prepare("SELECT COUNT(*) n FROM rooms WHERE owner = ? AND status IN ('lobby','slide','wordcloud','question','results') AND expires_at > ?").bind(user.id, Date.now()).first<{ n: number }>();
   if (count!.n >= 5) throw new HttpError(400, "Você já tem 5 salas abertas. Encerre uma para continuar.");
   for (let retry = 0; retry < 8; retry++) {
     const n = crypto.getRandomValues(new Uint32Array(1))[0]; const code = String(100000 + n % 900000); const now = Date.now();
@@ -114,24 +111,26 @@ async function ticketKey(secretHash: string) {
   return crypto.subtle.importKey("raw",new TextEncoder().encode(secretHash),{name:"HMAC",hash:"SHA-256"},false,["sign","verify"]);
 }
 function ticketMessage(code: string, id: string, expires: number) { return new TextEncoder().encode(`QuizEdu:player-install:v1:${code}:${id}:${expires}`); }
-async function verifyPlayerTicket(code: string, ticket: string): Promise<PlayerIdentity | null> {
+async function verifyPlayerTicket(code: string, ticket: string, allowBlocked=false): Promise<PlayerIdentity | null> {
   const parts = ticket.split(".");
   if (parts.length !== 3 || !/^[a-f0-9-]{36}$/.test(parts[0]) || !/^\d{13}$/.test(parts[1]) || !/^[a-f0-9]{64}$/.test(parts[2])) return null;
   const [id, rawExpires, signature] = parts; const expires = Number(rawExpires);
   if (expires <= Date.now()) return null;
-  const row = await db().prepare("SELECT p.id,p.name,p.avatar,p.secret_hash,r.expires_at FROM players p JOIN rooms r ON r.code = p.room WHERE p.room = ? AND p.id = ?").bind(code,id).first<PlayerIdentity & {secret_hash:string;expires_at:number}>();
+  const row = await db().prepare("SELECT p.id,p.name,p.avatar,p.secret_hash,p.blocked,r.expires_at FROM players p JOIN rooms r ON r.code = p.room WHERE p.room = ? AND p.id = ?").bind(code,id).first<PlayerIdentity & {secret_hash:string;expires_at:number;blocked:number}>();
   if (!row || row.expires_at !== expires) return null;
+  if (row.blocked && !allowBlocked) throw new HttpError(403,"Seu acesso a esta sala foi removido pelo professor.");
   const bytes = Uint8Array.from(signature.match(/../g)!,value=>parseInt(value,16));
   if (!await crypto.subtle.verify("HMAC",await ticketKey(row.secret_hash),bytes,ticketMessage(code,id,expires))) return null;
   return {id:row.id,name:row.name,avatar:row.avatar};
 }
-export async function playerFor(request: Request, code: string): Promise<PlayerIdentity | null> {
+export async function playerFor(request: Request, code: string, allowBlocked=false): Promise<PlayerIdentity | null> {
   const token = cookieValue(request, `qe_player_${code}`);
   if (/^[a-f0-9]{64}$/.test(token)) {
-    const player = await db().prepare("SELECT id, name, avatar FROM players WHERE room = ? AND secret_hash = ?").bind(code,await hash(token)).first<PlayerIdentity>();
+    const player = await db().prepare("SELECT id, name, avatar, blocked FROM players WHERE room = ? AND secret_hash = ?").bind(code,await hash(token)).first<PlayerIdentity & {blocked:number}>();
+    if (player?.blocked && !allowBlocked) throw new HttpError(403,"Seu acesso a esta sala foi removido pelo professor.");
     if (player) return player;
   }
-  return verifyPlayerTicket(code,cookieValue(request,`qe_resume_${code}`));
+  return verifyPlayerTicket(code,cookieValue(request,`qe_resume_${code}`),allowBlocked);
 }
 export async function appManifest(request: Request) {
   const code = new URL(request.url).searchParams.get("sala") || ""; let ticket: string | undefined;
@@ -158,12 +157,12 @@ export async function resumePlayer(request: Request, code: string) {
 export async function joinRoom(request: Request, code: string) {
   const data = await body(request); const room = await getRoom(code); const previous = await playerFor(request, code);
   if (previous && room.status !== "closed") return json({ joined: true, id: previous.id });
-  if (room.status !== "lobby" && !(room.presentation && room.status === "slide")) throw new HttpError(409, room.status === "closed" || room.status === "finished" ? "Esta sala já foi encerrada." : room.presentation?"Aguarde o professor concluir a pergunta para entrar na aula.":"O quiz já começou. Aguarde o professor abrir outra sala.");
+  if (!["lobby","slide","wordcloud","question","results"].includes(room.status)) throw new HttpError(409, "Esta sala já foi encerrada. Peça ao professor um novo código.");
   const name = cleanName(data.name, 24); if (!AVATARS.includes(data.avatar)) throw new HttpError(400, "Escolha um dos avatares.");
   const token = secret(); const id = crypto.randomUUID();
   try {
-    const result = await db().prepare("INSERT INTO players (id, room, secret_hash, name, name_key, avatar, joined_at, last_seen) SELECT ?, r.code, ?, ?, ?, ?, ?, ? FROM rooms r WHERE r.code = ? AND (r.status = 'lobby' OR (r.presentation IS NOT NULL AND r.status = 'slide')) AND r.expires_at > ? AND (SELECT COUNT(*) FROM players WHERE room = r.code) < 100").bind(id, await hash(token), name, name.toLocaleLowerCase("pt-BR"), data.avatar, Date.now(), Date.now(), code, Date.now()).run();
-    if (!result.meta.changes) throw new HttpError(409, "A sala está cheia ou o quiz já começou.");
+    const result = await db().prepare("INSERT INTO players (id, room, secret_hash, name, name_key, avatar, joined_at, last_seen) SELECT ?, r.code, ?, ?, ?, ?, ?, ? FROM rooms r WHERE r.code = ? AND r.status IN ('lobby','slide','wordcloud','question','results') AND r.expires_at > ? AND (SELECT COUNT(*) FROM players WHERE room = r.code AND blocked = 0) < 100").bind(id, await hash(token), name, name.toLocaleLowerCase("pt-BR"), data.avatar, Date.now(), Date.now(), code, Date.now()).run();
+    if (!result.meta.changes) throw new HttpError(409, "A sala está cheia ou foi encerrada.");
   } catch (e) { if (String(e).includes("UNIQUE")) throw new HttpError(409, "Esse nome já está na sala. Use um apelido ou acrescente seu sobrenome."); throw e; }
   return json({ joined: true, id }, 201, sessionCookie(request, `qe_player_${code}`, token, 86400));
 }
@@ -186,27 +185,86 @@ export async function roomState(request: Request, code: string) {
   if(since){room=await getRoom(code);version=roomVersion(room);}
   const [user, me] = await Promise.all([educator(request, false), playerFor(request, code)]);
   const deck:SlideDeck|null=room.presentation?JSON.parse(room.presentation):null;const currentSlide=deck?.slides[room.slide_index]||null;const viewingQuestion=deck&&currentSlide?.kind==="question"?questionIndexAt(deck,room.slide_index):room.question_index;
-  const questions: Question[] = JSON.parse(room.questions); const q = deck&&currentSlide?.kind!=="question"?null:questions[viewingQuestion] || null; const reveal = ["slide","results", "finished", "closed"].includes(room.status);
+  const questions: Question[] = JSON.parse(room.questions); const q = deck&&currentSlide?.kind!=="question"?null:questions[viewingQuestion] || null; const reveal = ["slide","wordcloud","results", "finished", "closed"].includes(room.status);
   const players = await db().prepare(`SELECT p.id, p.name, p.avatar, p.joined_at, p.last_seen,
-    COALESCE(SUM(CASE WHEN a.question_index < ? OR (? = 1 AND a.question_index = ?) THEN a.points ELSE 0 END),0) score,
+    COALESCE(SUM(CASE WHEN a.question_index < ? OR (? = 1 AND a.question_index = ?) THEN a.points ELSE 0 END),0) + (SELECT COUNT(*) * 100 FROM cloud_words w WHERE w.room = p.room AND w.player = p.id) score,
     COALESCE(SUM(CASE WHEN a.question_index < ? OR (? = 1 AND a.question_index = ?) THEN a.correct ELSE 0 END),0) correctCount,
     COALESCE(SUM(CASE WHEN a.correct = 1 AND (a.question_index < ? OR (? = 1 AND a.question_index = ?)) THEN a.elapsed_ms ELSE 0 END),0) totalMs,
     MAX(CASE WHEN a.question_index = ? THEN 1 ELSE 0 END) answered,
     MAX(CASE WHEN a.question_index = ? AND ? = 1 THEN a.points ELSE 0 END) roundPoints,
     MAX(CASE WHEN a.question_index = ? AND ? = 1 THEN a.correct ELSE NULL END) roundCorrect,
     MAX(CASE WHEN a.question_index = ? THEN a.option ELSE NULL END) submittedOption
-    FROM players p LEFT JOIN answers a ON a.player = p.id AND a.room = p.room WHERE p.room = ? GROUP BY p.id
+    FROM players p LEFT JOIN answers a ON a.player = p.id AND a.room = p.room WHERE p.room = ? AND p.blocked = 0 GROUP BY p.id
     ORDER BY score DESC, correctCount DESC, ${room.mode === "accuracy" ? "" : "totalMs ASC,"} p.joined_at ASC, p.id ASC`).bind(room.question_index, reveal ? 1 : 0, room.question_index, room.question_index, reveal ? 1 : 0, room.question_index, room.question_index, reveal ? 1 : 0, room.question_index, viewingQuestion, viewingQuestion, reveal ? 1 : 0, viewingQuestion, reveal ? 1 : 0, viewingQuestion, code).all<any>();
+  const votes=q?.kind==="poll"?(await db().prepare("SELECT v.player,v.choices FROM poll_votes v JOIN players p ON p.id=v.player WHERE v.room = ? AND v.question_index = ? AND p.blocked = 0").bind(code,viewingQuestion).all<{player:string;choices:string}>()).results:[];
+  if(q?.kind==="poll")for(const player of players.results){player.answered=votes.some(v=>v.player===player.id)?1:0;player.roundCorrect=null;player.roundPoints=0;player.submittedOption=null;}
   const roster = players.results.map((p: any, i: number) => ({ id: p.id, name: p.name, avatar: p.avatar, score: p.score, correctCount: p.correctCount, totalMs: p.totalMs, position: i + 1, answered: !!p.answered, roundPoints: p.roundPoints, roundCorrect: p.roundCorrect === null ? null : !!p.roundCorrect, ...(user?.id === room.owner ? {lastSeen:p.last_seen} : {}) }));
   const own = me ? players.results.find(p => p.id === me.id) : null; const ownPublic = me ? roster.find(p => p.id === me.id) : null;
   const state: RoomState = { code, title: room.title, teacher: room.teacher, status: room.status, index: room.question_index, total: questions.length, startsAt: room.starts_at, endsAt: room.ends_at, serverNow: Date.now(), revision: room.roster_version, question: q ? { id: q.id, text: q.text, options: q.options, seconds: q.seconds, image: q.image, imageAlt: q.imageAlt, optionImages: q.optionImages } : null, correct: reveal && q ? q.correct : null, explanation: reveal && q ? q.explanation : null, players: roster, answeredCount: room.answered_count, isHost: user?.id === room.owner, me: ownPublic ? { ...ownPublic, option: own?.submittedOption ?? null } : null, expiresAt: room.expires_at, version, mode: room.mode || "speed", untimed: !!room.untimed, ...(user?.id === room.owner ? {presence:Object.fromEntries(players.results.map(p => [p.id,p.last_seen]))} : {}) };
   if(deck){const {question:ignoredQuestion,notes,...publicSlide}=currentSlide||{};const p:RoomPresentation={id:deck.id,index:room.slide_index,total:deck.slides.length,step:room.build_step,steps:slideSteps(currentSlide),blackout:!!room.blackout,slide:currentSlide?{...publicSlide,...(state.isHost?{notes}:{})} as RoomPresentation["slide"]:null,questionIndex:viewingQuestion,review:currentSlide?.kind==="question"&&room.status==="slide",theme:deck.theme,showSlideNumbers:deck.showSlideNumbers};if(state.isHost)p.outline=deck.slides.map((s,i)=>({id:s.id,title:s.title||`Slide ${i+1}`,kind:s.kind,questionIndex:questionIndexAt(deck,i)}));state.presentation=p;}
+  if(currentSlide?.kind==="wordcloud"){
+    const entries=await db().prepare("SELECT id,word,player FROM cloud_words WHERE room = ? AND slide_id = ? AND hidden = 0 ORDER BY created_at,id").bind(code,currentSlide.id).all<{id:string;word:string;player:string}>();
+    state.wordCloud={slideId:currentSlide.id,prompt:currentSlide.wordCloud?.prompt||currentSlide.title,accepting:room.status==="wordcloud"&&!room.blackout,words:entries.results.map(({id,word})=>({id,word})),myWords:entries.results.filter(w=>w.player===me?.id).map(({id,word})=>({id,word})),pointsPerWord:WORD_CLOUD_POINTS};
+  }
+  if(state.isHost){
+    const reports=await db().prepare("SELECT c.id,c.message,c.created_at,p.name FROM classroom_reports c JOIN players p ON p.id=c.player WHERE c.room = ? AND c.resolved = 0 ORDER BY c.created_at DESC LIMIT 50").bind(code).all();
+    (state as any).reports=reports.results;
+  }
+  state.gradingTotal=questions.filter(q=>q.kind!=="poll").length;
+  state.lastRoundIsPoll=questions[room.question_index]?.kind==="poll";
+  if(q?.kind==="poll"){
+    const mine=votes.find(v=>v.player===me?.id);
+    state.poll={allowMultiple:!!q.allowMultiple,revealed:reveal,respondents:votes.length,myChoices:mine?JSON.parse(mine.choices):[],...(reveal?pollSummary(q.options.length,votes.map(v=>JSON.parse(v.choices))):{})};
+    state.correct=null;state.question={...state.question!,kind:"poll",allowMultiple:!!q.allowMultiple};state.untimed=true;
+  }
   return json(state);
+}
+export async function votePoll(request:Request,code:string){
+  const data=await body(request),received=Date.now(),room=await getRoom(code),me=await playerFor(request,code);
+  if(!me)throw new HttpError(401,"Entre na sala antes de votar.");
+  const q:Question|undefined=JSON.parse(room.questions)[data.index];
+  if(!Number.isInteger(data.index)||data.index<0||q?.kind!=="poll")throw new HttpError(400,"Escolha uma enquete válida.");
+  let choices:number[];try{choices=pollChoices(data.choices,q);}catch(e){throw new HttpError(400,(e as Error).message);}
+  const encoded=JSON.stringify(choices);
+  const prior=await db().prepare("SELECT choices FROM poll_votes WHERE room = ? AND player = ? AND question_index = ?").bind(code,me.id,data.index).first<{choices:string}>();
+  if(prior){if(prior.choices!==encoded)throw new HttpError(409,"Seu voto já foi confirmado e não pode ser alterado.");return json({accepted:true,choices});}
+  if(room.status!=="question"||room.question_index!==data.index||!room.starts_at||received<room.starts_at||(room.ends_at!==null&&received>room.ends_at))throw new HttpError(409,"A enquete já encerrou ou ainda não começou.");
+  const result=await db().prepare(`INSERT OR IGNORE INTO poll_votes (room,player,question_index,choices,received_at)
+    SELECT r.code,?,?,?,? FROM rooms r WHERE r.code = ? AND r.status = 'question' AND r.question_index = ? AND r.starts_at <= ? AND (r.ends_at IS NULL OR r.ends_at >= ?) AND r.expires_at > ? AND json_extract(r.questions,'$[' || r.question_index || '].kind') = 'poll' AND EXISTS (SELECT 1 FROM players p WHERE p.room = r.code AND p.id = ? AND p.blocked = 0)`)
+    .bind(me.id,data.index,encoded,received,code,data.index,received,received,received,me.id).run();
+  if(!result.meta.changes){const raced=await db().prepare("SELECT choices FROM poll_votes WHERE room = ? AND player = ? AND question_index = ?").bind(code,me.id,data.index).first<{choices:string}>();if(raced?.choices!==encoded)throw new HttpError(409,"A enquete mudou ou seu voto já foi confirmado. Atualize a tela.");}
+  return json({accepted:true,choices});
+}
+export async function submitCloudWord(request:Request,code:string){
+  const data=await body(request),room=await getRoom(code),me=await playerFor(request,code);
+  if(!me)throw new HttpError(401,"Entre na sala antes de enviar palavras.");
+  if(typeof data.slideId!=="string"||typeof data.writeId!=="string"||!/^[-a-f0-9]{36}$/.test(data.writeId))throw new HttpError(400,"Atualize a atividade antes de enviar.");
+  let entry:ReturnType<typeof cloudWord>;try{entry=cloudWord(data.word);}catch(e){throw new HttpError(400,(e as Error).message);}
+  const previous=await db().prepare("SELECT id,player,word_key FROM cloud_words WHERE id = ? AND room = ? AND slide_id = ?").bind(data.writeId,code,data.slideId).first<{id:string;player:string;word_key:string}>();
+  if(previous){if(previous.player!==me.id||previous.word_key!==entry.key)throw new HttpError(409,"Este envio já foi utilizado. Digite a palavra novamente.");return json({accepted:true,added:false,id:previous.id,word:entry.word,pointsAwarded:0});}
+  const deck:SlideDeck|null=room.presentation?JSON.parse(room.presentation):null,slide=deck?.slides[room.slide_index];
+  if(room.status!=="wordcloud"||room.blackout||slide?.kind!=="wordcloud"||slide.id!==data.slideId)throw new HttpError(409,"A nuvem está pausada ou encerrada. Aguarde o professor.");
+  const result=await db().prepare(`INSERT OR IGNORE INTO cloud_words (id,room,slide_id,player,word,word_key,created_at)
+    SELECT ?,r.code,?,?,?,?,? FROM rooms r WHERE r.code = ? AND r.status = 'wordcloud' AND r.blackout = 0 AND r.expires_at > ?
+      AND json_extract(r.presentation,'$.slides[' || r.slide_index || '].id') = ?
+      AND json_extract(r.presentation,'$.slides[' || r.slide_index || '].kind') = 'wordcloud'
+      AND (SELECT COUNT(*) FROM cloud_words WHERE room = r.code AND slide_id = ?) < ? AND EXISTS (SELECT 1 FROM players p WHERE p.room = r.code AND p.id = ? AND p.blocked = 0)`)
+    .bind(data.writeId,data.slideId,me.id,entry.word,entry.key,Date.now(),code,Date.now(),data.slideId,data.slideId,MAX_CLOUD_WORDS,me.id).run();
+  if(!result.meta.changes){
+    const duplicate=await db().prepare("SELECT id,player FROM cloud_words WHERE room = ? AND slide_id = ? AND word_key = ?").bind(code,data.slideId,entry.key).first<{id:string;player:string}>();
+    if(duplicate&&duplicate.id===data.writeId&&duplicate.player===me.id)return json({accepted:true,added:false,id:duplicate.id,word:entry.word,pointsAwarded:0});
+    if(duplicate)throw new HttpError(409,`“${entry.word}” já está na nuvem. Tente outra palavra para ganhar 100 pontos.`);
+    const count=await db().prepare("SELECT COUNT(*) n FROM cloud_words WHERE room = ? AND slide_id = ?").bind(code,data.slideId).first<{n:number}>();
+    if((count?.n||0)>=MAX_CLOUD_WORDS)throw new HttpError(409,"Esta nuvem está completa. Aguarde a próxima atividade.");
+    throw new HttpError(409,"A atividade mudou. Atualize a tela antes de enviar.");
+  }
+  return json({accepted:true,added:true,id:data.writeId,word:entry.word,pointsAwarded:WORD_CLOUD_POINTS},201);
 }
 export async function answer(request: Request, code: string) {
   const data = await body(request); const received = Date.now(); const room = await getRoom(code); const me = await playerFor(request, code);
   if (!me) throw new HttpError(401, "Entre na sala antes de responder.");
   if (!Number.isInteger(data.index) || !Number.isInteger(data.option)) throw new HttpError(400, "Resposta inválida.");
+  if((JSON.parse(room.questions)[data.index] as Question|undefined)?.kind==="poll")throw new HttpError(400,"Esta atividade é uma enquete. Atualize o aplicativo para votar.");
   const existing = await db().prepare("SELECT option FROM answers WHERE room = ? AND player = ? AND question_index = ?").bind(code, me.id, data.index).first<{ option: number }>();
   if (existing) { if (existing.option !== data.option) throw new HttpError(409, "Sua resposta já foi enviada e não pode ser alterada."); return json({ accepted: true, option: existing.option }); }
   if (room.status !== "question" || room.question_index !== data.index || !room.starts_at || received < room.starts_at || (room.ends_at !== null && received > room.ends_at)) throw new HttpError(409, "O tempo desta pergunta terminou ou a rodada ainda não começou.");
@@ -219,8 +277,8 @@ export async function answer(request: Request, code: string) {
       CASE WHEN r.mode = 'accuracy' OR NOT EXISTS (
         SELECT 1 FROM answers a WHERE a.room = r.code AND a.question_index = r.question_index AND a.correct = 1
       ) THEN ? ELSE ? END, ?, ?
-    FROM rooms r WHERE r.code = ? AND r.status = 'question' AND r.question_index = ? AND r.starts_at <= ? AND (r.ends_at IS NULL OR r.ends_at >= ?) AND r.expires_at > ?`)
-    .bind(me.id, data.index, data.option, correct ? 1 : 0, correct ? MAX_POINTS : 0, scoreFor(correct, elapsed, q.seconds * 1000), elapsed, received, code, data.index, received, received, received).run();
+    FROM rooms r WHERE r.code = ? AND r.status = 'question' AND r.question_index = ? AND r.starts_at <= ? AND (r.ends_at IS NULL OR r.ends_at >= ?) AND r.expires_at > ? AND EXISTS (SELECT 1 FROM players p WHERE p.room = r.code AND p.id = ? AND p.blocked = 0)`)
+    .bind(me.id, data.index, data.option, correct ? 1 : 0, correct ? MAX_POINTS : 0, scoreFor(correct, elapsed, q.seconds * 1000), elapsed, received, code, data.index, received, received, received, me.id).run();
   if (!result.meta.changes) { const raced = await db().prepare("SELECT option FROM answers WHERE room = ? AND player = ? AND question_index = ?").bind(code, me.id, data.index).first<{ option: number }>(); if (!raced || raced.option !== data.option) throw new HttpError(409, "Sua resposta não pôde ser registrada nesta rodada."); }
   return json({ accepted: true, option: data.option });
 }
@@ -229,26 +287,28 @@ export async function controlRoom(request: Request, code: string) {
   if (room.owner !== user.id) throw new HttpError(403, "Somente o professor desta sala pode conduzir o quiz.");
   if (room.status === "closed") throw new HttpError(409, "Esta sala foi encerrada.");
   if (data.action === "kick") {
-    if (room.status !== "lobby") throw new HttpError(409, "Só é possível remover participantes antes de iniciar.");
-    await db().prepare("DELETE FROM players WHERE id = ? AND room = ? AND EXISTS(SELECT 1 FROM rooms WHERE code = ? AND status = 'lobby')").bind(String(data.playerId), code, code).run(); return roomState(request, code);
+    await db().batch([
+      db().prepare("UPDATE players SET blocked = 1 WHERE id = ? AND room = ? AND blocked = 0").bind(String(data.playerId),code),
+      db().prepare("UPDATE cloud_words SET hidden = 1 WHERE player = ? AND room = ?").bind(String(data.playerId),code)
+    ]); return roomState(request, code);
   }
   if (data.index !== room.question_index || data.status !== room.status) throw new HttpError(409, "A sala já mudou. Aguarde a atualização da tela.");
-  if(room.presentation){if(data.slideIndex!==room.slide_index||data.step!==room.build_step)throw new HttpError(409,"O slide já mudou. Aguarde a atualização da tela.");const deck:SlideDeck=JSON.parse(room.presentation);let next:ReturnType<typeof movePresentation>;try{next=movePresentation(deck,{status:room.status,questionIndex:room.question_index,slideIndex:room.slide_index,step:room.build_step,blackout:!!room.blackout},data.action,data.targetSlide,data.blackout);}catch(e){throw new HttpError(409,(e as Error).message);}const startsAt=next.newRound?Date.now()+3000:null;const endsAt=next.newRound&&!room.untimed?startsAt!+JSON.parse(room.questions)[next.questionIndex].seconds*1000:null;
+  if(room.presentation){if(data.slideIndex!==room.slide_index||data.step!==room.build_step)throw new HttpError(409,"O slide já mudou. Aguarde a atualização da tela.");const deck:SlideDeck=JSON.parse(room.presentation);let next:ReturnType<typeof movePresentation>;try{next=movePresentation(deck,{status:room.status,questionIndex:room.question_index,slideIndex:room.slide_index,step:room.build_step,blackout:!!room.blackout},data.action,data.targetSlide,data.blackout);}catch(e){throw new HttpError(409,(e as Error).message);}const startsAt=next.newRound?Date.now()+3000:null;const endsAt=next.newRound&&!room.untimed&&JSON.parse(room.questions)[next.questionIndex]?.kind!=="poll"?startsAt!+JSON.parse(room.questions)[next.questionIndex].seconds*1000:null;
     const result=await db().prepare("UPDATE rooms SET roster_version = roster_version + 1, status = ?, question_index = ?, slide_index = ?, build_step = ?, blackout = ?, starts_at = ?, ends_at = ?, answered_count = CASE WHEN ? = 1 THEN 0 ELSE answered_count END WHERE code = ? AND owner = ? AND status = ? AND question_index = ? AND slide_index = ? AND build_step = ? AND blackout = ? AND expires_at > ?").bind(next.status,next.questionIndex,next.slideIndex,next.step,next.blackout?1:0,startsAt,endsAt,next.newRound?1:0,code,user.id,room.status,room.question_index,room.slide_index,room.build_step,room.blackout,Date.now()).run();if(!result.meta.changes)throw new HttpError(409,"Outra tela avançou a aula. Aguarde a atualização.");return roomState(request,code);
   }
   let status: RoomState["status"] = room.status; let index = room.question_index; let startsAt = room.starts_at; let endsAt = room.ends_at;
   const questions: Question[] = JSON.parse(room.questions);
   if (data.action === "start" && room.status === "lobby") {
-    const count = await db().prepare("SELECT COUNT(*) n FROM players WHERE room = ?").bind(code).first<{ n: number }>(); if (!count!.n) throw new HttpError(400, "Aguarde pelo menos um participante entrar."); index = 0; status = "question";
+    const count = await db().prepare("SELECT COUNT(*) n FROM players WHERE room = ? AND blocked = 0").bind(code).first<{ n: number }>(); if (!count!.n) throw new HttpError(400, "Aguarde pelo menos um participante entrar."); index = 0; status = "question";
   } else if (data.action === "next" && room.status === "results") { if (index + 1 >= questions.length) status = "finished"; else { index++; status = "question"; } }
   else if (data.action === "end_round" && room.status === "question") { status = "results"; }
   else if (data.action === "close") status = "closed";
   else throw new HttpError(409, "Esta ação não está disponível nesta etapa.");
-  if (status === "question") { startsAt = Date.now() + 3000; endsAt = room.untimed ? null : startsAt + questions[index].seconds * 1000; }
+  if (status === "question") { startsAt = Date.now() + 3000; endsAt = room.untimed || questions[index].kind === "poll" ? null : startsAt + questions[index].seconds * 1000; }
   const result = await db().prepare("UPDATE rooms SET roster_version = roster_version + 1, status = ?, question_index = ?, starts_at = ?, ends_at = ?, answered_count = CASE WHEN ? = 'question' THEN 0 ELSE answered_count END WHERE code = ? AND owner = ? AND status = ? AND question_index = ? AND expires_at > ?").bind(status, index, startsAt, endsAt, status, code, user.id, room.status, room.question_index, Date.now()).run();
   if (!result.meta.changes) throw new HttpError(409, "A sala já mudou. Aguarde a atualização da tela."); return roomState(request, code);
 }
 export async function heartbeat(request:Request,code:string) {
   await body(request); const player=await playerFor(request,code); if(!player)throw new HttpError(401,"Entre na sala antes de testar a conexão.");
-  const now=Date.now(); await db().prepare("UPDATE players SET last_seen = ? WHERE id = ? AND room = ? AND last_seen < ? AND EXISTS (SELECT 1 FROM rooms WHERE code = ? AND expires_at > ? AND status IN ('lobby','slide','question','results'))").bind(now,player.id,code,now-12000,code,now).run(); return json({serverNow:Date.now(),connected:true});
+  const now=Date.now(); await db().prepare("UPDATE players SET last_seen = ? WHERE id = ? AND room = ? AND last_seen < ? AND EXISTS (SELECT 1 FROM rooms WHERE code = ? AND expires_at > ? AND status IN ('lobby','slide','wordcloud','question','results'))").bind(now,player.id,code,now-12000,code,now).run(); return json({serverNow:Date.now(),connected:true});
 }

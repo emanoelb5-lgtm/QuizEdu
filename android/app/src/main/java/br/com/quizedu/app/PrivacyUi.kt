@@ -21,7 +21,7 @@ import androidx.compose.ui.unit.dp
     var confirmation by remember { mutableStateOf("") }
     AlertDialog(onDismissRequest = { if (!vm.busy) onDismiss() }, title = { Text("Excluir conta e dados?") }, text = {
         Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("Seu perfil no Prativerso, aulas, imagens, quizzes, salas e registros associados serão apagados. Aparelhos vinculados perderão acesso. Essa ação é definitiva e não exclui sua conta ChatGPT.")
+            Text("Seu perfil no Prativerso, aulas, imagens, quizzes, salas e registros associados serão apagados. Aparelhos vinculados perderão acesso. Essa ação é definitiva.")
             Text("As cópias exportadas ou guardadas em outros aparelhos precisam ser apagadas nesses locais.")
             OutlinedTextField(confirmation, { confirmation = it }, label = { Text("Digite EXCLUIR") }, singleLine = true, modifier = Modifier.testTag("delete-account-confirmation"))
         }

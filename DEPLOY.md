@@ -1,49 +1,38 @@
-# Hospedagem independente
+# Prativerso na Cloudflare
 
-O QuizEdu já está publicado no endereço do README. Estes passos são uma alternativa para manter o aplicativo em sua própria conta Cloudflare, com D1 para os dados e R2 para as imagens. Confira as quotas e condições dos planos gratuitos antes de habilitar recursos na sua conta.
+A publicação independente usa Cloudflare Pages com um Worker ES Module em modo avançado, banco D1 e arquivos R2. O projeto é separado do site institucional B5 Soluções.
 
-**Contas permanentes:** o login do ChatGPT desta versão pertence ao gateway da hospedagem gerenciada. Uma publicação independente funciona com acesso temporário. Para oferecer login permanente, integre um provedor de identidade e valide as sessões no servidor antes de substituir `platformIdentity()`. Nunca aceite identidade a partir de cabeçalhos arbitrários do cliente. As rotas `/signin-with-chatgpt`, `/signout-with-chatgpt` e `/callback` não são implementadas neste Worker.
+- Domínio: https://prativerso.b5solucoes.online
+- Repositório: emanoelb5-lgtm/QuizEdu, branch main.
+- Projeto Pages: prativerso.
+- Banco D1: prativerso (`6687dd06-6270-4826-91df-f02a2e2f912c`), binding `DB`.
+- Bucket R2: prativerso-imagens, binding `BUCKET`.
+- Node: 22.16.0 ou superior. Gerenciador: pnpm 11.25.0, conforme lockfile.
+- Comando de build: `pnpm run build:cloudflare`.
+- Diretório publicado: `dist/pages`.
+- Compatibilidade: 2026-05-15, flag `nodejs_compat`.
 
-1. Crie uma conta Cloudflare e selecione os recursos gratuitos disponíveis. Não é necessário comprar domínio.
-2. Clone este repositório, use Node 22.13+ e execute `pnpm install --frozen-lockfile`.
-3. Execute `pnpm exec wrangler login`, `pnpm exec wrangler d1 create quizedu` e `pnpm exec wrangler r2 bucket create quizedu-imagens`.
-4. Guarde o `database_id` retornado e rode `pnpm build`.
-5. Crie um `wrangler.deploy.json` na raiz com seu ID real:
+O painel Cloudflare mantém os bindings. Não há token Cloudflare no repositório. A integração Git da conta retornou o erro 8000011 na criação do projeto; esta primeira publicação foi feita por upload direto. A publicação automática a partir do GitHub requer configurar o token Cloudflare em um workflow de CI. Não configure dados de produção nos deployments de preview.
 
-```json
-{
-  "name": "quizedu",
-  "main": "dist/server/index.js",
-  "compatibility_date": "2026-05-15",
-  "compatibility_flags": ["nodejs_compat"],
-  "no_bundle": true,
-  "find_additional_modules": true,
-  "rules": [{"type": "ESModule", "globs": ["**/*.js", "**/*.mjs"]}],
-  "assets": {"directory": "dist/client"},
-  "d1_databases": [{
-    "binding": "DB",
-    "database_name": "quizedu",
-    "database_id": "SUBSTITUA-PELO-ID-REAL"
-  }],
-  "r2_buckets": [{
-    "binding": "BUCKET",
-    "bucket_name": "quizedu-imagens"
-  }]
-}
-```
+## Atualizações e migrações
 
-6. Aplique cada migração uma única vez e na ordem:
+1. Instale com `pnpm install --frozen-lockfile`.
+2. Aplique uma única vez as novas migrações SQL em `drizzle/`, na ordem numérica, pelo D1 da conta Cloudflare. As migrações 0000 a 0008 são necessárias nesta versão. Preserve o banco existente e nunca reaplique as migrações antigas.
+3. Valide `pnpm typecheck`, `pnpm build:cloudflare`, `pnpm test` e `pnpm test:accounts`.
+4. Envie a versão validada para main e publique a saída `dist/pages` no projeto Pages prativerso. Até configurar CI, o push sozinho não publica o site.
 
-```sh
-pnpm exec wrangler d1 execute DB --remote --config wrangler.deploy.json --file drizzle/0000_wonderful_the_phantom.sql
-pnpm exec wrangler d1 execute DB --remote --config wrangler.deploy.json --file drizzle/0001_melted_skaar.sql
-pnpm exec wrangler d1 execute DB --remote --config wrangler.deploy.json --file drizzle/0002_empty_edwin_jarvis.sql
-```
+`dist/pages/_worker.js` contém o servidor e não deve ser entregue como arquivo estático. `_routes.json` permite servir imagens e scripts estáticos sem invocar o Worker. Todas as rotas dinâmicas e APIs continuam no Worker, com D1/R2.
 
-7. Publique: `pnpm exec wrangler deploy --config wrangler.deploy.json`. A Cloudflare retorna uma URL HTTPS `workers.dev`. O QR code e os links compartilhados passam a usar essa origem.
-8. Adapte a interface do login para seu provedor, ou apresente apenas o acesso temporário até concluir essa integração.
-9. Guarde sua configuração e consulte o painel de métricas para acompanhar as quotas.
+## Login próprio
 
-O ID do banco identifica um recurso, não uma senha. Tokens de acesso ficam somente no login local/segredos da plataforma. Não coloque tokens no repositório. O bucket de imagens não precisa ser público: o aplicativo entrega as imagens pelas URLs `/api/media/<id>`.
+Educadores criam conta em `/entrar`, com nome, e-mail e senha. A senha usa PBKDF2-SHA256 com sal individual; sessões usam tokens aleatórios, somente seus resumos ficam no banco, e cookies HttpOnly/Secure/SameSite. Há limites de tentativas por IP e conta. Nenhum cabeçalho de identidade fornecido pelo visitante concede acesso.
 
-Para atualizar, compile novamente, aplique apenas novas migrações e repita a publicação. Preserve o banco e o bucket existentes para manter os quizzes, relatórios e imagens.
+O cadastro entrega um código de recuperação, exibido somente uma vez. Guarde-o; ele permite redefinir a senha sem depender de um serviço de e-mail. Recuperação e alteração de senha trocam esse código e revogam sessões e aparelhos anteriores. `/conta` permite alterar a senha. A exclusão remove também a conta e suas sessões.
+
+O Android 1.7.0 usa a nova origem. O vínculo continua pelo navegador, usando o login próprio e um token revogável no aparelho. Alunos continuam entrando por QR/código, sem conta. O acesso temporário para experimentar continua disponível.
+
+Os dados gravados no banco da hospedagem anterior não foram importados: permanecem disponíveis no site anterior. As funcionalidades, exemplos e aulas que fazem parte do código foram preservados.
+
+## Assinatura Android
+
+A chave de assinatura existente permanece protegida no serviço de assinatura já configurado para o GitHub Actions. O aplicativo instalado e o login operam no novo domínio. Preserve a chave original para que atualizações continuem compatíveis. A compilação nunca deve gerar uma chave diferente silenciosamente.

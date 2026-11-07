@@ -1,0 +1,5230 @@
+{
+  "id": "4029e8fe-574b-49c6-bbfa-db42737f5b25",
+  "title": "Artigo de opinião · Aula 1 · 9º ano",
+  "subject": "Português",
+  "topic": "Características do artigo de opinião, tese e argumentação",
+  "theme": "prativerso",
+  "slides": [
+    {
+      "id": "923b1937-370e-43e6-b240-9034c80f4f8b",
+      "kind": "content",
+      "title": "Artigo de opinião · Aula 1 · 9º ano",
+      "notes": "Aula de Língua Portuguesa, 9º ano, 4º bimestre. Revisão visual com textos maiores, contraste e imagens. Mantém as sete perguntas originais, a nuvem e o texto de apoio completo. A abertura contém três enquetes consecutivas de preferência, seguidas da ligação entre opinião e argumento. A avaliação fecha a aula. Modo por acerto e tempo livre. Fonte-base: apresentação enviada pelo educador. Imagens antigas provenientes desse arquivo. As novas ilustrações das enquetes foram geradas para a aula e as embalagens foram obtidas em páginas de produtos.",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [
+        {
+          "id": "30b175ae-50ce-4951-8238-4e40f68264ad",
+          "type": "text",
+          "x": 56,
+          "y": 45,
+          "w": 340,
+          "h": 72,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 23,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "PORTUGUÊS",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "9º ANO",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "53caddda-749f-48fe-9f24-1fe909953c22",
+          "type": "text",
+          "x": 56,
+          "y": 151,
+          "w": 480,
+          "h": 183,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 66,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Artigo de",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "opinião",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "b191b0da-406f-439d-bae2-8bc9e85dd97b",
+          "type": "text",
+          "x": 56,
+          "y": 353,
+          "w": 480,
+          "h": 107,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 32,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Como reconhecer uma ideia"
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "defendida em um texto"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "01349b68-17e9-4d2b-9d3a-2634e886db85",
+          "type": "image",
+          "x": 554,
+          "y": 111,
+          "w": 400,
+          "h": 352,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "src": "/lessons/artigo-opiniao/ilustracao-1.jpg",
+          "alt": "Ilustração de estudantes que participam de uma discussão em sala.",
+          "fit": "contain",
+          "positionX": 50,
+          "positionY": 50,
+          "radius": 0
+        }
+      ]
+    },
+    {
+      "id": "8850f01f-4466-4ed4-9e1d-ad692ffd1087",
+      "kind": "content",
+      "title": "O foco da aula",
+      "notes": "O texto didático de apoio permanece completo e agora aparece em seis trechos de leitura. As sete perguntas originais verificam a compreensão.",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [
+        {
+          "id": "db6593e6-54b3-4c74-bffd-c770db8ea09f",
+          "type": "text",
+          "x": 56,
+          "y": 38,
+          "w": 888,
+          "h": 112,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 42,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "O foco da aula",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "8091e473-b1b1-4b80-82f9-3e4a4f28da0d",
+          "type": "text",
+          "x": 56,
+          "y": 148,
+          "w": 888,
+          "h": 48,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 35,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Reconhecer o gênero",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "5818a169-4681-414e-b2b0-8a3883ba1f60",
+          "type": "text",
+          "x": 56,
+          "y": 198,
+          "w": 888,
+          "h": 54,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Entender o que caracteriza um artigo de opinião."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "69e87fbb-27b1-4a5c-85d8-1054f15b26a4",
+          "type": "text",
+          "x": 56,
+          "y": 276,
+          "w": 888,
+          "h": 48,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 35,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Diferenciar textos",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "edb9ce33-4cbd-4d78-97bc-e8f3028c725c",
+          "type": "text",
+          "x": 56,
+          "y": 326,
+          "w": 888,
+          "h": 58,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Comparar notícia, reportagem informativa e artigo de opinião."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "598ccf4f-e1cc-4a25-b4ea-fce998a78542",
+          "type": "text",
+          "x": 56,
+          "y": 402,
+          "w": 888,
+          "h": 48,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 35,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Aplicar na leitura",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "d9de16b4-b9ee-4291-8d57-0187762ed463",
+          "type": "text",
+          "x": 56,
+          "y": 452,
+          "w": 888,
+          "h": 65,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Identificar tema, tese e argumentos no texto sobre celular."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "d74d8ae5-d112-46af-8f73-b5d810f4205c",
+      "kind": "question",
+      "title": "Enquete 1 · Nescau ou Toddy",
+      "notes": "Enquete de escolha única. Após revelar os resultados, peça justificativas orais sem eleger uma preferência correta. Imagens das embalagens: https://mercado.carrefour.com.br/achocolatado-em-po-nescau-2-0-actigen-400-g-7974264/p e https://supermarketdelivery.com.br/p/achocolatado-po-original-toddy-pote-400g. Exemplos de marcas para uma atividade didática sobre opinião.",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [],
+      "question": {
+        "id": "e49614ba-d7a3-4d94-bbbe-4b487b88aa49",
+        "kind": "poll",
+        "text": "Qual você prefere: Nescau ou Toddy?",
+        "options": [
+          "Nescau",
+          "Toddy"
+        ],
+        "correct": -1,
+        "seconds": 60,
+        "allowMultiple": false,
+        "explanation": "Preferências podem ser diferentes. Qual motivo explica sua escolha?",
+        "optionImages": [
+          "/lessons/artigo-opiniao/enquete-nescau.jpg",
+          "/lessons/artigo-opiniao/enquete-toddy.jpg"
+        ]
+      }
+    },
+    {
+      "id": "000eeb54-65fe-4b53-a8f5-a3c8c2822201",
+      "kind": "question",
+      "title": "Enquete 2 · Açaí",
+      "notes": "Segunda enquete, imediatamente após a primeira. Convide dois participantes com escolhas diferentes a dizer por que escolheram cada opção. Ilustrações editoriais geradas em formato 16:9 para a aula: açaí tradicional paraense com açúcar e sem adição de açúcar. O exemplo trata de preferências.",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [],
+      "question": {
+        "id": "a8e44ba8-9b87-4298-be6c-cbcde642188c",
+        "kind": "poll",
+        "text": "Como você prefere o açaí?",
+        "options": [
+          "Com açúcar",
+          "Sem açúcar"
+        ],
+        "correct": -1,
+        "seconds": 60,
+        "allowMultiple": false,
+        "explanation": "A mesma comida pode despertar opiniões diferentes. Explique sua preferência com respeito.",
+        "optionImages": [
+          "/lessons/artigo-opiniao/enquete-acai-acucar.jpg",
+          "/lessons/artigo-opiniao/enquete-acai-sem-acucar.jpg"
+        ]
+      }
+    },
+    {
+      "id": "b3f9767a-4957-4c03-ab99-f28a606746f6",
+      "kind": "question",
+      "title": "Enquete 3 · Livro ou filme",
+      "notes": "Terceira enquete sequencial. Peça que os alunos completem oralmente “Prefiro…, porque…”. Ilustrações editoriais geradas em formato 16:9 para a aula: livro de histórias e cinema, sem representar obras específicas.",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [],
+      "question": {
+        "id": "9f9b0a38-7eab-40dc-af76-90119ad1cad2",
+        "kind": "poll",
+        "text": "Para acompanhar uma história, você prefere…",
+        "options": [
+          "Ler o livro",
+          "Assistir ao filme"
+        ],
+        "correct": -1,
+        "seconds": 60,
+        "allowMultiple": false,
+        "explanation": "Uma justificativa acrescenta razões à opinião: “Prefiro…, porque…”.",
+        "optionImages": [
+          "/lessons/artigo-opiniao/enquete-livro.jpg",
+          "/lessons/artigo-opiniao/enquete-filme.jpg"
+        ]
+      }
+    },
+    {
+      "id": "885b4803-99b6-4572-b80e-27493360b337",
+      "kind": "content",
+      "title": "Preferência, opinião e argumento",
+      "notes": "Use as três enquetes para diferenciar a escolha pessoal da argumentação. Uma preferência isolada não caracteriza, por si só, um artigo de opinião. O gênero desenvolve uma posição sobre um assunto em debate e a sustenta com argumentos.",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [
+        {
+          "id": "536ddbcd-90a9-4c74-918c-f7c5745684e9",
+          "type": "text",
+          "x": 56,
+          "y": 38,
+          "w": 888,
+          "h": 112,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 42,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Preferência, opinião e argumento",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "6ecabacc-4917-4db0-ad3b-8d72f54f6c0d",
+          "type": "text",
+          "x": 56,
+          "y": 155,
+          "w": 888,
+          "h": 65,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 39,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "“Prefiro ler o livro.”",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "25fcc3d3-d965-4254-acde-bed106ea99ec",
+          "type": "text",
+          "x": 56,
+          "y": 227,
+          "w": 888,
+          "h": 55,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "A frase apresenta uma preferência pessoal."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "3b06ab46-bc8c-4f51-a06d-be6b7daf86f0",
+          "type": "text",
+          "x": 56,
+          "y": 303,
+          "w": 888,
+          "h": 110,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 36,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "“Prefiro ler o livro porque imagino as cenas",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "do meu jeito.”",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "7bcccf83-a2ae-4d48-bb3b-6f1b508d4380",
+          "type": "text",
+          "x": 56,
+          "y": 438,
+          "w": 888,
+          "h": 90,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 29,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "O motivo ajuda a sustentar a opinião."
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "Um artigo desenvolve uma tese sobre um tema em debate."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "29d37ad7-9482-48fe-8692-c8a0db0167fd",
+      "kind": "wordcloud",
+      "title": "Discussão inicial",
+      "notes": "Após as três enquetes, abra a nuvem e retome os motivos apresentados pela turma. Cada palavra nova aceita continua valendo 100 pontos. Pergunte o que ajuda uma opinião a convencer.",
+      "background": {
+        "color": "#ffffff"
+      },
+      "transition": "fade",
+      "elements": [],
+      "wordCloud": {
+        "prompt": "Quando duas pessoas discordam, o que faz uma opinião convencer mais? Envie uma palavra."
+      }
+    },
+    {
+      "id": "a519bdc8-b5f2-4746-9444-6de97619be79",
+      "kind": "content",
+      "title": "Onde o artigo de opinião aparece?",
+      "notes": "",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [
+        {
+          "id": "0a1297f4-094e-4351-b00b-2a178070aee9",
+          "type": "text",
+          "x": 56,
+          "y": 38,
+          "w": 888,
+          "h": 112,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 42,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Onde o artigo de opinião aparece?",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "f4fe35ad-6ba7-4735-9262-f3b7a7808cb9",
+          "type": "text",
+          "x": 56,
+          "y": 153,
+          "w": 434,
+          "h": 133,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 34,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Jornais, revistas, blogs,",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "sites e portais de notícia.",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "af656a05-878f-4e83-a3fe-2afd7bc09202",
+          "type": "text",
+          "x": 56,
+          "y": 318,
+          "w": 442,
+          "h": 137,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 32,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "O autor participa de um debate"
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "e defende um ponto de vista."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "51bec559-da0d-4584-aa6d-735a732d5d29",
+          "type": "image",
+          "x": 535,
+          "y": 159,
+          "w": 409,
+          "h": 287,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "src": "/lessons/artigo-opiniao/ilustracao-2.jpg",
+          "alt": "Ilustração de um professor que explica ideias no quadro a estudantes.",
+          "fit": "contain",
+          "positionX": 50,
+          "positionY": 50,
+          "radius": 0
+        },
+        {
+          "id": "bc88e5d7-966d-4a6d-bc1f-f0c496c82b28",
+          "type": "text",
+          "x": 56,
+          "y": 477,
+          "w": 888,
+          "h": 64,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 27,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "O artigo e a notícia podem circular no mesmo veículo."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "3e035b45-07f0-4dba-b9e3-7351ff08ba24",
+      "kind": "content",
+      "title": "O que caracteriza um artigo de opinião?",
+      "notes": "Referência didática complementar: Instituto Claro, “Gênero textual: artigo de opinião”, plano de aula de Mayra Mattar Moraes, 05/05/2023. https://www.institutoclaro.org.br/educacao/para-ensinar/planos-de-aula/genero-textual-artigo-de-opiniao/ . As características são apresentadas sem impor quantidade fixa de parágrafos.",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [
+        {
+          "id": "52340897-40b6-4334-8a79-7e4df772d2d7",
+          "type": "text",
+          "x": 56,
+          "y": 38,
+          "w": 888,
+          "h": 112,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 42,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "O que caracteriza um artigo de opinião?",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "8a3f5dc0-1244-4333-aed5-34b84147f93f",
+          "type": "text",
+          "x": 56,
+          "y": 151,
+          "w": 246,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 32,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Debate",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "067e81f1-0e73-4658-84cc-e9bbdf1af919",
+          "type": "text",
+          "x": 316,
+          "y": 151,
+          "w": 628,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Aborda um tema que admite posições diferentes."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "41cb8fc5-7e13-434e-8732-bf0306d61ba0",
+          "type": "text",
+          "x": 56,
+          "y": 243,
+          "w": 246,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 32,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Tese",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "2f604e9c-aef5-40a8-986a-883b85f7e25c",
+          "type": "text",
+          "x": 316,
+          "y": 243,
+          "w": 628,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Apresenta a posição que o autor defende."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "0845d57d-d79d-4ccf-9191-12d968580be1",
+          "type": "text",
+          "x": 56,
+          "y": 335,
+          "w": 246,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 32,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Argumentos",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "1a9e4f84-fe89-46eb-9c3f-5441b0753c18",
+          "type": "text",
+          "x": 316,
+          "y": 335,
+          "w": 628,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Oferece razões, exemplos, dados ou fontes."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "c0c81d11-38cb-40a6-abf5-e98c1810a92d",
+          "type": "text",
+          "x": 56,
+          "y": 427,
+          "w": 246,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 32,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Conclusão",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "f6b2a2da-3df5-4190-881f-fbf40cf0fc1f",
+          "type": "text",
+          "x": 316,
+          "y": 427,
+          "w": 628,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Retoma a ideia defendida e fecha a reflexão."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "58b7fd27-e18d-48f2-a2e2-7dd4485122b4",
+      "kind": "content",
+      "title": "Autoria, linguagem e organização",
+      "notes": "Referência didática complementar: Instituto Claro, “Gênero textual: artigo de opinião”, plano de aula de Mayra Mattar Moraes, 05/05/2023. https://www.institutoclaro.org.br/educacao/para-ensinar/planos-de-aula/genero-textual-artigo-de-opiniao/ . As características são apresentadas sem impor quantidade fixa de parágrafos. Autoria e circulação ajudam a reconhecer a situação comunicativa do gênero. Conectivos são recursos de organização, e não um teste automático de classificação.",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [
+        {
+          "id": "cfe3e389-bb4e-4f77-9d1b-e839425630d4",
+          "type": "text",
+          "x": 56,
+          "y": 38,
+          "w": 888,
+          "h": 112,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 42,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Autoria, linguagem e organização",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "2ac7d305-1cb2-4c75-ab3f-0d718968d7a9",
+          "type": "text",
+          "x": 56,
+          "y": 154,
+          "w": 888,
+          "h": 50,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 35,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Uma voz que assume uma posição",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "bd563889-06df-4ead-b234-3974aa27eb2e",
+          "type": "text",
+          "x": 56,
+          "y": 211,
+          "w": 888,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 32,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "O texto costuma ser assinado e se dirige a leitores"
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "de um jornal, site ou outro espaço de debate."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "f44882cf-c394-4365-ba74-433672eb8e7e",
+          "type": "text",
+          "x": 56,
+          "y": 330,
+          "w": 888,
+          "h": 50,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 35,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Ideias ligadas com clareza",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "c964cec8-068b-41e6-8466-5b651a3387d2",
+          "type": "text",
+          "x": 56,
+          "y": 390,
+          "w": 888,
+          "h": 93,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "O autor apresenta o assunto, desenvolve argumentos"
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "e conclui. “Porque”, “porém” e “portanto” ligam ideias."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "63d441c8-53b4-4413-b46b-f51d29797f17",
+          "type": "text",
+          "x": 56,
+          "y": 510,
+          "w": 888,
+          "h": 35,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 25,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "A linguagem deve combinar com o público e o veículo."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "756e0c77-b53e-4a28-b4d4-26413a366705",
+      "kind": "content",
+      "title": "Notícia e artigo de opinião",
+      "notes": "",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [
+        {
+          "id": "0fbb1c0e-bfd4-4b13-aa37-83102491aa01",
+          "type": "text",
+          "x": 56,
+          "y": 38,
+          "w": 888,
+          "h": 112,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 42,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Notícia e artigo de opinião",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "aa5bcb57-b828-4174-b174-87052e2a3daf",
+          "type": "text",
+          "x": 56,
+          "y": 151,
+          "w": 427,
+          "h": 90,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 34,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Notícia / reportagem",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "542e63a0-4780-4d4a-9d15-302712adb57c",
+          "type": "text",
+          "x": 56,
+          "y": 243,
+          "w": 427,
+          "h": 233,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 30,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Informa fatos."
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "Busca linguagem objetiva."
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "Apresenta o quê, quem,"
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "quando e onde."
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "Usa dados e fontes."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "27d86bc3-89ec-4f2d-9d9e-97d6c3c57c01",
+          "type": "text",
+          "x": 520,
+          "y": 151,
+          "w": 424,
+          "h": 90,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 34,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Artigo de opinião",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "0e4d438e-f4e4-44e3-b2fb-1469c3a7e311",
+          "type": "text",
+          "x": 520,
+          "y": 243,
+          "w": 424,
+          "h": 233,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 30,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Defende uma ideia."
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "Aborda uma controvérsia."
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "Argumenta para convencer."
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "Apresenta avaliações"
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "e um ponto de vista."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "a4494cd0-c4a1-452d-9817-208e724e5aee",
+          "type": "text",
+          "x": 56,
+          "y": 510,
+          "w": 888,
+          "h": 38,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 25,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "As finalidades dos textos ajudam a reconhecer o gênero."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "5ec4d296-0d78-4a0b-b0ac-9a695f8511a6",
+      "kind": "question",
+      "title": "Pergunta 1",
+      "notes": "Gabarito: B · Defender um ponto de vista usando argumentos.\nO artigo de opinião participa de um debate e defende um ponto de vista. O autor usa argumentos para sustentar sua posição e tentar convencer o leitor.\nDiscussão: Que expressões da alternativa correta mostram o objetivo do gênero?",
+      "background": {
+        "color": "#ffffff"
+      },
+      "transition": "fade",
+      "elements": [],
+      "question": {
+        "text": "Qual é o objetivo principal de um artigo de opinião?",
+        "options": [
+          "Contar uma história fictícia.",
+          "Defender um ponto de vista usando argumentos.",
+          "Informar apenas data, local e horário.",
+          "Explicar como montar um objeto."
+        ],
+        "correct": 1,
+        "explanation": "O artigo de opinião participa de um debate e defende um ponto de vista. O autor usa argumentos para sustentar sua posição e tentar convencer o leitor.",
+        "id": "8c02c1bd-3dbd-4a9d-b9cc-6ac1dcb73f04",
+        "kind": "multiple",
+        "seconds": 60
+      }
+    },
+    {
+      "id": "2c3184d3-57f9-4ca5-9503-cb24879f5c8b",
+      "kind": "content",
+      "title": "Compare os textos",
+      "notes": "",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [
+        {
+          "id": "8760d16e-d52e-48e7-b8c8-980edf128f85",
+          "type": "text",
+          "x": 56,
+          "y": 38,
+          "w": 888,
+          "h": 112,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 42,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Compare os textos",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "01317a54-53ab-4d80-bab4-1247bba2ecc6",
+          "type": "text",
+          "x": 56,
+          "y": 149,
+          "w": 421,
+          "h": 50,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 36,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Texto A",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "5b249ef6-e810-4f3d-a228-f473fb404c32",
+          "type": "text",
+          "x": 56,
+          "y": 214,
+          "w": 421,
+          "h": 254,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 30,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "A escola publicou novas regras para o uso do celular durante as aulas. A medida começa a valer na próxima semana."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "c683f730-c551-4193-b2cf-9af34fd735e3",
+          "type": "text",
+          "x": 522,
+          "y": 149,
+          "w": 422,
+          "h": 50,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 36,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Texto B",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "80dbf815-ffc4-47f4-bef1-59c4546dd373",
+          "type": "text",
+          "x": 522,
+          "y": 214,
+          "w": 422,
+          "h": 254,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 30,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "A escola acerta quando cria regras para o celular, pois o uso responsável ajuda os alunos a aprenderem melhor."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "392b88d6-2bd8-4015-83ca-ef3689cd8b80",
+          "type": "text",
+          "x": 56,
+          "y": 505,
+          "w": 888,
+          "h": 46,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 25,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "A informa. B avalia e apresenta uma razão para a opinião."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "4c5ea9ce-6397-4667-9a8b-bb637e66a744",
+      "kind": "question",
+      "title": "Pergunta 2",
+      "notes": "Gabarito: A · O texto apresenta uma posição defendida pelo autor.\nUma posição defendida pelo autor é uma marca do artigo de opinião. Datas, locais e narradores podem aparecer em outros gêneros e não definem esse gênero.\nDiscussão: Compare a posição do autor com as informações do Texto A.",
+      "background": {
+        "color": "#ffffff"
+      },
+      "transition": "fade",
+      "elements": [],
+      "question": {
+        "text": "Qual alternativa mostra uma marca de artigo de opinião?",
+        "options": [
+          "O texto apresenta uma posição defendida pelo autor.",
+          "O texto apresenta somente local e data.",
+          "O texto evita qualquer avaliação sobre o tema.",
+          "O texto sempre conta uma história com narrador."
+        ],
+        "correct": 0,
+        "explanation": "Uma posição defendida pelo autor é uma marca do artigo de opinião. Datas, locais e narradores podem aparecer em outros gêneros e não definem esse gênero.",
+        "id": "6e6f6177-93d4-4ddf-a93f-f60c6ec082a5",
+        "kind": "multiple",
+        "seconds": 60
+      }
+    },
+    {
+      "id": "ad46c7f9-1bd1-477a-b2d7-eaf22d4c480d",
+      "kind": "content",
+      "title": "Elementos do artigo de opinião",
+      "notes": "Esses elementos ajudam o leitor a entender o que o texto quer defender.",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [
+        {
+          "id": "803840fc-ceca-4d7e-8ab0-c965541722b0",
+          "type": "text",
+          "x": 56,
+          "y": 38,
+          "w": 888,
+          "h": 112,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 42,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Elementos do artigo de opinião",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "8175328a-183d-4580-97e9-c6305713643c",
+          "type": "text",
+          "x": 56,
+          "y": 151,
+          "w": 246,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 32,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Tema",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "2b422421-0650-4176-9d1e-3adf2d790789",
+          "type": "text",
+          "x": 316,
+          "y": 151,
+          "w": 628,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "O assunto geral do texto."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "b81a13a6-dee1-4bd9-b195-332d7166f308",
+          "type": "text",
+          "x": 56,
+          "y": 243,
+          "w": 246,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 32,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Questão",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "controversa",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "30993104-d371-4db7-ae9c-81d08808639b",
+          "type": "text",
+          "x": 316,
+          "y": 243,
+          "w": 628,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "A pergunta que divide opiniões."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "7bd25345-bf37-45e5-8f14-da2089c7f89a",
+          "type": "text",
+          "x": 56,
+          "y": 335,
+          "w": 246,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 32,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Tese",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "09b89f6b-18cd-4dd8-aa41-d264addcf880",
+          "type": "text",
+          "x": 316,
+          "y": 335,
+          "w": 628,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "A posição defendida pelo autor."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "c6f42f28-0990-4a1e-afa6-8b2ea8bc30a5",
+          "type": "text",
+          "x": 56,
+          "y": 427,
+          "w": 246,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 32,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Argumentos",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "4a96f234-e1a1-48b9-b739-3962c21e31e7",
+          "type": "text",
+          "x": 316,
+          "y": 427,
+          "w": 628,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "As razões que sustentam a tese."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "52fd9bff-5e00-4f94-ad60-b4def2abc984",
+      "kind": "content",
+      "title": "Tema e questão controversa",
+      "notes": "",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [
+        {
+          "id": "0f2894ab-b411-4edb-b998-69e652dd2851",
+          "type": "text",
+          "x": 56,
+          "y": 38,
+          "w": 888,
+          "h": 112,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 42,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Tema e questão controversa",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "44996d60-ea7d-4826-ab06-60e63bcd6f6c",
+          "type": "text",
+          "x": 56,
+          "y": 153,
+          "w": 888,
+          "h": 54,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 38,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Tema",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "02152492-df6a-49fd-8a80-6768ba7a4ea3",
+          "type": "text",
+          "x": 56,
+          "y": 215,
+          "w": 888,
+          "h": 100,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 35,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "É o assunto geral."
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "Exemplo: o uso do celular na escola."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "d11d8156-b1ae-4eff-ac5a-eb4e88c00503",
+          "type": "text",
+          "x": 56,
+          "y": 351,
+          "w": 888,
+          "h": 54,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 38,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Questão controversa",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "390e3bb3-197d-4b92-988f-b1c64efae35d",
+          "type": "text",
+          "x": 56,
+          "y": 413,
+          "w": 888,
+          "h": 107,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 33,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "É a pergunta que permite posições diferentes."
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "Exemplo: proibir ou ensinar a usar?"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "faae505e-8905-4e0c-97cc-30d0989265dd",
+      "kind": "question",
+      "title": "Pergunta 3",
+      "notes": "Gabarito: C · O celular deve ser proibido ou usado com orientação?\nUma questão controversa admite posições diferentes e pode gerar debate. As outras alternativas apresentam afirmações, sem formular uma questão que divida opiniões.\nDiscussão: Que posições diferentes essa pergunta permite?",
+      "background": {
+        "color": "#ffffff"
+      },
+      "transition": "fade",
+      "elements": [],
+      "question": {
+        "text": "Qual alternativa apresenta uma questão controversa?",
+        "options": [
+          "O celular é um aparelho eletrônico.",
+          "A escola possui salas de aula.",
+          "O celular deve ser proibido ou usado com orientação?",
+          "Muitos adolescentes usam tecnologia."
+        ],
+        "correct": 2,
+        "explanation": "Uma questão controversa admite posições diferentes e pode gerar debate. As outras alternativas apresentam afirmações, sem formular uma questão que divida opiniões.",
+        "id": "0a124c02-068a-4439-b551-745215e40466",
+        "kind": "multiple",
+        "seconds": 60
+      }
+    },
+    {
+      "id": "6f7744f3-e7ad-499b-b061-4f110d9299fa",
+      "kind": "content",
+      "title": "Tese ou posicionamento",
+      "notes": "",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [
+        {
+          "id": "53007857-46d7-49a2-8f8e-89b1e81e0779",
+          "type": "text",
+          "x": 56,
+          "y": 38,
+          "w": 888,
+          "h": 112,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 42,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Tese ou posicionamento",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "fe49f724-6207-4c90-93f4-9087081ce7d4",
+          "type": "text",
+          "x": 56,
+          "y": 164,
+          "w": 500,
+          "h": 135,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 38,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "A tese é a ideia central",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "que o autor quer defender.",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "9b3f7529-c587-46ec-bcad-dfe8af223143",
+          "type": "text",
+          "x": 56,
+          "y": 326,
+          "w": 500,
+          "h": 153,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 34,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "O que o autor quer que"
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "o leitor aceite como"
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "ideia principal?"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "1105856b-1494-4661-a810-a04cc3cdeb81",
+          "type": "image",
+          "x": 605,
+          "y": 158,
+          "w": 339,
+          "h": 299,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "src": "/lessons/artigo-opiniao/ilustracao-3.jpg",
+          "alt": "Ilustração de uma pessoa que apresenta e defende seu ponto de vista.",
+          "fit": "contain",
+          "positionX": 50,
+          "positionY": 50,
+          "radius": 0
+        },
+        {
+          "id": "970a3917-d8c3-474b-af51-93d19694c8db",
+          "type": "text",
+          "x": 56,
+          "y": 514,
+          "w": 888,
+          "h": 36,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 25,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "A tese pode aparecer de forma direta ou implícita."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "6a77b09c-e381-48ff-8aff-da72753e9397",
+      "kind": "content",
+      "title": "Argumentos: como o autor convence?",
+      "notes": "Argumento é a razão usada para sustentar a opinião. Dados e fontes devem ser verificáveis.",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [
+        {
+          "id": "b01963d3-6ccf-4745-ac65-09e9ab5a351c",
+          "type": "text",
+          "x": 56,
+          "y": 38,
+          "w": 888,
+          "h": 112,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 42,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Argumentos: como o autor convence?",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "d7501e80-d3b1-4a08-b993-d89e56629fb1",
+          "type": "text",
+          "x": 56,
+          "y": 151,
+          "w": 246,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 32,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Exemplo",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "dcfad6ff-45a1-4dd7-9d4c-4344458210f1",
+          "type": "text",
+          "x": 316,
+          "y": 151,
+          "w": 628,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Mostra uma situação concreta."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "7cb832bc-da5d-4984-8926-c57dcd4bc47f",
+          "type": "text",
+          "x": 56,
+          "y": 243,
+          "w": 246,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 32,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Dado",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "8dfd13c5-6087-4ca3-927c-ab9fb0d01ea2",
+          "type": "text",
+          "x": 316,
+          "y": 243,
+          "w": 628,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Usa uma informação para dar força à ideia."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "cf5d083f-7a50-41ce-bc5a-dd99de00c0d4",
+          "type": "text",
+          "x": 56,
+          "y": 335,
+          "w": 246,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 32,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Comparação",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "889dc23f-9f6b-4d13-9501-d4651efb71a3",
+          "type": "text",
+          "x": 316,
+          "y": 335,
+          "w": 628,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Aproxima duas situações para explicar."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "98e69a10-020c-4530-bf09-fe29b8b7664d",
+          "type": "text",
+          "x": 56,
+          "y": 427,
+          "w": 246,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 32,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Consequência",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "469c8b25-ff5a-40ba-9535-9558ac9ee6d1",
+          "type": "text",
+          "x": 316,
+          "y": 427,
+          "w": 628,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Mostra os efeitos de uma escolha."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "317b92ed-219f-4384-a22c-b64f720d5346",
+      "kind": "content",
+      "title": "Marcas de opinião",
+      "notes": "Essas marcas ajudam a identificar a posição do autor. Uma palavra avaliativa sozinha não define o gênero textual.",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [
+        {
+          "id": "a8eb2b5a-014c-46a2-8a88-c52748dd6ae5",
+          "type": "text",
+          "x": 56,
+          "y": 38,
+          "w": 888,
+          "h": 112,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 42,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Marcas de opinião",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "592d9d66-3aa5-4c81-a41f-c1334f8886fb",
+          "type": "text",
+          "x": 56,
+          "y": 151,
+          "w": 888,
+          "h": 107,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 34,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Algumas palavras revelam julgamento,"
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "recomendação ou defesa de uma ideia."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "89d9af12-2d57-4512-8acf-f53717b5bf89",
+          "type": "text",
+          "x": 56,
+          "y": 302,
+          "w": 888,
+          "h": 62,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 40,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "deve    necessário    melhor",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "119b6544-ad2d-4f35-8ad9-9f696f4983fc",
+          "type": "text",
+          "x": 56,
+          "y": 387,
+          "w": 888,
+          "h": 114,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 40,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "adequado    ganha mais",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "responsável",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "a2d3bf72-f02c-4ce5-ad1f-ba31303657f4",
+          "type": "text",
+          "x": 56,
+          "y": 516,
+          "w": 888,
+          "h": 35,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 25,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "A posição do autor aparece no conjunto do texto."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "01dcaf22-d8c9-41b2-bc07-70275b47db6a",
+      "kind": "question",
+      "title": "Pergunta 4",
+      "notes": "Gabarito: C · Regras claras são necessárias.\nA palavra “necessárias” apresenta uma avaliação e uma recomendação. Ela indica o que alguém considera desejável, em vez de apenas informar uma característica observável.\nDiscussão: Que palavra sinaliza avaliação? Compare com as outras frases.",
+      "background": {
+        "color": "#ffffff"
+      },
+      "transition": "fade",
+      "elements": [],
+      "question": {
+        "text": "Qual frase apresenta opinião ou avaliação?",
+        "options": [
+          "O celular faz parte da rotina de muitos adolescentes.",
+          "O texto tem seis parágrafos.",
+          "Regras claras são necessárias.",
+          "A palavra celular tem sete letras."
+        ],
+        "correct": 2,
+        "explanation": "A palavra “necessárias” apresenta uma avaliação e uma recomendação. Ela indica o que alguém considera desejável, em vez de apenas informar uma característica observável.",
+        "id": "1db1ffba-f022-4a4e-ae41-b174d419d059",
+        "kind": "multiple",
+        "seconds": 60
+      }
+    },
+    {
+      "id": "9786da8e-f7f3-476f-8859-a4e543a3c9f8",
+      "kind": "content",
+      "title": "A leitura do texto-exemplo",
+      "notes": "",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [
+        {
+          "id": "1118e3af-0ff3-4884-8688-ccc30de1dae0",
+          "type": "text",
+          "x": 56,
+          "y": 38,
+          "w": 888,
+          "h": 112,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 42,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "A leitura do texto-exemplo",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "793c4e1e-66cd-43c2-8556-d300e4691e1d",
+          "type": "text",
+          "x": 56,
+          "y": 165,
+          "w": 470,
+          "h": 141,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 38,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Celular na escola:",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "proibir ou ensinar a usar?",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "9a5ac244-abb0-44d6-ab90-07e478551651",
+          "type": "text",
+          "x": 56,
+          "y": 344,
+          "w": 470,
+          "h": 137,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 32,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Acompanhe a leitura"
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "nos próximos slides"
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "ou no texto de apoio."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "1d26ea16-37ac-4025-8b98-2b256582cb64",
+          "type": "image",
+          "x": 557,
+          "y": 162,
+          "w": 387,
+          "h": 300,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "src": "/lessons/artigo-opiniao/ilustracao-4.jpg",
+          "alt": "Ilustração de estudantes que acompanham uma leitura e uma atividade orientada.",
+          "fit": "contain",
+          "positionX": 50,
+          "positionY": 50,
+          "radius": 0
+        },
+        {
+          "id": "99e94c8d-5589-4493-b36d-82d5f0088210",
+          "type": "text",
+          "x": 56,
+          "y": 515,
+          "w": 888,
+          "h": 37,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 25,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Procure tema, questão controversa, tese e argumentos."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "3718bceb-df9d-4b98-a691-bb7ef83421bf",
+      "kind": "content",
+      "title": "Texto de apoio · parágrafo 1",
+      "notes": "Leia com a turma, faça pausas e peça exemplos. Texto didático elaborado para esta aula a partir dos temas da apresentação enviada. Não é uma transcrição de um artigo externo. Versão completa para leitura e impressão em Texto de apoio, no catálogo. Identifique assunto e posicionamento.\nTexto didático elaborado para esta aula: “Celular na escola: proibir ou ensinar a usar?”. Trecho preservado integralmente. Leia com a turma e convide os alunos a identificar as ideias do autor.",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "transition": "fade",
+      "elements": [
+        {
+          "id": "b9391d39-7deb-402e-96cd-e5447548e01d",
+          "type": "text",
+          "x": 56,
+          "y": 38,
+          "w": 888,
+          "h": 112,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 42,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Celular na escola",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "577c12a9-8fcb-4822-a4bd-3602ea53a5a9",
+          "type": "text",
+          "x": 56,
+          "y": 120,
+          "w": 888,
+          "h": 41,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 23,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "LEITURA · PARÁGRAFO 1 DE 6",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "1bb48da0-01d6-4615-aaf0-225295484b97",
+          "type": "text",
+          "x": 56,
+          "y": 193,
+          "w": 888,
+          "h": 324,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 36,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "O celular faz parte da rotina de muitos adolescentes. Na escola, mensagens, jogos e vídeos sem relação com a atividade podem tirar o foco da aula. Regras claras são necessárias."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "bfd7f79c-6ec9-4d25-a6e4-abee25828192",
+      "kind": "content",
+      "title": "Texto de apoio · parágrafo 2",
+      "notes": "Texto didático elaborado para esta aula: “Celular na escola: proibir ou ensinar a usar?”. Trecho preservado integralmente. Leia com a turma e convide os alunos a identificar as ideias do autor.",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [
+        {
+          "id": "7e7871b3-8c94-4513-929d-2a91636a8a73",
+          "type": "text",
+          "x": 56,
+          "y": 38,
+          "w": 888,
+          "h": 112,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 42,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Celular na escola",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "dd487631-e638-4fa0-92d1-c7f432eecf2e",
+          "type": "text",
+          "x": 56,
+          "y": 120,
+          "w": 888,
+          "h": 41,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 23,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "LEITURA · PARÁGRAFO 2 DE 6",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "f0140079-5114-4b2f-9139-f5523d5fd825",
+          "type": "text",
+          "x": 56,
+          "y": 193,
+          "w": 888,
+          "h": 324,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 36,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Defendo o uso do celular com critérios e finalidade pedagógica. O celular pode ter sentido pedagógico com orientação. Seu uso precisa respeitar as regras da escola e o planejamento do professor."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "3f5617a2-b77c-43dc-80cd-a676cc780070",
+      "kind": "content",
+      "title": "Texto de apoio · parágrafo 3",
+      "notes": "Texto didático elaborado para esta aula: “Celular na escola: proibir ou ensinar a usar?”. Trecho preservado integralmente. Leia com a turma e convide os alunos a identificar as ideias do autor.",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [
+        {
+          "id": "d69949c8-0017-4f61-b5cf-28159885ba00",
+          "type": "text",
+          "x": 56,
+          "y": 38,
+          "w": 888,
+          "h": 112,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 42,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Celular na escola",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "8256c8cf-7154-40aa-9f02-eb65c7fd456b",
+          "type": "text",
+          "x": 56,
+          "y": 120,
+          "w": 888,
+          "h": 41,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 23,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "LEITURA · PARÁGRAFO 3 DE 6",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "96a8f608-833d-41d0-ac56-0ceba645e8b1",
+          "type": "text",
+          "x": 56,
+          "y": 193,
+          "w": 888,
+          "h": 324,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 36,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Uma pesquisa em fontes indicadas, o registro de uma observação e a participação em um quiz são exemplos de usos que podem ajudar a turma. O professor apresenta a tarefa e acompanha sua realização."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "5ee27971-3eed-463b-8fea-8566bc4fa32e",
+      "kind": "content",
+      "title": "Texto de apoio · parágrafo 4",
+      "notes": "Leia com a turma, faça pausas e peça exemplos. Texto didático elaborado para esta aula a partir dos temas da apresentação enviada. Não é uma transcrição de um artigo externo. Versão completa para leitura e impressão em Texto de apoio, no catálogo. Retome razões, exemplos e a relação entre tecnologia e aprendizagem.\nTexto didático elaborado para esta aula: “Celular na escola: proibir ou ensinar a usar?”. Trecho preservado integralmente. Leia com a turma e convide os alunos a identificar as ideias do autor.",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "transition": "fade",
+      "elements": [
+        {
+          "id": "090200fe-c391-4b8e-86be-e4bd1cd1559e",
+          "type": "text",
+          "x": 56,
+          "y": 38,
+          "w": 888,
+          "h": 112,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 42,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Celular na escola",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "149e8d67-fdd9-4ef7-932c-b7a6ff661433",
+          "type": "text",
+          "x": 56,
+          "y": 120,
+          "w": 888,
+          "h": 41,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 23,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "LEITURA · PARÁGRAFO 4 DE 6",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "faa3c175-dfc7-484a-872c-133949b64747",
+          "type": "text",
+          "x": 56,
+          "y": 193,
+          "w": 888,
+          "h": 324,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 36,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Por outro lado, usar o aparelho para conversar sobre outros assuntos ou assistir a vídeos durante uma explicação pode interromper a concentração. O problema não está só no aparelho, mas no modo de uso."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "55a196b0-6bdb-4e2d-ad97-73591b71cac8",
+      "kind": "content",
+      "title": "Texto de apoio · parágrafo 5",
+      "notes": "Texto didático elaborado para esta aula: “Celular na escola: proibir ou ensinar a usar?”. Trecho preservado integralmente. Leia com a turma e convide os alunos a identificar as ideias do autor.",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [
+        {
+          "id": "34368f82-6120-4642-a57c-bf88a4bed98a",
+          "type": "text",
+          "x": 56,
+          "y": 38,
+          "w": 888,
+          "h": 112,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 42,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Celular na escola",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "b23e7da9-7674-45e9-8119-0dc7c239bf24",
+          "type": "text",
+          "x": 56,
+          "y": 120,
+          "w": 888,
+          "h": 41,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 23,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "LEITURA · PARÁGRAFO 5 DE 6",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "692af9c1-4488-4164-ab29-0782794498a7",
+          "type": "text",
+          "x": 56,
+          "y": 193,
+          "w": 888,
+          "h": 324,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 36,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Também é necessário incluir quem não tem celular. A atividade pode oferecer participação em duplas ou outros recursos. A oportunidade de aprender deve ser para todos."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "b5ed60f4-5671-4e11-8f3f-d4ac294bee55",
+      "kind": "content",
+      "title": "Texto de apoio · parágrafo 6",
+      "notes": "Texto didático elaborado para esta aula: “Celular na escola: proibir ou ensinar a usar?”. Trecho preservado integralmente. Leia com a turma e convide os alunos a identificar as ideias do autor.",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [
+        {
+          "id": "d44e847f-f254-423f-b8f9-44be54e4a32d",
+          "type": "text",
+          "x": 56,
+          "y": 38,
+          "w": 888,
+          "h": 112,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 42,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Celular na escola",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "839050d1-2aee-48df-89ea-26c4269009af",
+          "type": "text",
+          "x": 56,
+          "y": 120,
+          "w": 888,
+          "h": 41,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 23,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "LEITURA · PARÁGRAFO 6 DE 6",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "020be0e1-d4a6-411c-a408-a0d6ecb8a8e5",
+          "type": "text",
+          "x": 56,
+          "y": 193,
+          "w": 888,
+          "h": 324,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 36,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "A tecnologia deve servir à aprendizagem. Regras claras, orientação e objetivos definidos podem transformar o celular em um recurso da aula, com espaço para a participação responsável de toda a turma."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "99cf5c59-0966-47cf-89a5-c3be7fabba16",
+      "kind": "content",
+      "title": "Roteiro de leitura",
+      "notes": "Use o texto de apoio para localizar as respostas.",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [
+        {
+          "id": "cc321171-3a32-489b-bbdd-be89346fbaaa",
+          "type": "text",
+          "x": 56,
+          "y": 38,
+          "w": 888,
+          "h": 112,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 42,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Roteiro de leitura",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "c65a42af-dd03-4613-b6e8-c615e96b06f0",
+          "type": "text",
+          "x": 56,
+          "y": 151,
+          "w": 246,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 32,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Tema",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "da0182bb-a6a8-4287-9ab5-f60f444f2deb",
+          "type": "text",
+          "x": 316,
+          "y": 151,
+          "w": 628,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Qual é o assunto do texto?"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "4be57b75-8da4-4593-897a-ce9b9c770cb7",
+          "type": "text",
+          "x": 56,
+          "y": 243,
+          "w": 246,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 32,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Questão",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "controversa",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "01895ef7-a471-4543-b7db-be5351f67975",
+          "type": "text",
+          "x": 316,
+          "y": 243,
+          "w": 628,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Que pergunta divide opiniões?"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "cee1f0eb-d78f-4dc9-9b7f-fce1f0252dd8",
+          "type": "text",
+          "x": 56,
+          "y": 335,
+          "w": 246,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 32,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Tese",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "ee85b79e-1f6e-44cb-badf-3a75597da3fe",
+          "type": "text",
+          "x": 316,
+          "y": 335,
+          "w": 628,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "O que o autor defende?"
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "077a048a-4c99-41b0-8d76-dd48ad99c5d9",
+          "type": "text",
+          "x": 56,
+          "y": 427,
+          "w": 246,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 32,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Argumentos",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "f58b4a05-2dd7-41a8-9d3b-02041ebcbf6d",
+          "type": "text",
+          "x": 316,
+          "y": 427,
+          "w": 628,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Que razões ele usa para defender a ideia?"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "099a138e-d294-456f-a4f5-cb08b9260ae2",
+      "kind": "content",
+      "title": "Destaques do texto-exemplo",
+      "notes": "Esses trechos ajudam a comprovar a posição do autor. Peça que a turma localize os trechos no texto completo.",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [
+        {
+          "id": "ef57eb8f-f5a6-4ff2-8611-34d15bac8930",
+          "type": "text",
+          "x": 56,
+          "y": 38,
+          "w": 888,
+          "h": 112,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 42,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Destaques do texto-exemplo",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "8eba6854-ee1c-445f-9e7d-175cbb05fd9f",
+          "type": "text",
+          "x": 56,
+          "y": 160,
+          "w": 888,
+          "h": 99,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 35,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "“O problema não está só no aparelho,",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "mas no modo de uso.”",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "95948f07-b228-4231-9f53-da8150e290c3",
+          "type": "text",
+          "x": 56,
+          "y": 292,
+          "w": 888,
+          "h": 99,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 35,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "“O celular pode ter sentido pedagógico",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "com orientação.”",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "7dc7c34f-2434-442c-a78d-13329a54f7be",
+          "type": "text",
+          "x": 56,
+          "y": 431,
+          "w": 888,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 35,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "“A tecnologia deve servir à aprendizagem.”",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "ded13a6c-8580-4f56-86cf-1e407e93e9bd",
+      "kind": "question",
+      "title": "Pergunta 5",
+      "notes": "Gabarito: C · O celular pode ser usado com critérios e finalidade pedagógica.\nO segundo parágrafo declara a posição defendida: uso com critérios e finalidade pedagógica. O texto também valoriza regras, orientação e participação de quem não tem aparelho.\nDiscussão: Peça uma passagem do texto que sustente a resposta.",
+      "background": {
+        "color": "#ffffff"
+      },
+      "transition": "fade",
+      "elements": [],
+      "question": {
+        "text": "No texto de apoio, qual posição é defendida?",
+        "options": [
+          "O celular deve ser sempre proibido.",
+          "O celular deve ser usado sem regras.",
+          "O celular pode ser usado com critérios e finalidade pedagógica.",
+          "O texto não apresenta opinião."
+        ],
+        "correct": 2,
+        "explanation": "O segundo parágrafo declara a posição defendida: uso com critérios e finalidade pedagógica. O texto também valoriza regras, orientação e participação de quem não tem aparelho.",
+        "id": "33cb7530-eb83-4ef2-a96c-6166ffc00281",
+        "kind": "multiple",
+        "seconds": 60
+      }
+    },
+    {
+      "id": "f9e40d0f-c19d-44d5-897a-7ed0199fcbbc",
+      "kind": "question",
+      "title": "Pergunta 6",
+      "notes": "Gabarito: B · Tese ou posicionamento.\nA tese é a posição central que o autor defende. Os argumentos oferecem razões para sustentar essa ideia e o título ajuda a apresentar o assunto.\nDiscussão: Qual é a diferença entre tese e argumento?",
+      "background": {
+        "color": "#ffffff"
+      },
+      "transition": "fade",
+      "elements": [],
+      "question": {
+        "text": "Qual elemento do artigo de opinião indica a ideia defendida pelo autor?",
+        "options": [
+          "Título.",
+          "Tese ou posicionamento.",
+          "Número de parágrafos.",
+          "Nome da escola."
+        ],
+        "correct": 1,
+        "explanation": "A tese é a posição central que o autor defende. Os argumentos oferecem razões para sustentar essa ideia e o título ajuda a apresentar o assunto.",
+        "id": "30c50627-edfd-4d29-9145-1aee4decf514",
+        "kind": "multiple",
+        "seconds": 60
+      }
+    },
+    {
+      "id": "fa3072d3-667a-46bf-aaf4-ba7e6cd5b2fc",
+      "kind": "question",
+      "title": "Pergunta 7",
+      "notes": "Gabarito: B · A notícia busca informar fatos; o artigo defende um ponto de vista.\nA finalidade da notícia ou reportagem informativa é informar fatos. O artigo de opinião se organiza para defender uma posição. Os dois podem circular no mesmo jornal.\nDiscussão: Retome os Textos A e B e peça uma justificativa.",
+      "background": {
+        "color": "#ffffff"
+      },
+      "transition": "fade",
+      "elements": [],
+      "question": {
+        "text": "Qual alternativa diferencia melhor notícia ou reportagem informativa de artigo de opinião?",
+        "options": [
+          "A notícia defende uma tese; o artigo só informa horário.",
+          "A notícia busca informar fatos; o artigo defende um ponto de vista.",
+          "Os dois textos sempre têm o mesmo objetivo.",
+          "O artigo de opinião nunca aparece em jornais."
+        ],
+        "correct": 1,
+        "explanation": "A finalidade da notícia ou reportagem informativa é informar fatos. O artigo de opinião se organiza para defender uma posição. Os dois podem circular no mesmo jornal.",
+        "id": "bf224cd1-25a5-4e1a-ae00-a13adb4dcdeb",
+        "kind": "multiple",
+        "seconds": 60
+      }
+    },
+    {
+      "id": "304de8e6-2cac-4738-bce6-309e1cb41d04",
+      "kind": "content",
+      "title": "Síntese da aula",
+      "notes": "Retome a questão controversa como a pergunta que permite posições diferentes. A finalidade do artigo é defender uma ideia e buscar o convencimento do leitor.",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [
+        {
+          "id": "f81d388c-914a-4099-a56c-bb2ac28eaa28",
+          "type": "text",
+          "x": 56,
+          "y": 38,
+          "w": 888,
+          "h": 112,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 42,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Síntese da aula",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "962498c5-af99-481b-bf09-cadccf2a428a",
+          "type": "text",
+          "x": 56,
+          "y": 151,
+          "w": 246,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 32,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Artigo de",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "opinião",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "56cf3598-c748-4eb1-8567-1572c0da6598",
+          "type": "text",
+          "x": 316,
+          "y": 151,
+          "w": 628,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Desenvolve uma posição sobre um tema em debate."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "9989ec2b-79fd-48e5-aa1a-8e2a195b9905",
+          "type": "text",
+          "x": 56,
+          "y": 243,
+          "w": 246,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 32,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Tese",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "1219e3ad-dfe3-455a-81a2-8cd94d703d48",
+          "type": "text",
+          "x": 316,
+          "y": 243,
+          "w": 628,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "A ideia central defendida pelo autor."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "f02596ba-15a3-48d4-9de9-e0f0f684d41c",
+          "type": "text",
+          "x": 56,
+          "y": 335,
+          "w": 246,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 32,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Argumentos",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "935a6190-e87f-4406-8be3-26baa0a6e660",
+          "type": "text",
+          "x": 316,
+          "y": 335,
+          "w": 628,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "As razões que sustentam a tese."
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "1376abc9-2ee9-4f4c-8c13-0144b6628913",
+          "type": "text",
+          "x": 56,
+          "y": 427,
+          "w": 246,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 32,
+          "color": "#137D61",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Notícia /",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "reportagem",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "e35fb351-a546-4eca-9bae-4ad81d4925dc",
+          "type": "text",
+          "x": 316,
+          "y": 427,
+          "w": 628,
+          "h": 88,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 31,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Busca informar fatos ao leitor."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "886f735a-3516-4aea-861a-fa498777d85c",
+      "kind": "content",
+      "title": "Saída da aula",
+      "notes": "Fechamento oral: cada aluno ou dupla apresenta uma frase que diferencie artigo de opinião de notícia. Acolha as hipóteses e peça o uso dos conceitos opinião, ponto de vista ou argumento. Retome as dificuldades percebidas nas sete perguntas.\nFechamento oral. Convide alguns alunos a compartilhar sua frase. Depois, avance para a enquete de avaliação da aula.",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [
+        {
+          "id": "dc36d23a-d82c-4030-a2ba-e3d177b20384",
+          "type": "text",
+          "x": 56,
+          "y": 38,
+          "w": 888,
+          "h": 112,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 42,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Saída da aula",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "51aff237-ff92-4cae-9f98-2282515727ac",
+          "type": "text",
+          "x": 56,
+          "y": 172,
+          "w": 888,
+          "h": 168,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 46,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "O que diferencia um artigo",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "de opinião de uma notícia?",
+                    "marks": [
+                      {
+                        "type": "bold"
+                      }
+                    ]
+                  }
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "id": "ce7966e6-f5c1-4097-8837-b6eafacd9569",
+          "type": "text",
+          "x": 56,
+          "y": 390,
+          "w": 888,
+          "h": 99,
+          "rotation": 0,
+          "opacity": 100,
+          "locked": false,
+          "hidden": false,
+          "build": 0,
+          "font": "Arial",
+          "fontSize": 33,
+          "color": "#18344E",
+          "align": "left",
+          "doc": {
+            "type": "doc",
+            "content": [
+              {
+                "type": "paragraph",
+                "content": [
+                  {
+                    "type": "text",
+                    "text": "Responda em uma frase usando “opinião”,"
+                  },
+                  {
+                    "type": "hardBreak"
+                  },
+                  {
+                    "type": "text",
+                    "text": "“ponto de vista” ou “argumento”."
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "cf22a32a-7547-4133-8142-d1ba2fef65f0",
+      "kind": "question",
+      "title": "Avaliação da aula",
+      "notes": "Última atividade da aula. Enquete de escolha única e sem gabarito. Revele as contagens e porcentagens e peça sugestões orais à turma.",
+      "transition": "fade",
+      "background": {
+        "color": "#FFFCF7"
+      },
+      "elements": [],
+      "question": {
+        "id": "8b5331fb-fa36-4bfc-9381-b74600de94d1",
+        "kind": "poll",
+        "text": "Como você avalia a aula de hoje?",
+        "options": [
+          "Bom",
+          "Ótimo",
+          "OK",
+          "Ruim"
+        ],
+        "correct": -1,
+        "seconds": 60,
+        "allowMultiple": false,
+        "explanation": "Sua opinião ajuda a preparar as próximas aulas."
+      }
+    }
+  ],
+  "mode": "accuracy",
+  "untimed": true,
+  "showSlideNumbers": true
+}

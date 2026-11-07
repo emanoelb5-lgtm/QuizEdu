@@ -18,7 +18,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
-                <data android:scheme="https" android:host="quizedu-emanuel.emanuelb5.chatgpt.site" android:pathPrefix="/participar/" />
+                <data android:scheme="https" android:host="prativerso.b5solucoes.online" android:pathPrefix="/participar/" />
             </intent-filter>
         </activity>
         <activity android:name="com.journeyapps.barcodescanner.CaptureActivity"

@@ -1,15 +1,24 @@
-import { answer, appManifest, body, controlRoom, createRoom, dashboard, deleteQuiz, HttpError, joinRoom, json, profile, resumePlayer, roomState, roomEvents, saveQuiz } from "@/lib/server";
+import { registerAccount,loginAccount,recoverAccount,changePassword } from "@/lib/account-server";
+import {contactSupport,deleteAccount,deleteParticipation,reportClassroom,moderateClassroom} from "@/lib/privacy-server";
+import { votePoll, submitCloudWord, answer, appManifest, body, controlRoom, createRoom, dashboard, deleteQuiz, HttpError, joinRoom, json, profile, resumePlayer, roomState, roomEvents, saveQuiz } from "@/lib/server";
 import { copySharedQuiz, deleteDraft, deleteQuestion, linkAccount, listQuestions, logout, readImage, reportCsv, reportData, saveDraft, saveQuestion, sharedQuiz, shareQuiz, unshareQuiz, uploadImage } from "@/lib/library-server";
 import { heartbeat } from "@/lib/server";
-import {deletePresentation,listPresentations,readPresentation,savePresentation} from "@/lib/presentation-server";
+import {activePresentations,deletePresentation,listPresentations,readPresentation,savePresentation} from "@/lib/presentation-server";
 import {approveNative,listNative,nativeInfo,nativeStatus,revokeNative,startNative} from "@/lib/native-server";
 import {androidSigning} from "@/lib/android-signing";
 import {readPresentationImport} from "@/lib/presentation-import-server";
 import {readExamples} from "@/lib/examples-server";
+import {readLessonCatalog,readReadyLesson} from "@/lib/lesson-catalog-server";
 export const dynamic = "force-dynamic";
 async function handle(request: Request) {
   try {
     const path = new URL(request.url).pathname.slice(5).split("/").filter(Boolean); const method = request.method;
+    if (method === "POST" && path[0] === "auth" && path.length === 2) {
+      if (path[1] === "register") return await registerAccount(request);
+      if (path[1] === "login") return await loginAccount(request);
+      if (path[1] === "recover") return await recoverAccount(request);
+      if (path[1] === "password") return await changePassword(request);
+    }
     if(method==="POST"&&path.join("/")==="android/signing")return await androidSigning(request);
     if(method==="POST"&&path.join("/")==="presentation-import")return await readPresentationImport(request);
     if(path[0]==="native"){
@@ -21,16 +30,21 @@ async function handle(request: Request) {
       if(method==="DELETE"&&path[1]==="devices"&&path.length===3)return await revokeNative(request,path[2]);
     }
     if (method === "GET" && path.join("/") === "ping") return json({serverNow:Date.now()});
-    if (method === "GET" && path.join("/") === "examples") return readExamples();
+    if (method === "GET" && path.join("/") === "examples") return readExamples(request);
+    if (method === "GET" && path[0] === "lessons" && path.length === 1) return readLessonCatalog(request);
+    if (method === "GET" && path[0] === "lessons" && path.length === 2) return readReadyLesson(path[1]);
     if (method === "GET" && path.join("/") === "app-manifest") return await appManifest(request);
     if (method === "GET" && path[0] === "dashboard" && path.length === 1) return await dashboard(request);
     if (path[0] === "presentations") {
+      if (method === "GET" && path.join("/") === "presentations/active") return await activePresentations(request);
       if (method === "GET" && path.length === 1) return await listPresentations(request);
       if (method === "GET" && path.length === 2) return await readPresentation(request,path[1]);
       if (method === "POST" && path.length === 1) return await savePresentation(request);
       if (method === "DELETE" && path.length === 2) return await deletePresentation(request,path[1]);
     }
     if (method === "POST" && path[0] === "profile" && path.length === 1) return await profile(request);
+    if (method === "POST" && path.join("/") === "support") return await contactSupport(request);
+    if (method === "POST" && path.join("/") === "account/delete") return await deleteAccount(request);
     if (method === "POST" && path.join("/") === "account/link") return await linkAccount(request);
     if (method === "POST" && path.join("/") === "logout") return await logout(request);
     if (method === "POST" && path[0] === "drafts" && path.length === 1) return await saveDraft(request);
@@ -59,8 +73,13 @@ async function handle(request: Request) {
       if (method === "GET" && path.length === 3 && path[2] === "events") return await roomEvents(request, path[1]);
       if (method === "GET" && path.length === 2) return await roomState(request, path[1]);
       if (method === "POST" && path.length === 3) {
+        if (path[2] === "delete-participation") return await deleteParticipation(request,path[1]);
+        if (path[2] === "report") return await reportClassroom(request,path[1]);
+        if (path[2] === "moderate") return await moderateClassroom(request,path[1]);
         if (path[2] === "join") return await joinRoom(request, path[1]);
         if (path[2] === "resume") return await resumePlayer(request, path[1]);
+        if (path[2] === "word") return await submitCloudWord(request,path[1]);
+        if (path[2] === "vote") return await votePoll(request,path[1]);
         if (path[2] === "answer") return await answer(request, path[1]);
         if (path[2] === "control") return await controlRoom(request, path[1]);
         if (path[2] === "heartbeat") return await heartbeat(request,path[1]);

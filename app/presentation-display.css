@@ -1,0 +1,67 @@
+/* Presentation surfaces fill the viewport; every slide retains its 16:9 canvas. */
+.lesson-immersive,.lesson-preview-immersive{position:fixed;inset:0;height:100dvh;min-height:0;overflow:hidden;background:#141122}
+.lesson-immersive.has-action-dock{padding:0!important}
+.lesson-immersive .lesson-live-grid{position:absolute;inset:0;display:block;padding:0}
+.lesson-immersive .lesson-stage-area{height:100%;width:100%;margin:0;display:flex;align-items:center;justify-content:center}
+.lesson-immersive .lesson-slide-stage{width:min(100%,calc(100dvh * 16 / 9));max-height:100dvh;flex-shrink:0;border-radius:0;box-shadow:none;background:#141122}
+.lesson-immersive .lesson-slide-stage>.slide-frame{width:100%}
+.lesson-immersive .lesson-live-topbar{position:absolute;top:0;left:0;right:0;z-index:22;min-height:64px;padding:12px 24px;background:linear-gradient(#141122e8,#141122bf);border:0;backdrop-filter:blur(12px)}
+.lesson-immersive .lesson-stage-meta{position:absolute;left:24px;right:24px;top:74px;z-index:20;margin:0;font-size:.6875rem;text-shadow:0 1px 5px #000}
+.lesson-immersive .lesson-control-dock{z-index:22;background:#141122e8;backdrop-filter:blur(14px);padding-top:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom))}
+.lesson-immersive .lesson-round-summary{position:absolute;left:24px;bottom:calc(var(--action-dock-height,0px) + 12px);z-index:20;width:fit-content;max-width:calc(100% - 48px);border-radius:10px;padding:8px 12px;background:#141122d9;color:#eee8fa;font-size:.75rem;backdrop-filter:blur(8px)}
+.lesson-immersive .lesson-question-feedback{display:none}
+.lesson-immersive .lesson-live-topbar,.lesson-immersive .lesson-stage-meta,.lesson-immersive .lesson-control-dock,.lesson-immersive .lesson-round-summary{opacity:0;pointer-events:none;transition:opacity .2s}
+.lesson-immersive.lesson-tools-visible .lesson-live-topbar,.lesson-immersive.lesson-tools-visible .lesson-stage-meta,.lesson-immersive.lesson-tools-visible .lesson-control-dock,.lesson-immersive.lesson-tools-visible .lesson-round-summary,.lesson-immersive .lesson-live-topbar:has(:focus-visible),.lesson-immersive .lesson-control-dock:has(:focus-visible){opacity:1;pointer-events:auto}
+.lesson-immersive .lesson-presenter-notes{position:absolute;z-index:25;left:20px;bottom:calc(var(--action-dock-height,90px) + 12px);width:min(720px,calc(100% - 40px));max-height:45dvh;overflow:auto;border:1px solid #ffffff25;border-radius:13px;box-shadow:0 12px 36px #0006;background:#23213ded}
+.lesson-immersive>.offline{position:absolute;z-index:28;top:74px;left:20px;right:20px}
+.lesson-preview-immersive>main{position:absolute;inset:0;padding:0;min-height:0;display:flex;align-items:center;justify-content:center}
+.lesson-preview-immersive>main>.slide-frame{width:min(100%,calc(100dvh * 16 / 9));flex-shrink:0;border-radius:0;box-shadow:none}
+.lesson-preview-immersive>header,.lesson-preview-immersive>footer{position:absolute;left:0;right:0;z-index:3;background:#141122e8;backdrop-filter:blur(12px);opacity:0;pointer-events:none;transition:opacity .2s}
+.lesson-preview-immersive>header{top:0}.lesson-preview-immersive>footer{bottom:0}
+.lesson-preview-immersive.lesson-tools-visible>header,.lesson-preview-immersive.lesson-tools-visible>footer,.lesson-preview-immersive>header:has(:focus-visible),.lesson-preview-immersive>footer:has(:focus-visible){opacity:1;pointer-events:auto}
+.lesson-preview-immersive .lesson-preview-notes{position:absolute;z-index:4;left:20px;right:20px;bottom:94px;max-height:40dvh;overflow:auto;border-radius:12px;background:#23213ded}
+
+/* A brief ranking announcement over the slide, with an automatic exit. */
+.lesson-ranking-overlay{position:absolute;right:clamp(12px,2vw,32px);bottom:20px;z-index:15;width:clamp(300px,28vw,430px);max-width:calc(100% - 24px);max-height:calc(100% - 40px);display:flex;flex-direction:column;border-radius:19px;overflow:hidden;background:#23213dee;color:#fff;border:1px solid #ffffff30;box-shadow:0 20px 70px #14112270;backdrop-filter:blur(20px);animation:lesson-ranking-spotlight 6s ease both}
+.lesson-immersive:not(.lesson-projection) .lesson-ranking-overlay{bottom:min(calc(var(--action-dock-height,80px) + 12px),15%);max-height:calc(85% - 20px)}
+.lesson-ranking-overlay>header{display:flex;align-items:center;gap:12px;padding:17px 18px;border-bottom:1px solid #ffffff14;flex-shrink:0}
+.lesson-ranking-cup{width:42px;height:42px;display:grid;place-items:center;background:#ffb35c1c;border:1px solid #ffb35c28;border-radius:13px;color:#ffb35c;flex-shrink:0}
+.lesson-ranking-overlay h2{font-size:1rem;font-weight:750;margin:0;letter-spacing:-.015em}
+.lesson-ranking-overlay header p{font-size:.6875rem;color:#cbc1e7;line-height:1.4;margin-top:4px}
+.lesson-ranking-overlay header button{display:grid;place-items:center;min-width:34px;min-height:34px;margin-left:auto;border-radius:8px;color:#cbc1e7}
+.lesson-ranking-overlay header button:hover{background:#ffffff14;color:#fff}
+.lesson-ranking-overlay .ranking{overflow:auto;min-height:0;margin:0;padding:7px 10px}
+.lesson-ranking-overlay .ranking>li{min-height:62px;padding:9px 8px;gap:10px;border:0;background:transparent;border-radius:9px;margin:2px 0}
+.lesson-ranking-overlay .ranking>li:first-child{background:#ffb35c12}
+.lesson-ranking-overlay .rank-position{min-width:25px;font-size:1rem;color:#ffb35c}
+.lesson-ranking-overlay .rank-avatar .illustrated-avatar{width:36px;height:36px}
+.lesson-ranking-overlay .rank-person{min-width:0}
+.lesson-ranking-overlay .rank-person>b{font-size:clamp(.875rem,1.1vw,1.125rem);color:#fff;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lesson-ranking-overlay .rank-person>span{font-size:.6875rem;color:#b9aecf}
+.lesson-ranking-overlay .rank-score{font-size:clamp(1rem,1.3vw,1.375rem);color:#56dbc2}
+.lesson-ranking-overlay .rank-score small{font-size:.625rem;color:#cbc1e7}
+.lesson-ranking-empty{padding:20px;font-size:.8125rem;color:#cbc1e7}
+.lesson-ranking-time{height:3px;flex-shrink:0;background:#ffffff12}
+.lesson-ranking-time>span{display:block;height:100%;background:linear-gradient(90deg,#56dbc2,#ffb35c);transform-origin:left;animation:lesson-ranking-time 6s linear forwards}
+@keyframes lesson-ranking-spotlight{0%{opacity:0;transform:translateY(16px) scale(.97)}6%,90%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(10px) scale(.98)}}
+@keyframes lesson-ranking-time{to{transform:scaleX(0)}}
+
+/* The student's full ranking remains available across every classroom phase. */
+.student-ranking-dock{padding-top:10px;padding-bottom:calc(10px + env(safe-area-inset-bottom));background:#ffffffed;backdrop-filter:blur(16px);box-shadow:0 -5px 24px #23213d0d;border-color:#e5dff0}
+.student-ranking-dock .action-dock-inner{max-width:602px}
+.student-ranking{width:100%;min-width:0}
+.student-ranking>header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px}
+.student-ranking h2{display:flex;align-items:center;gap:7px;font-size:.8125rem;font-weight:750;color:#433362}
+.student-ranking h2 svg{color:#a9651f}
+.student-ranking>header>span{font-size:.75rem;color:#796b8f;white-space:nowrap}.student-ranking>header b{color:#6546d7}
+.student-ranking-track{display:flex;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;scroll-snap-type:x proximity;scrollbar-width:thin;scrollbar-color:#d5c9ec transparent;padding:0 0 3px;margin:0;list-style:none}
+.student-ranking-track>li{display:flex;align-items:center;gap:7px;flex:0 0 153px;min-width:0;padding:9px 10px;min-height:56px;border:1px solid #ece6f4;border-radius:11px;background:#faf8fd;scroll-snap-align:start}
+.student-ranking-track .student-ranking-self{border-color:#b6a1ec;background:#f0eaff}
+.student-ranking-position{font-size:.75rem;font-weight:750;color:#857695}.student-ranking-medal{color:#a9651f}
+.student-ranking-track .illustrated-avatar{width:30px;height:30px;flex-shrink:0}
+.student-ranking-track>li>div{min-width:0;display:flex;flex-direction:column;gap:4px;flex:1}
+.student-ranking-track b{display:block;font-size:.75rem;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:#433362}
+.student-ranking-track>li>div>span{font-size:.6875rem;color:#6546d7;font-weight:650;white-space:nowrap}
+@media(max-width:600px),(max-height:500px){.lesson-ranking-overlay{width:300px;border-radius:12px}.lesson-ranking-overlay>header{padding:10px;gap:8px}.lesson-ranking-cup{width:30px;height:30px}.lesson-ranking-cup svg{width:18px}.lesson-ranking-overlay .ranking>li{min-height:47px;padding:5px;gap:7px}.lesson-ranking-overlay .rank-avatar .illustrated-avatar{width:28px;height:28px}.lesson-ranking-overlay h2{font-size:.875rem}.lesson-immersive .lesson-live-topbar{padding:10px 12px}.lesson-immersive .lesson-stage-meta{left:12px;right:12px;top:68px}.lesson-immersive .lesson-round-summary{left:12px;max-width:calc(100% - 24px)}}
+@media(max-height:500px){.student-ranking-dock{padding-top:6px;padding-bottom:calc(6px + env(safe-area-inset-bottom))}.student-ranking>header{margin-bottom:4px}.student-ranking-track>li{min-height:44px;padding:5px 8px}.student-ranking-track .illustrated-avatar{width:24px;height:24px}}
+@media(prefers-reduced-motion:reduce){.lesson-ranking-overlay,.lesson-ranking-time>span{animation:none}.lesson-immersive .lesson-live-topbar,.lesson-immersive .lesson-control-dock,.lesson-immersive .lesson-stage-meta,.lesson-immersive .lesson-round-summary,.lesson-preview-immersive>header,.lesson-preview-immersive>footer{transition:none}}

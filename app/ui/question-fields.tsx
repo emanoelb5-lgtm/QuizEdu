@@ -5,6 +5,7 @@ import {RadioGroup,RadioGroupItem} from "@/components/ui/radio-group";
 import {Select,SelectContent,SelectItem,SelectTrigger,SelectValue} from "@/components/ui/select";
 import {AlertDialog,AlertDialogAction,AlertDialogCancel,AlertDialogContent,AlertDialogDescription,AlertDialogFooter,AlertDialogTitle} from "@/components/ui/alert-dialog";
 import {applyQuestionTemplate,DURATIONS,LETTERS,QUESTION_TEMPLATES,Question,QuestionIssue,QuestionKind,questionIssues} from "@/lib/quiz";
+import {PollFields} from "./poll-fields";
 import {ImageField} from "./learning-tools";
 
 export type QuestionPatch=Partial<Question>|((current:Question)=>Partial<Question>);
@@ -15,9 +16,10 @@ export function QuestionFields({q,onChange,untimed=false,showErrors=false,onUplo
   const touch=(field:string)=>setTouched(old=>old.includes(field)?old:[...old,field]);
   function matching(field:QuestionIssue["field"],option?:number){return issues.filter(i=>i.field===field&&(option===undefined||i.option===option)&&(i.severity==="warning"||showErrors||touched.includes(option===undefined?field:`${field}-${option}`)));}
   function messages(field:QuestionIssue["field"],option?:number){return <div id={`help-${field}-${q.id}-${option??"all"}`} className="field-messages">{matching(field,option).map((issue,i)=><p className={issue.severity==="error"?"field-error":"field-warning"} key={i}>{issue.message}</p>)}</div>;}
-  function changeKind(next:QuestionKind){if(next===kind)return;const switches=(next==="true_false")!==(kind==="true_false");if(switches&&(q.correct>=0||q.optionImages?.some(Boolean)||q.options.some(o=>o.trim()&&!["Verdadeiro","Falso"].includes(o))))setPendingKind(next);else onChange(applyQuestionTemplate(q,next));}
+  function changeKind(next:QuestionKind){if(next===kind)return;const switches=(next==="true_false")!==(kind==="true_false")||(kind==="poll"&&next!=="poll"&&q.options.length>4);if(switches&&(q.correct>=0||q.optionImages?.some(Boolean)||q.options.some(o=>o.trim()&&!["Verdadeiro","Falso"].includes(o))))setPendingKind(next);else onChange(applyQuestionTemplate(q,next));}
   return <>
     <div className="question-template"><label>Modelo da pergunta</label><RadioGroup disabled={mediaBusy>0} className="template-options" value={kind} onValueChange={v=>changeKind(v as QuestionKind)} aria-label="Modelo da pergunta">{QUESTION_TEMPLATES.map(t=><label key={t.kind} className={kind===t.kind?"template-selected":""}><RadioGroupItem value={t.kind}/><span>{t.label}</span></label>)}</RadioGroup><p className="field-help">{template.description}</p></div>
+    {kind==="poll"?<PollFields q={q} onChange={onChange} onUploadChange={uploadChanged} showErrors={showErrors} disabled={mediaBusy>0}/>:<>
     <label htmlFor={`text-${q.id}`}>{kind==="true_false"?"Qual afirmação a turma vai avaliar?":kind==="scenario"?"Qual situação você quer apresentar?":"O que você quer perguntar?"}</label>
     <textarea id={`text-${q.id}`} rows={4} maxLength={400} value={q.text} onChange={e=>onChange({text:e.target.value})} onBlur={()=>touch("text")} placeholder={template.placeholder} aria-invalid={matching("text").some(i=>i.severity==="error")} aria-describedby={`help-text-${q.id}-all`}/><div className="field-counter">{q.text.length}/400</div>{messages("text")}
     {kind==="image"&&<div className="image-question-field"><ImageField onBusyChange={uploadChanged} value={q.image} alt={q.imageAlt} onChange={image=>onChange({image})} onAltChange={imageAlt=>onChange({imageAlt})}/>{messages("image")}{messages("imageAlt")}</div>}
@@ -36,6 +38,7 @@ export function QuestionFields({q,onChange,untimed=false,showErrors=false,onUplo
       <div className="question-settings"><div><label><Clock3 size={17}/>Tempo para responder</label>{untimed?<p className="field-help">Tempo livre. A rodada termina quando todos respondem ou quando você a encerra.</p>:<Select value={String(q.seconds)} onValueChange={value=>onChange({seconds:Number(value)})}><SelectTrigger className="duration-select" aria-label="Tempo para responder"><SelectValue/></SelectTrigger><SelectContent>{DURATIONS.map(s=><SelectItem key={s} value={String(s)}>{s} segundos</SelectItem>)}</SelectContent></Select>}</div></div>{messages("seconds")}
       <label htmlFor={`explanation-${q.id}`}>Explicação após a rodada <span className="optional">(opcional)</span></label><textarea id={`explanation-${q.id}`} rows={3} maxLength={500} value={q.explanation} onChange={e=>onChange({explanation:e.target.value})} onBlur={()=>touch("explanation")} placeholder="Explique por que a resposta está correta."/><div className="field-counter">{q.explanation.length}/500</div>{messages("explanation")}
     </div></details>
+    </>}
     <AlertDialog open={!!pendingKind} onOpenChange={open=>{if(!open)setPendingKind(null);}}><AlertDialogContent className="q-dialog"><AlertDialogTitle>Trocar o modelo desta pergunta?</AlertDialogTitle><AlertDialogDescription>O enunciado, a imagem da pergunta e a explicação continuam. As alternativas e suas imagens serão substituídas, e você precisará marcar a resposta correta novamente.</AlertDialogDescription><AlertDialogFooter><AlertDialogCancel>Manter o modelo</AlertDialogCancel><AlertDialogAction onClick={()=>{if(pendingKind)onChange(applyQuestionTemplate(q,pendingKind));setPendingKind(null);}}>Trocar modelo</AlertDialogAction></AlertDialogFooter></AlertDialogContent></AlertDialog>
   </>;
 }

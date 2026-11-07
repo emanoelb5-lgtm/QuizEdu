@@ -1,6 +1,6 @@
 {
   "name": "prativerso",
-  "version": "3.6.1",
+  "version": "4.0.0",
   "private": true,
   "engines": {
     "node": ">=22.13.0"
@@ -12,8 +12,10 @@
     "start": "node --import ./scripts/sites-env.mjs ./node_modules/wrangler/bin/wrangler.js dev --config dist/server/wrangler.json --local --persist-to .wrangler/state --ip 127.0.0.1 --inspector-port 0",
     "lint": "eslint . --ignore-pattern dist --ignore-pattern .next",
     "db:generate": "drizzle-kit generate",
-    "test": "node tests/live-sync.mjs && node tests/integration.mjs && node tests/features.mjs && node tests/authoring.mjs && node tests/player-app.mjs && node tests/app-install.mjs && node tests/presentation-import.mjs && node tests/presentations.mjs && node tests/native.mjs",
-    "typecheck": "tsc --noEmit"
+    "test": "node tests/live-sync.mjs && node tests/integration.mjs && node tests/features.mjs && node tests/authoring.mjs && node tests/player-app.mjs && node tests/app-install.mjs && node tests/presentation-import.mjs && node tests/presentations.mjs && node tests/contos-example.mjs && node tests/lesson-catalog.mjs && node tests/presentation-display.mjs && node tests/word-cloud.mjs && node tests/polls.mjs && node tests/native.mjs && node tests/store-readiness.mjs",
+    "typecheck": "tsc --noEmit",
+    "build:cloudflare": "node scripts/prepare-pdf.mjs && node --import ./scripts/sites-env.mjs ./node_modules/vinext/dist/cli.js build && node scripts/cloudflare/package-pages.mjs",
+    "test:accounts": "node tests/accounts.mjs"
   },
   "dependencies": {
     "@base-ui/react": "^1.7.0",

@@ -4,8 +4,10 @@ export type PresentationProgress={status:RoomState["status"];questionIndex:numbe
 export function movePresentation(deck:SlideDeck,current:PresentationProgress,action:string,target?:number,blackout?:boolean):PresentationProgress & {newRound:boolean} {
   const state={...current,newRound:false};const fail=(text:string):never=>{throw new Error(text);};
   if(action==="close")return {...state,status:"closed",blackout:false};
+  if(action==="end_cloud"&&current.status==="wordcloud")return {...state,status:"slide",blackout:false};
+  if(action==="resume_cloud"&&current.status==="slide"&&deck.slides[current.slideIndex]?.kind==="wordcloud")return {...state,status:"wordcloud",blackout:false};
   if(action==="end_round"&&current.status==="question")return {...state,status:"results"};
-  if(action==="blackout"){if(!["slide","results"].includes(current.status)||typeof blackout!=="boolean")fail("A tela pode ser pausada entre as perguntas.");return {...state,blackout:blackout!};}
+  if(action==="blackout"){if(!["slide","wordcloud","results"].includes(current.status)||typeof blackout!=="boolean")fail("A tela pode ser pausada entre as perguntas.");return {...state,blackout:blackout!};}
   if(action==="start"&&current.status==="lobby")target=0;
   else if(["slide","results"].includes(current.status)){
     if(action==="next") {const max=slideSteps(deck.slides[current.slideIndex]);if(current.status==="slide"&&current.step<max)return {...state,step:current.step+1,blackout:false};target=current.slideIndex+1;}
@@ -16,7 +18,7 @@ export function movePresentation(deck:SlideDeck,current:PresentationProgress,act
   if(target===undefined||!allowedSlide(deck,target,current.questionIndex))fail("Avance até a próxima pergunta antes de ir para esse slide.");
   const slide=deck.slides[target!];const index=questionIndexAt(deck,target!);
   if(slide.kind==="question"&&index>current.questionIndex){state.status="question";state.questionIndex=index;state.newRound=true;}
-  else state.status="slide";
+  else state.status=slide.kind==="wordcloud"?"wordcloud":"slide";
   state.slideIndex=target!;state.step=action==="previous"?slideSteps(slide):0;state.blackout=false;
   return state;
 }

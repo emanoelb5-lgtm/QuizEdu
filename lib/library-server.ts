@@ -1,10 +1,12 @@
+import { logoutAccount } from "./account-server";
+import {pollSummary} from "./poll";
 import { env } from "cloudflare:workers";
 import { BankQuestion, Draft, LessonReport, Question, Quiz, ReportPlayer } from "./quiz";
 import { body, cleanName, db, educator, hash, HttpError, json, platformIdentity, publicProfile, quizFromRow, secret, sessionCookie, temporaryEducator, validateQuiz } from "./server";
 
 export async function linkAccount(request: Request) {
-  const data = await body(request); const identity = platformIdentity(request);
-  if (!identity) throw new HttpError(401, "Entre com o ChatGPT para vincular sua conta.");
+  const data = await body(request); const identity = await platformIdentity(request);
+  if (!identity) throw new HttpError(401, "Entre na sua conta Prativerso para continuar.");
   const temporary = await temporaryEducator(request);
   let permanent = await db().prepare("SELECT * FROM educators WHERE auth_id = ?").bind(identity.id).first<any>();
   const name = cleanName(data.name || permanent?.name || temporary?.name || identity.name);
@@ -24,7 +26,7 @@ export async function linkAccount(request: Request) {
   }
   return json({profile:publicProfile(permanent)},200,sessionCookie(request,"qe_host","",0));
 }
-export async function logout(request: Request) { await body(request); return json({signedOut:true},200,sessionCookie(request,"qe_host","",0)); }
+export async function logout(request: Request) { await body(request); return logoutAccount(request); }
 
 export async function saveDraft(request: Request) {
   const user = (await educator(request))!; const data = await body(request); const quiz = validateQuiz(data.quiz,true);
@@ -111,18 +113,29 @@ export async function reportData(request:Request,code:string):Promise<LessonRepo
   let room=await db().prepare("SELECT * FROM rooms WHERE code = ? AND owner = ?").bind(code,user.id).first<any>(); if(!room) throw new HttpError(404,"Relatório não encontrado neste acesso.");
   if(room.status==="question" && room.ends_at!==null && room.ends_at<=Date.now()) {await db().prepare("UPDATE rooms SET status = 'results' WHERE code = ? AND status = 'question' AND ends_at <= ?").bind(code,Date.now()).run(); room=await db().prepare("SELECT * FROM rooms WHERE code = ? AND owner = ?").bind(code,user.id).first<any>();}
   const status=room.expires_at<=Date.now()&&room.status!=="finished"?"closed":room.status;
-  const allQuestions:Question[]=JSON.parse(room.questions); const completed=Math.min(allQuestions.length,Math.max(0,room.question_index+(["slide","results","finished","closed"].includes(status)?1:0)));
-  const [roster,answers]=await db().batch([db().prepare("SELECT id,name,avatar,joined_at FROM players WHERE room = ? ORDER BY joined_at, id").bind(code),db().prepare("SELECT player,question_index,option,correct,points,elapsed_ms FROM answers WHERE room = ? AND question_index < ? ORDER BY question_index").bind(code,completed)]);
+  const allQuestions:Question[]=JSON.parse(room.questions); const completed=Math.min(allQuestions.length,Math.max(0,room.question_index+(["slide","wordcloud","results","finished","closed"].includes(status)?1:0)));
+  const [roster,answers]=await db().batch([db().prepare("SELECT id,name,avatar,joined_at FROM players WHERE room = ? AND blocked = 0 ORDER BY joined_at, id").bind(code),db().prepare("SELECT a.player,a.question_index,a.option,a.correct,a.points,a.elapsed_ms FROM answers a JOIN players p ON p.id=a.player WHERE a.room = ? AND a.question_index < ? AND p.blocked = 0 ORDER BY a.question_index").bind(code,completed)]);
+  const cloudRows=await db().prepare("SELECT w.id,w.slide_id,w.player,w.word,w.hidden,p.name FROM cloud_words w JOIN players p ON p.id = w.player AND p.room = w.room WHERE w.room = ? AND p.blocked = 0 ORDER BY w.created_at,w.id").bind(code).all<{id:string;slide_id:string;player:string;word:string;hidden:number;name:string}>();
+  const pollRows=await db().prepare("SELECT v.player,v.question_index,v.choices FROM poll_votes v JOIN players p ON p.id=v.player WHERE v.room = ? AND v.question_index < ? AND p.blocked = 0 ORDER BY v.question_index,v.player").bind(code,completed).all<{player:string;question_index:number;choices:string}>();
+  const pollVotes=pollRows.results.map(v=>({playerId:v.player,index:v.question_index,choices:JSON.parse(v.choices) as number[]}));
+  const gradedCompleted=allQuestions.slice(0,completed).filter(q=>q.kind!=="poll").length;
+  const deck=room.presentation?JSON.parse(room.presentation):null;
+  const wordClouds:NonNullable<LessonReport["wordClouds"]>=(deck?.slides||[]).filter((s:any)=>s.kind==="wordcloud").map((s:any)=>({slideId:s.id,prompt:s.wordCloud?.prompt||s.title,words:cloudRows.results.filter(w=>w.slide_id===s.id&&!w.hidden).map(w=>({id:w.id,word:w.word,playerId:w.player,playerName:w.name}))}));
   const byPlayer=new Map<string,Map<number,any>>(); for(const a of answers.results as any[]){if(!byPlayer.has(a.player))byPlayer.set(a.player,new Map()); byPlayer.get(a.player)!.set(a.question_index,a);}
-  const players:ReportPlayer[]=roster.results.map((p:any)=>{const rows=byPlayer.get(p.id); const list=Array.from({length:completed},(_,i)=>{const a=rows?.get(i); return a?{option:a.option,correct:!!a.correct,points:a.points,elapsedMs:a.elapsed_ms}:null;}); return {id:p.id,name:p.name,avatar:p.avatar,score:list.reduce((s,a)=>s+(a?.points||0),0),correctCount:list.filter(a=>a?.correct).length,answeredCount:list.filter(Boolean).length,position:0,answers:list};});
+  const players:ReportPlayer[]=roster.results.map((p:any)=>{const rows=byPlayer.get(p.id); const list=Array.from({length:completed},(_,i)=>{const a=rows?.get(i); return a?{option:a.option,correct:!!a.correct,points:a.points,elapsedMs:a.elapsed_ms}:null;}); return {id:p.id,name:p.name,avatar:p.avatar,score:list.reduce((s,a)=>s+(a?.points||0),0)+cloudRows.results.filter(w=>w.player===p.id).length*100,correctCount:list.filter(a=>a?.correct).length,answeredCount:list.filter(Boolean).length,position:0,answers:list,...(wordClouds.length?{wordCount:cloudRows.results.filter(w=>w.player===p.id).length,wordPoints:cloudRows.results.filter(w=>w.player===p.id).length*100}:{})};});
   // Array.sort is stable: accuracy ties retain join order, without a speed bonus.
   players.sort((a,b)=>b.score-a.score||b.correctCount-a.correctCount||(room.mode==="accuracy"?0:a.answers.reduce((s,v)=>s+(v?.correct?v.elapsedMs:0),0)-b.answers.reduce((s,v)=>s+(v?.correct?v.elapsedMs:0),0))); players.forEach((p,i)=>p.position=i+1);
-  const questions=allQuestions.slice(0,completed).map((question,i)=>{const rows=(answers.results as any[]).filter(a=>a.question_index===i); const correct=rows.filter(a=>a.correct).length; return {question,answered:rows.length,correct,accuracy:players.length?Math.round(correct/players.length*100):0,choices:question.options.map((_,o)=>rows.filter(a=>a.option===o).length)};});
-  return {code,title:room.title,teacher:room.teacher,createdAt:room.created_at,status,mode:room.mode||"speed",untimed:!!room.untimed,total:allQuestions.length,completed,accuracy:players.length&&completed?Math.round(players.reduce((s,p)=>s+p.correctCount,0)/(players.length*completed)*100):0,players,questions};
+  const questions=allQuestions.slice(0,completed).map((question,i)=>{const rows=(answers.results as any[]).filter(a=>a.question_index===i); const correct=rows.filter(a=>a.correct).length; if(question.kind==="poll"){const summary=pollSummary(question.options.length,pollVotes.filter(v=>v.index===i).map(v=>v.choices));return {question,answered:summary.respondents,correct:0,accuracy:0,choices:summary.counts,poll:{...summary,allowMultiple:!!question.allowMultiple,revealed:true,myChoices:[]}};} return {question,answered:rows.length,correct,accuracy:players.length?Math.round(correct/players.length*100):0,choices:question.options.map((_,o)=>rows.filter(a=>a.option===o).length)};});
+  return {code,title:room.title,teacher:room.teacher,createdAt:room.created_at,status,mode:room.mode||"speed",untimed:!!room.untimed,total:allQuestions.length,completed,accuracy:players.length&&gradedCompleted?Math.round(players.reduce((s,p)=>s+p.correctCount,0)/(players.length*gradedCompleted)*100):0,gradingTotal:allQuestions.filter(q=>q.kind!=="poll").length,players,questions,...(pollVotes.length?{pollVotes}:{}),...(wordClouds.length?{wordClouds}:{})};
 }
 export async function reportCsv(request:Request,code:string) {
   const report=await reportData(request,code); const rows:unknown[][]=[["Participante","Classificação","Pontos totais","Pergunta","Enunciado","Resposta enviada","Resposta correta","Resultado","Pontos na pergunta","Tempo em segundos"]];
-  for(const p of report.players)report.questions.forEach((q,i)=>{const a=p.answers[i]; rows.push([p.name,p.position,p.score,i+1,q.question.text,a?q.question.options[a.option]:"Sem resposta",q.question.options[q.question.correct],a?(a.correct?"Acerto":"Erro"):"Sem resposta",a?.points||0,a?(a.elapsedMs/1000).toFixed(2):""]);});
+  for(const p of report.players)report.questions.forEach((q,i)=>{if(q.question.kind==="poll"){const vote=report.pollVotes?.find(v=>v.playerId===p.id&&v.index===i);rows.push([p.name,p.position,p.score,`Enquete ${i+1}`,q.question.text,vote?vote.choices.map(at=>q.question.options[at]||`Foto ${String.fromCharCode(65+at)}`).join(" | "):"Sem voto","Sem gabarito",vote?"Votou":"Sem voto",0,""]);return;}const a=p.answers[i]; rows.push([p.name,p.position,p.score,i+1,q.question.text,a?q.question.options[a.option]:"Sem resposta",q.question.options[q.question.correct],a?(a.correct?"Acerto":"Erro"):"Sem resposta",a?.points||0,a?(a.elapsedMs/1000).toFixed(2):""]);});
+  for(const p of report.players){
+    const entries=(report.wordClouds||[]).flatMap(cloud=>cloud.words.filter(w=>w.playerId===p.id).map(w=>({cloud,word:w.word})));
+    for(const entry of entries)rows.push([p.name,p.position,p.score,"Nuvem de palavras",entry.cloud.prompt,entry.word,"Palavra nova","Contribuição",100,""]);
+    if(!report.questions.length&&!entries.length)rows.push([p.name,p.position,p.score,"Nuvem de palavras","","Sem contribuição","","",0,""]);
+  }
   const cell=(value:unknown)=>{let text=String(value??""); if(/^[\s]*[=+\-@]/.test(text))text="'"+text; return '"'+text.replaceAll('"','""')+'"';};
   return new Response("\ufeff"+rows.map(r=>r.map(cell).join(";")).join("\r\n"),{headers:{"Content-Type":"text/csv; charset=utf-8","Content-Disposition":`attachment; filename="Prativerso-relatorio-${code}.csv"`,"Cache-Control":"no-store, private","X-Content-Type-Options":"nosniff"}});
 }

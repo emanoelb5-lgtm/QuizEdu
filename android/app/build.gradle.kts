@@ -11,9 +11,9 @@ android {
         minSdk = 24
         targetSdk = 36
         versionCode = 10000 + (System.getenv("QUIZEDU_BUILD_NUMBER")?.toIntOrNull() ?: 1)
-        versionName = "1.6.0"
+        versionName = "1.7.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        buildConfigField("String", "SITE_URL", "\"https://quizedu-emanuel.emanuelb5.chatgpt.site\"")
+        buildConfigField("String", "SITE_URL", "\"https://prativerso.b5solucoes.online\"")
     }
     flavorDimensions += "distribution"
     productFlavors {

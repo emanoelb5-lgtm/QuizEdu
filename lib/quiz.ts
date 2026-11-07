@@ -1,13 +1,14 @@
 export const AVATARS = ["🦊", "🐼", "🐸", "🦁", "🐯", "🐨", "🐧", "🦉", "🐝", "🦋", "🐢", "🐙"];
-export const LETTERS = ["A", "B", "C", "D"];
+export const LETTERS = ["A", "B", "C", "D", "E", "F", "G", "H"];
 export const DURATIONS = [10, 15, 20, 30, 45, 60, 90, 120];
-export type QuestionKind = "multiple" | "true_false" | "image" | "scenario";
-export type Question = { id: string; text: string; options: string[]; correct: number; seconds: number; explanation: string; image?: string; imageAlt?: string; optionImages?: string[]; kind?: QuestionKind };
+export type QuestionKind = "multiple" | "true_false" | "image" | "scenario" | "poll";
+export type Question = { id: string; text: string; options: string[]; correct: number; seconds: number; explanation: string; image?: string; imageAlt?: string; optionImages?: string[]; kind?: QuestionKind;allowMultiple?:boolean };
 export const QUESTION_TEMPLATES: {kind:QuestionKind;label:string;description:string;placeholder:string}[] = [
   {kind:"multiple",label:"Múltipla escolha",description:"Uma pergunta com duas a quatro alternativas.",placeholder:"Escreva uma pergunta clara para sua turma…"},
   {kind:"true_false",label:"Verdadeiro ou falso",description:"Uma afirmação com duas respostas prontas.",placeholder:"Escreva uma afirmação que a turma vai avaliar…"},
   {kind:"image",label:"Identificar uma imagem",description:"Uma foto para observar e escolher a resposta.",placeholder:"O que a turma deve identificar ou observar nesta imagem?"},
-  {kind:"scenario",label:"Situação prática",description:"Um caso do cotidiano para decidir como agir.",placeholder:"Descreva uma situação e pergunte qual decisão a turma tomaria…"}
+  {kind:"scenario",label:"Situação prática",description:"Um caso do cotidiano para decidir como agir.",placeholder:"Descreva uma situação e pergunte qual decisão a turma tomaria…"},
+  {kind:"poll",label:"Enquete",description:"Ouça a turma: uma ou várias escolhas, com texto, fotos ou ambos. Sem gabarito e sem alterar os pontos.",placeholder:"Qual opinião, preferência ou ideia você quer conhecer?"}
 ];
 export type GameMode = "speed" | "accuracy";
 export type Quiz = { id: string; title: string; questions: Question[]; updatedAt?: number; mode?: GameMode; untimed?: boolean; subject?: string; topic?: string };
@@ -16,20 +17,24 @@ export type Draft = { id: string; quiz: Quiz; updatedAt: number; revision: numbe
 export type BankQuestion = { id: string; question: Question; subject: string; topic: string; updatedAt: number };
 export type Player = { id: string; name: string; avatar: string; score: number; correctCount: number; totalMs: number; position: number; answered: boolean; roundPoints: number; roundCorrect: boolean | null; lastSeen?: number };
 export type RoomState = {
-  code: string; title: string; teacher: string; status: "lobby" | "slide" | "question" | "results" | "finished" | "closed";
+  code: string; title: string; teacher: string; status: "lobby" | "slide" | "wordcloud" | "question" | "results" | "finished" | "closed";
   index: number; total: number; startsAt: number | null; endsAt: number | null; serverNow: number; revision?: number; clock?: import("./live-clock").LiveClock;
   question: Omit<Question, "correct" | "explanation"> | null; correct: number | null; explanation: string | null;
   players: Player[]; answeredCount: number; isHost: boolean; me: (Player & { option: number | null }) | null; expiresAt: number; version: string;
   mode: GameMode; untimed: boolean; presence?: Record<string, number>;
   presentation?: import("./presentation").RoomPresentation;
+  wordCloud?: import("./word-cloud").RoomWordCloud;
+  poll?: import("./poll").PollResults;gradingTotal?:number;lastRoundIsPoll?:boolean;
 };
-export type ReportPlayer = { id: string; name: string; avatar: string; score: number; correctCount: number; answeredCount: number; position: number; answers: ({ option: number; correct: boolean; points: number; elapsedMs: number } | null)[] };
-export type LessonReport = { code: string; title: string; teacher: string; createdAt: number; status: string; mode: GameMode; untimed: boolean; total: number; completed: number; accuracy: number; players: ReportPlayer[]; questions: { question: Question; answered: number; correct: number; accuracy: number; choices: number[] }[] };
+export type ReportPlayer = { id: string; name: string; avatar: string; score: number; correctCount: number; answeredCount: number; position: number; answers: ({ option: number; correct: boolean; points: number; elapsedMs: number } | null)[];wordCount?:number;wordPoints?:number };
+export type LessonReport = { code: string; title: string; teacher: string; createdAt: number; status: string; mode: GameMode; untimed: boolean; total: number; completed: number; accuracy: number; players: ReportPlayer[]; questions: { question: Question; answered: number; correct: number; accuracy: number; choices: number[];poll?:import("./poll").PollResults }[];wordClouds?:import("./word-cloud").CloudReport[];gradingTotal?:number;pollVotes?:{playerId:string;index:number;choices:number[]}[] };
 export function newQuestion(kind:QuestionKind="multiple",settings:{seconds?:number;optionCount?:number}={}): Question {
-  const count=settings.optionCount&&settings.optionCount>=2&&settings.optionCount<=4?settings.optionCount:4;
-  return {id:crypto.randomUUID(),kind,text:"",options:kind==="true_false"?["Verdadeiro","Falso"]:Array(count).fill(""),correct:-1,seconds:DURATIONS.includes(settings.seconds||0)?settings.seconds!:30,explanation:""};
+  const count=settings.optionCount&&settings.optionCount>=2&&settings.optionCount<=(kind==="poll"?8:4)?settings.optionCount:4;
+  return {id:crypto.randomUUID(),kind,text:"",options:kind==="true_false"?["Verdadeiro","Falso"]:Array(count).fill(""),correct:-1,seconds:DURATIONS.includes(settings.seconds||0)?settings.seconds!:30,explanation:"",...(kind==="poll"?{allowMultiple:false}:{})};
 }
 export function applyQuestionTemplate(question:Question,kind:QuestionKind):Question {
+  if(kind==="poll")return {...question,kind,correct:-1,allowMultiple:question.allowMultiple??false};
+  if(question.kind==="poll")return {...question,kind,allowMultiple:undefined,options:kind==="true_false"?["Verdadeiro","Falso"]:question.options.slice(0,4),optionImages:kind==="true_false"?undefined:question.optionImages?.slice(0,4),correct:-1};
   if(kind==="true_false"&&question.kind!=="true_false")return {...question,kind,options:["Verdadeiro","Falso"],correct:-1,optionImages:undefined};
   if(question.kind==="true_false"&&kind!=="true_false")return {...question,kind,options:["","","",""],correct:-1,optionImages:undefined};
   return {...question,kind};
@@ -41,10 +46,12 @@ export function questionIssues(q:Question):QuestionIssue[] {
   const warning=(field:QuestionIssue["field"],message:string,option?:number)=>issues.push({field,message,severity:"warning",...(option!==undefined?{option}:{})});
   if(!q||typeof q.text!=="string"||typeof q.explanation!=="string"||!Array.isArray(q.options)){error("text","Verifique o formato da pergunta.");return issues;}
   if(!q.text.trim())error("text","Escreva o enunciado.");else if(q.text.length>400)error("text","Use até 400 caracteres no enunciado.");else if(q.text.length>240)warning("text","O enunciado está longo. Confira a leitura no celular.");
-  if(q.options.length<2||q.options.length>4)error("options","Use de duas a quatro alternativas.");
+  const poll=q.kind==="poll";
+  if(q.options.length<2||q.options.length>(poll?8:4))error("options",poll?"Use de duas a oito opções.":"Use de duas a quatro alternativas.");
   const seen=new Map<string,number>();
-  q.options.forEach((o,i)=>{if(typeof o!=="string"||!o.trim())error("options",`Preencha a alternativa ${LETTERS[i]||i+1}.`,i);else if(o.length>180)error("options",`Use até 180 caracteres na alternativa ${LETTERS[i]}.`,i);else{const value=o.trim().replace(/\s+/g," ").normalize("NFC").toLocaleLowerCase("pt-BR");const previous=seen.get(value);if(previous!==undefined)error("options",`As alternativas ${LETTERS[previous]} e ${LETTERS[i]} são iguais.`,i);else seen.set(value,i);if(o.length>100)warning("options",`A alternativa ${LETTERS[i]} está longa. Teste no celular.`,i);}});
-  if(!Number.isInteger(q.correct)||q.correct<0||q.correct>=q.options.length)error("correct","Marque a resposta correta.");
+  q.options.forEach((o,i)=>{if(typeof o!=="string"||(!o.trim()&&!(poll&&q.optionImages?.[i])))error("options",`Preencha a alternativa ${LETTERS[i]||i+1}${poll?" com texto ou foto":""}.`,i);else if(o.length>180)error("options",`Use até 180 caracteres na alternativa ${LETTERS[i]}.`,i);else{const value=o.trim().replace(/\s+/g," ").normalize("NFC").toLocaleLowerCase("pt-BR")+(poll?`\u0000${q.optionImages?.[i]||""}`:"");const previous=seen.get(value);if(previous!==undefined)error("options",`As alternativas ${LETTERS[previous]} e ${LETTERS[i]} são iguais.`,i);else seen.set(value,i);if(o.length>100)warning("options",`A alternativa ${LETTERS[i]} está longa. Teste no celular.`,i);}});
+  if(!poll&&(!Number.isInteger(q.correct)||q.correct<0||q.correct>=q.options.length))error("correct","Marque a resposta correta.");
+  if(poll&&q.allowMultiple!==undefined&&typeof q.allowMultiple!=="boolean")error("kind","Escolha uma configuração de votação válida.");
   if(!DURATIONS.includes(q.seconds))error("seconds","Escolha um tempo disponível.");
   if(q.explanation.length>500)error("explanation","Use até 500 caracteres na explicação.");
   if(q.kind!==undefined&&!QUESTION_TEMPLATES.some(t=>t.kind===q.kind))error("kind","Escolha um modelo válido.");
@@ -83,7 +90,8 @@ export function quizError(quiz: Quiz): string | null {
   return null;
 }
 export const EXAMPLE_IMAGES=["solo","palhada","erosao","minhoca","cultivo","plantio"].map(name=>`/examples/${name}.jpg`);
-export function mediaPath(value: unknown): value is string { return typeof value === "string" && (/^\/api\/media\/[a-f0-9-]{36}$/.test(value)||EXAMPLE_IMAGES.includes(value)); }
+export const READY_LESSON_IMAGES=[...[1,2,3,4].map(index=>`/lessons/artigo-opiniao/ilustracao-${index}.jpg`),...["nescau","toddy","acai-acucar","acai-sem-acucar","livro","filme"].map(name=>`/lessons/artigo-opiniao/enquete-${name}.jpg`)];
+export function mediaPath(value: unknown): value is string { return typeof value === "string" && (/^\/api\/media\/[a-f0-9-]{36}$/.test(value)||EXAMPLE_IMAGES.includes(value)||READY_LESSON_IMAGES.includes(value)); }
 export const MAX_POINTS = 1000;
 export function scoreFor(correct: boolean, elapsedMs: number, durationMs: number, firstCorrect = false) {
   if (!correct) return 0;

@@ -1,4 +1,4 @@
 import { Dashboard } from "@/app/ui/dashboard";
-import { chatGPTSignInPath, chatGPTSignOutPath } from "./chatgpt-auth";
+import { accountSignInPath, accountSignOutPath } from "./account-auth";
 export const dynamic = "force-dynamic";
-export default function Home() { return <Dashboard signInHref={chatGPTSignInPath("/?vincular=1")} signOutHref={chatGPTSignOutPath("/")} signInTargets={{quiz:chatGPTSignInPath("/?vincular=1&criar=quiz"),presentation:chatGPTSignInPath("/?vincular=1&criar=presentation"),example:chatGPTSignInPath("/?vincular=1&criar=example")}} />; }
+export default function Home() { return <><Dashboard signInHref={accountSignInPath("/?vincular=1")} signOutHref={accountSignOutPath("/")} signInTargets={{quiz:accountSignInPath("/?vincular=1&criar=quiz"),presentation:accountSignInPath("/?vincular=1&criar=presentation"),example:accountSignInPath("/?vincular=1&criar=example"),contos:accountSignInPath("/?vincular=1&criar=contos")}} /><footer style={{padding:"16px 24px",display:"flex",justifyContent:"center",gap:24,flexWrap:"wrap"}}><a href="/privacidade">Privacidade</a><a href="/termos">Termos de uso</a><a href="/excluir-conta">Excluir conta e dados</a><a href="/contato">Contato</a></footer></>; }

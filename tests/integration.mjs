@@ -63,7 +63,10 @@ try {
   state = await host.request(`/api/rooms/${code}/control`, { action: "start", status: "lobby", index: -1 }); eq(state.status, "question"); eq(state.index, 0);
   const student = await alice.request(`/api/rooms/${code}`); check(!student.isHost); eq(student.correct, null); eq(student.explanation, null); check(!("correct" in student.question), "Correct option is never included during the live question.");
   await alice.request(`/api/rooms/${code}/answer`, { index: 0, option: 0 }, 409);
-  await duplicate.request(`/api/rooms/${code}/join`, { name: "Late arrival", avatar: "🦉" }, 409);
+  const late=await duplicate.request(`/api/rooms/${code}/join`, { name: "Late arrival", avatar: "🦉" }, 201);
+  const lateState=await duplicate.request(`/api/rooms/${code}`); eq(lateState.status,"question"); eq(lateState.me.score,0); eq(lateState.correct,null); check(!("correct" in lateState.question));
+  await host.request(`/api/rooms/${code}/control`, {action:"kick",playerId:late.id});
+  await duplicate.request(`/api/rooms/${code}/answer`, {index:0,option:0},403);
   await host.request(`/api/rooms/${code}/control`, { action: "start", status: "lobby", index: -1 }, 409);
   await sleep(Math.max(0, state.startsAt - Date.now() + 30));
   await alice.request(`/api/rooms/${code}/answer`, { index: 0, option: 0 });

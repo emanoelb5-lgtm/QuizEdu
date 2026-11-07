@@ -4,15 +4,15 @@
 
 Plataforma gratuita para educadores, em português, com quizzes ao vivo e aulas completas de slides com perguntas intercaladas. Uma tela para o professor, um telão e outra tela para cada participante.
 
-**Abrir o site:** https://quizedu-emanuel.emanuelb5.chatgpt.site
+**Abrir o site:** https://prativerso.b5solucoes.online
 
-**Aplicativo Android:** [baixar o APK no GitHub Releases](https://github.com/emanoelb5-lgtm/QuizEdu/releases/latest). Cliente nativo em Kotlin para alunos e professores, com leitura de QR code, retomada da sala, editor de slides, biblioteca sincronizada e controle da apresentação do computador. Requer Android 7.0 ou superior. Salas ao vivo precisam de internet; rascunhos de aulas já abertas podem ser editados no aparelho sem conexão.
+**Aplicativo Android 1.4.0:** [baixar o APK no GitHub Releases](https://github.com/emanoelb5-lgtm/QuizEdu/releases/latest). Cliente nativo em Kotlin para alunos e professores, com leitura de QR code, retomada da sala, editor de slides, aulas prontas por disciplina, nuvens de palavras de 100 pontos, ranking fixo no celular e apresentação em tela cheia. A biblioteca e o catálogo compartilham o conteúdo do site. O app avisa quando há uma versão mais recente; a instalação é confirmada pelo Android. Requer Android 7.0 ou superior. Salas ao vivo precisam de internet; rascunhos de aulas já abertas podem ser editados no aparelho sem conexão.
 
 O [GitHub Actions](.github/workflows/android.yml) compila, testa no emulador, assina e publica as versões do app. Código e instruções de desenvolvimento estão em [android/README.md](android/README.md).
 
 ## Como usar
 
-1. Use **Continuar com ChatGPT** para guardar suas atividades em uma conta permanente, acessível em outros aparelhos. Também é possível começar com um nome e um acesso temporário. Os alunos não precisam de conta.
+1. Use **Entrar no Prativerso** com seu e-mail e senha para guardar suas atividades em uma conta permanente, acessível em outros aparelhos. Também é possível começar com um nome e um acesso temporário. Os alunos não precisam de conta.
 2. Clique em **Criar quiz**, dê um título e, se quiser, informe a disciplina e o assunto.
 3. Escolha um modelo: **Múltipla escolha**, **Verdadeiro ou falso**, **Identificar uma imagem** ou **Situação prática**. Escreva o enunciado, preencha as alternativas e marque a correta. Nenhuma resposta vem marcada em uma pergunta nova.
 4. Abra **Configurações da atividade** para escolher **Competição** (acerto e rapidez) ou **Aprendizagem** (pontuação apenas por acerto). No segundo modo, também é possível responder sem cronômetro.
@@ -57,7 +57,7 @@ O Prativerso padrão mantém gratuitamente as funções de quiz já existentes. 
 ## App do aluno e retomada da sala
 
 - Ao abrir o QR code da sala, o aluno encontra a instalação do app. **Instalar Prativerso** abre diretamente a janela nativa do navegador. O botão só é habilitado quando essa instalação está disponível; antes disso, aparece **Preparando instalação**. A solicitação é capturada antes de a página terminar de carregar e usada uma única vez, no clique. Cancelar a instalação mantém o aluno no quiz. **Como instalar pelo menu** é uma ajuda separada. O app usa o mesmo site e não exige loja nem conta. No iPhone/iPad, use Compartilhar e **Adicionar à Tela de Início**; se necessário, abra no Safari. Navegadores dentro de outros aplicativos podem exigir abrir o endereço no navegador do aparelho.
-- O ícone abre **[o acesso dos alunos](https://quizedu-emanuel.emanuelb5.chatgpt.site/jogar)** e retoma a última sala neste aparelho. Nome, avatar, respostas confirmadas e pontos continuam no servidor. A sala permanece válida por 24 horas; encerrar a sala impede novas respostas.
+- O ícone abre **[o acesso dos alunos](https://prativerso.b5solucoes.online/jogar)** e retoma a última sala neste aparelho. Nome, avatar, respostas confirmadas e pontos continuam no servidor. A sala permanece válida por 24 horas; encerrar a sala impede novas respostas.
 - **Sair da sala** desativa a retomada automática e abre a entrada por código ou câmera. Sair não exclui o participante nem seus pontos; voltar pelo mesmo aparelho/navegador mantém o acesso, mesmo depois de iniciar o quiz.
 - **Ler QR code** pede permissão de câmera, lê apenas códigos de salas deste site e encerra a câmera ao fechar a janela, trocar de página ou colocar o app em segundo plano. As imagens são processadas no aparelho, sem envio ao servidor; também há entrada por seis números.
 - A instalação preserva a sala inicial e permite retomar o participante quando o navegador e o app usam sessões separadas. O vínculo é assinado, limitado ao aluno e à validade da sala; não concede acesso de educador. O endereço de instalação usa um fragmento removido ao abrir, e o manifesto pessoal não é guardado em cache.
@@ -85,13 +85,13 @@ No editor, use **Criar com IA**. Informe assunto, turma, quantidade (até 20 por
 3. Copie a resposta completa, volte ao Prativerso e use **Colar resposta e revisar**.
 4. Confira os fatos, as alternativas e o gabarito. Selecione as perguntas e adicione ao rascunho.
 
-Este é um fluxo assistido com copiar/colar. O Prativerso não envia chamadas de IA, não usa uma chave do proprietário, não recebe a senha do ChatGPT e não tem acesso às conversas. A geração acontece na conta aberta no ChatGPT e segue os limites dela. O login **Continuar com ChatGPT** do Prativerso identifica o educador e guarda suas atividades; não autoriza geração de IA.
+Este é um fluxo assistido com copiar/colar. O Prativerso não envia chamadas de IA, não usa uma chave do proprietário, não recebe a senha do ChatGPT e não tem acesso às conversas. A geração acontece na conta aberta no ChatGPT e segue os limites dela. O login próprio do Prativerso guarda suas atividades e é independente do ChatGPT.
 
 A integração automática que utiliza o plano ChatGPT do visitante exige autorização própria para inferência. A [documentação oficial de Sign in with ChatGPT](https://developers.openai.com/siwc/token-sharing-open-source) disponibiliza o fluxo aberto para aplicativos locais/de código aberto; aplicativos pagos ou hospedados remotamente precisam solicitar acesso à OpenAI. Esse acesso não está configurado neste site. A geração direta não deve ser ativada apenas com o login de identidade nem com a chave/saldo do proprietário.
 
 ## Biblioteca e recuperação
 
-- **Conta permanente:** o login do ChatGPT identifica o educador; quizzes, rascunhos, banco e aulas ficam no servidor. Ao vincular o acesso temporário, o trabalho existente é transferido para sua conta. O login não exige chave de API nem assinatura de um serviço de IA.
+- **Conta permanente:** o login próprio com e-mail e senha identifica o educador; quizzes, rascunhos, banco e aulas ficam no servidor. Ao vincular o acesso temporário, o trabalho existente é transferido para sua conta. O login não exige chave de API nem assinatura de um serviço de IA.
 - **Acesso temporário:** dura 30 dias no navegador utilizado. Limpar cookies ou trocar de aparelho perde a chave desse acesso. Vincule a conta ou exporte seus quizzes para conservar uma cópia.
 - **Rascunhos:** são salvos no servidor mesmo com campos incompletos. Uma cópia no aparelho preserva alterações durante falhas de conexão e tenta sincronizar novamente. Alterações simultâneas em duas telas são detectadas; a cópia local pode ser exportada ou salva como outro rascunho.
 - **Banco de questões:** organize por disciplina/assunto e pesquise por texto. Adicionar uma questão a um quiz cria uma cópia independente.
@@ -118,7 +118,7 @@ A integração automática que utiliza o plano ChatGPT do visitante exige autori
 
 - React 19 + TypeScript + Vinext/Vite, com componentes acessíveis Radix/Shadcn.
 - Cloudflare Worker para as regras e APIs; D1/SQLite para os dados persistentes e R2 para imagens.
-- Identidade permanente fornecida pelo fluxo **Sign in with ChatGPT** da hospedagem gerenciada. O servidor usa o identificador estável da conta; os alunos continuam anônimos.
+- Login próprio com e-mail/senha e código de recuperação; sessões revogáveis validadas em D1. Alunos continuam entrando por código sem conta.
 - QR code gerado no aplicativo (`qrcode`), sem enviar os dados da sala a terceiros.
 - Consultas HTTP compactas para acompanhar a sala. O servidor determina as mudanças de etapa; a presença é consultada separadamente para o professor.
 - Sessões temporárias com chaves aleatórias de 256 bits, cookies HttpOnly/SameSite e somente o hash das chaves no banco. Quizzes, banco, rascunhos e relatórios exigem autorização do educador responsável.
@@ -166,6 +166,6 @@ Os testes de integração executam o Worker compilado contra D1 e R2 descartáve
 
 O código não exige serviços pagos. A versão publicada usa hospedagem gerenciada, com D1 e R2 provisionados pela plataforma. Os planos gratuitos dos provedores têm quotas; a capacidade por sala não significa uso diário ilimitado.
 
-Também é possível hospedar o Worker em sua conta Cloudflare, adicionando D1 e R2. O login permanente desta versão utiliza uma função da hospedagem gerenciada e precisa de uma integração de identidade verificada para funcionar em outro provedor. Consulte [DEPLOY.md](./DEPLOY.md).
+A publicação independente funciona na conta Cloudflare, com D1, R2 e login próprio. Consulte [DEPLOY.md](./DEPLOY.md).
 
 Documentação dos limites: [Workers](https://developers.cloudflare.com/workers/platform/pricing/) · [D1](https://developers.cloudflare.com/d1/platform/pricing/) · [R2](https://developers.cloudflare.com/r2/pricing/).

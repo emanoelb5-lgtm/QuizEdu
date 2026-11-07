@@ -1,0 +1,60 @@
+.slide-wordcloud-content{position:absolute;inset:0;padding:32px 48px 25px;display:flex;flex-direction:column;gap:14px;isolation:isolate;background:radial-gradient(ellipse at 24% 66%,#dcf8efb8,transparent 48%),radial-gradient(ellipse at 78% 34%,#ffedce90,transparent 48%),radial-gradient(ellipse at 50% 55%,#f0edffde,transparent 75%),#fff}
+.slide-wordcloud-meta{display:flex;align-items:center;justify-content:space-between;gap:20px;color:#6546d7;font-size:16px;letter-spacing:1.2px;font-weight:700}
+.slide-wordcloud-meta>span{display:flex;align-items:center;gap:10px}
+.slide-wordcloud-meta>b{font-size:15px;letter-spacing:0;padding:8px 13px;border-radius:30px;background:#f0edff;color:#5636c6}
+.slide-wordcloud-content>h2{font-size:37px;line-height:1.2;font-weight:750;letter-spacing:-.025em;max-height:93px;overflow:auto;margin:6px 0;text-align:center}
+.slide-wordcloud-words{flex:1;min-height:0;display:flex;flex-wrap:wrap;align-content:safe center;justify-content:center;align-items:center;gap:0 4px;padding:16px 20px;overflow-y:auto;scrollbar-width:thin;line-height:1.12}
+.cloud-word-token{display:inline-block;max-width:100%;padding:10px 12px;font-weight:750;animation:cloud-word-arrive .45s ease-out}
+.cloud-word-text{display:block;overflow-wrap:anywhere;text-align:center;letter-spacing:-.035em;transform-origin:center;text-shadow:0 2px 16px #ffffff90}
+.cloud-word-token:nth-child(3n){font-weight:550}
+.cloud-word-moving{animation:cloud-word-float var(--cloud-duration,9s) ease-in-out var(--cloud-delay,0s) infinite both}
+.slide-wordcloud-empty{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:15px;text-align:center;color:#817493}
+.slide-wordcloud-empty>svg{color:#baa9ef}
+.slide-wordcloud-empty>b{font-size:26px;color:#5c4c78}
+.slide-wordcloud-empty>span{font-size:19px;line-height:1.5}
+.slide-wordcloud-content>footer{display:flex;justify-content:space-between;align-items:center;gap:12px;font-size:13px;color:#7d708d;border-top:1px solid #9f87c32b;padding-top:12px;line-height:1.45}
+.student-word-cloud{max-width:580px;width:100%;margin:0 auto;padding:26px 22px 45px;box-sizing:border-box}
+.student-cloud-icon{width:68px;height:68px;border-radius:22px;background:#f0eaff;color:#6546d7;display:grid;place-items:center;margin:0 auto 15px}
+.cloud-eyebrow{font-size:.68rem;letter-spacing:1.5px;font-weight:700;color:#6546d7;text-align:center;margin-bottom:12px}
+.student-word-cloud>h1{font-size:1.45rem;line-height:1.35;font-weight:750;text-align:center;letter-spacing:-.025em;overflow-wrap:anywhere;margin-bottom:15px}
+.student-cloud-rule{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;color:#786d85;font-size:.875rem;margin-bottom:25px}
+.student-cloud-rule>b{color:#6546d7}
+.student-cloud-form>label{display:block;font-size:.875rem;font-weight:650;color:#4c425d;margin-bottom:8px}
+.student-cloud-form>div{display:flex;gap:8px}
+.student-cloud-form input{min-width:0;flex:1;font-size:1rem;min-height:48px;border-radius:10px}
+.student-cloud-form .btn{min-height:48px;border-radius:10px;gap:6px;padding:10px 15px}
+.student-cloud-form>small{display:block;font-size:.72rem;color:#84788f;line-height:1.55;margin-top:9px}
+.student-cloud-notice{display:flex;align-items:flex-start;gap:9px;font-size:.85rem;line-height:1.5;padding:13px 15px;margin:16px 0 0;border-radius:10px}
+.student-cloud-notice svg{flex-shrink:0;margin-top:2px}
+.student-cloud-notice.notice-success{background:#eaf9ef;color:#247040}
+.student-cloud-notice.notice-warning{background:#fff5df;color:#95630e}
+.student-cloud-notice.notice-pending{background:#f0edff;color:#6546d7}
+.student-cloud-closed{display:flex;align-items:center;gap:10px;border:1px solid #e2d8f2;background:#f6f2fd;border-radius:11px;padding:16px;font-size:.85rem;color:#726080;line-height:1.5}
+.student-cloud-contributions{border:1px solid #e7dfef;border-radius:14px;padding:17px;margin-top:25px;background:#fff}
+.student-cloud-contributions>div{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:13px}
+.student-cloud-contributions h2{font-size:.9rem;font-weight:650;color:#554563}
+.student-cloud-contributions>div>b{color:#6546d7;font-size:.85rem}
+.student-cloud-contributions ul{display:flex;flex-wrap:wrap;gap:7px;list-style:none;padding:0}
+.student-cloud-contributions li{display:flex;align-items:center;gap:5px;background:#f2ecff;color:#6546d7;font-size:.8rem;line-height:1.4;padding:7px 9px;border-radius:7px;overflow-wrap:anywhere;max-width:100%}
+.student-cloud-contributions li small{font-size:.65rem;opacity:.7;margin-left:3px}
+.student-cloud-contributions>p{font-size:.8rem;color:#8e8298;line-height:1.5}
+.student-cloud-existing{margin-top:20px;font-size:.8rem;color:#84718f}
+.student-cloud-existing summary{cursor:pointer;padding:8px 0}
+.student-cloud-existing>div{display:flex;flex-wrap:wrap;gap:7px;padding-top:7px;max-height:250px;overflow:auto}
+.student-cloud-existing span{padding:5px 8px;border:1px solid #e9e0f0;border-radius:6px;overflow-wrap:anywhere;max-width:100%}
+.cloud-inspector-rules{display:flex;gap:10px;align-items:center;background:#f3eeff;color:#6546d7;padding:12px;border-radius:9px;line-height:1.5;font-size:.8rem}
+.cloud-inspector-rules>b{font-size:1.5rem}
+.lesson-cloud-summary{color:#d9ccff!important;background:#6546d722!important}
+.lesson-cloud-summary>span{flex:1}
+.lesson-cloud-summary button{font-size:.8rem;padding:6px 10px;background:#6546d7;color:white;border-radius:6px;white-space:nowrap}
+.report-cloud-section{margin-top:30px;border:1px solid #e3dcec;padding:24px;border-radius:16px;background:#fff}
+.report-cloud-section h2{display:flex;gap:9px;align-items:center;font-size:1.15rem;font-weight:700;margin-bottom:8px}
+.report-cloud-section>p{font-size:.85rem;color:#81718e;line-height:1.5}
+.report-cloud-section article{margin-top:22px}
+.report-cloud-section h3{font-size:.95rem;font-weight:650;margin-bottom:10px;overflow-wrap:anywhere}
+.report-cloud-words{display:flex;flex-wrap:wrap;gap:7px}
+.report-cloud-words>span{background:#f1eaff;color:#6546d7;padding:6px 10px;font-size:.85rem;border-radius:7px}
+@keyframes cloud-word-arrive{from{opacity:0;transform:scale(.7)}to{opacity:1;transform:scale(1)}}
+@keyframes cloud-word-float{0%,100%{transform:translate3d(calc(var(--cloud-x,0px) * -1),2px,0) scale(.76)}50%{transform:translate3d(var(--cloud-x,0px),var(--cloud-y,-5px),0) scale(1)}}
+@media(prefers-reduced-motion:reduce){.cloud-word-token,.cloud-word-moving{animation:none;transform:none}}
+@media(max-width:420px){.student-word-cloud{padding:22px 17px 35px}.student-cloud-form>div{flex-wrap:wrap}.student-cloud-form input{flex-basis:100%}.student-cloud-form .btn{width:100%}.student-word-cloud>h1{font-size:1.3rem}}

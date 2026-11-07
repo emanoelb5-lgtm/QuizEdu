@@ -33,7 +33,7 @@ export async function approveNative(request:Request){
  // Approval belongs to the existing browser account, never a second app's bearer.
  if(request.headers.has("Authorization")||request.headers.get("Origin")!==new URL(request.url).origin)throw new HttpError(403,"Autorize o aplicativo pelo Prativerso no navegador.");
  const copy=request.clone() as unknown as Request;const data=await body(request);if(!uuid(data.id))throw new HttpError(400,"Vínculo inválido.");
- if(platformIdentity(request))await linkAccount(copy);
+ if(await platformIdentity(request))await linkAccount(copy);
  const user=(await educator(request))!;
  const row=await db().prepare("SELECT id,device_name,owner,source_owner,created_at,expires_at,approved_at FROM native_sessions WHERE id = ? AND expires_at > ?").bind(data.id,Date.now()).first<Device>();
  if(!row)throw new HttpError(410,"Este vínculo expirou. Inicie novamente no aplicativo.");

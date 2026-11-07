@@ -9,8 +9,8 @@ export function matchingSlides(deck:SlideDeck,query:string,questionsOnly=false):
   const normalize=(text:string)=>text.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLocaleLowerCase("pt-BR");
   const terms=normalize(query).trim().split(/\s+/).filter(Boolean);
   return deck.slides.flatMap((s,i)=>{
-    if(questionsOnly&&s.kind!=="question")return [];
-    const content=normalize([String(i+1),s.title,s.question?.text,...(s.question?.options||[]),...s.elements.map(e=>[richTextPlain(e.doc),e.alt,e.cells?.flat().join(" "),e.labels?.join(" ")].filter(Boolean).join(" "))].filter(Boolean).join(" "));
+    if(questionsOnly&&s.kind!=="question"&&s.kind!=="wordcloud")return [];
+    const content=normalize([String(i+1),s.title,s.wordCloud?.prompt,s.question?.text,...(s.question?.options||[]),...s.elements.map(e=>[richTextPlain(e.doc),e.alt,e.cells?.flat().join(" "),e.labels?.join(" ")].filter(Boolean).join(" "))].filter(Boolean).join(" "));
     return terms.every(term=>content.includes(term))?[i]:[];
   });
 }
@@ -22,3 +22,44 @@ export function distributeElements(elements:SlideElement[],ids:string[],axis:"x"
 export function cloneElements(elements:SlideElement[],offset=16):SlideElement[] {const groups=new Map<string,string>();return elements.map(e=>{if(e.group&&!groups.has(e.group))groups.set(e.group,crypto.randomUUID());return boundedElement({...structuredClone(e),id:crypto.randomUUID(),x:e.x+offset,y:e.y+offset,group:e.group?groups.get(e.group):undefined,locked:false});});}
 export function elementStyle(e:SlideElement):Partial<SlideElement>{const style:Partial<SlideElement>={};for(const key of ["font","fontSize","color","align","fill","stroke","strokeWidth","fillOpacity","radius","opacity","fit","positionX","positionY","header"] as const)if(e[key]!==undefined)(style as Record<string,unknown>)[key]=structuredClone(e[key]);return style;}
 export function applyElementStyle(e:SlideElement,style:Partial<SlideElement>,type:SlideElement["type"]):SlideElement{if(e.locked||e.type!==type)return e;const next={...e,...style};if(e.type==="text"&&e.doc){const doc=structuredClone(e.doc);function write(node:RichNode){if(node.type==="paragraph"||node.type==="heading")node.attrs={...node.attrs,...(style.align?{textAlign:style.align}:{})};for(const mark of node.marks||[])if(mark.type==="textStyle")mark.attrs={...mark.attrs,...(style.color?{color:style.color}:{}),...(style.font?{fontFamily:style.font}:{}),...(style.fontSize?{fontSize:style.fontSize+"px"}:{})};node.content?.forEach(write);}write(doc);next.doc=doc;}return next;}
+
+export type TextFormat={kind:"mark";mark:"bold"|"italic"|"underline"|"strike"}|{kind:"list";list:"bulletList"|"orderedList"}|{kind:"clear"};
+export function hasTextMark(element:SlideElement,mark:string):boolean {
+  const text:RichNode[]=[];
+  function visit(node:RichNode){if(node.type==="text"&&node.text)text.push(node);node.content?.forEach(visit);}
+  if(element.doc)visit(element.doc);
+  return text.length>0&&text.every(node=>node.marks?.some(m=>m.type===mark));
+}
+/** Formats entire selected text boxes. Inline editing formats only the selected range. */
+export function formatTextElements(elements:SlideElement[],ids:string[],format:TextFormat):SlideElement[] {
+  const editable=elements.filter(e=>ids.includes(e.id)&&e.type==="text"&&!e.locked&&e.doc);
+  const remove=format.kind==="mark"&&editable.length>0&&editable.every(e=>hasTextMark(e,format.mark));
+  return elements.map(e=>{
+    if(!editable.includes(e))return e;
+    const doc=structuredClone(e.doc!);
+    if(format.kind==="list"){
+      const blocks=doc.content||[],already=blocks.length>0&&blocks.every(n=>n.type===format.list);
+      if(already)doc.content=blocks.flatMap(n=>(n.content||[]).flatMap(item=>item.content||[]));
+      else {
+        const output:RichNode[]=[];let items:RichNode[]=[];
+        const flush=()=>{if(items.length){output.push({type:format.list,content:items});items=[];}};
+        for(const node of blocks){
+          if(node.type==="paragraph"||node.type==="heading")items.push({type:"listItem",content:[{...node,type:"paragraph"}]});
+          else if(node.type==="bulletList"||node.type==="orderedList")items.push(...(node.content||[]));
+          else{flush();output.push(node);}
+        }
+        flush();doc.content=output;
+      }
+    }else{
+      function write(node:RichNode){
+        if(node.type==="text"){
+          if(format.kind==="mark"){node.marks=(node.marks||[]).filter(m=>m.type!==format.mark);if(!remove)node.marks.push({type:format.mark});}
+          else node.marks=(node.marks||[]).filter(m=>m.type==="link");
+        }
+        node.content?.forEach(write);
+      }
+      write(doc);
+    }
+    return {...e,doc:validateRichText(doc)};
+  });
+}

@@ -1,6 +1,6 @@
 # Prativerso Android
 
-Cliente **nativo**, sem WebView, em Kotlin e Jetpack Compose. Compartilha salas, pontuação, biblioteca, imagens e apresentações com o site. A autorização da conta acontece no navegador do usuário e concede uma sessão revogável ao aparelho; o app não recebe a senha do ChatGPT.
+Cliente **nativo**, sem WebView, em Kotlin e Jetpack Compose. Compartilha salas, pontuação, biblioteca, imagens e apresentações com o site. A autorização da conta acontece no navegador do usuário e concede uma sessão revogável ao aparelho; o app não recebe a senha da conta Prativerso.
 
 ## Instalar
 

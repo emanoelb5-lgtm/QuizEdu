@@ -8,7 +8,7 @@ import { usePlayerManifest } from "./player-app";
 import { QrScanner } from "./qr-scanner";
 import { ActionDock } from "./action-dock";
 
-export function PlayerHome({signInHref="/signin-with-chatgpt?return_to=%2F%3Fvincular%3D1",signedIn=false}:{signInHref?:string;signedIn?:boolean}) {
+export function PlayerHome({signInHref="/entrar?return_to=%2F%3Fvincular%3D1",signedIn=false}:{signInHref?:string;signedIn?:boolean}) {
   const [code,setCode]=useState("");const [busy,setBusy]=useState(false);const [restoring,setRestoring]=useState(true);const [error,setError]=useState("");const [active,setActive]=useState<ActiveRoom|null>(null);const [scanner,setScanner]=useState(false);
   const initial=useRef<{code:string;ticket:string;skip:boolean}|null>(null);
   usePlayerManifest(active?.code);
@@ -25,7 +25,7 @@ export function PlayerHome({signInHref="/signin-with-chatgpt?return_to=%2F%3Fvin
         const room=await api<RoomState>(`/api/rooms/${candidate}`);
         if(!alive)return;
         if(room.status==="closed"){try{leaveActiveRoom(localStorage,candidate);}catch{}setActive(null);setError("A sala anterior foi encerrada. Entre com o código da próxima atividade.");}
-        else if(room.me || room.status==="lobby" || (room.presentation&&room.status==="slide")){try{saveActiveRoom(localStorage,room);}catch{}window.location.replace(`/participar/${candidate}`);return;}
+        else if(room.me || ["lobby","slide","wordcloud","question","results"].includes(room.status)){try{saveActiveRoom(localStorage,room);}catch{}window.location.replace(`/participar/${candidate}`);return;}
         else{setCode(candidate);setError("Para retomar seu participante, abra o Prativerso no navegador em que você entrou na sala.");}
       }catch(reason){if(!alive)return;const failure=reason as ApiError;setError(failure.status===0||failure.status>=500?"Sem conexão no momento. Sua sala continua guardada; tente retomá-la quando a internet voltar.":failure.message);if(failure.status===404||failure.status===409){try{leaveActiveRoom(localStorage,candidate);}catch{}setActive(null);}}
       if(alive)setRestoring(false);
@@ -35,7 +35,7 @@ export function PlayerHome({signInHref="/signin-with-chatgpt?return_to=%2F%3Fvin
   async function enter(value:string){
     const parsed=roomCode(value,window.location.origin);if(!parsed){setError("Digite os 6 números da sala.");return;}
     setBusy(true);setError("");
-    try{const room=await api<RoomState>(`/api/rooms/${parsed}`);if(room.status==="closed")throw new Error("Esta sala foi encerrada. Peça ao professor um novo código.");if(!room.me&&room.status!=="lobby"&&!(room.presentation&&room.status==="slide"))throw new Error("Esta partida já começou. Aguarde o professor abrir outra sala.");try{saveActiveRoom(localStorage,room);}catch{}window.location.assign(`/participar/${parsed}`);}catch(reason){setError((reason as Error).message);setBusy(false);}
+    try{const room=await api<RoomState>(`/api/rooms/${parsed}`);if(room.status==="closed")throw new Error("Esta sala foi encerrada. Peça ao professor um novo código.");if(!room.me&&!["lobby","slide","wordcloud","question","results"].includes(room.status))throw new Error("Esta sala foi encerrada. Peça ao professor um novo código.");try{saveActiveRoom(localStorage,room);}catch{}window.location.assign(`/participar/${parsed}`);}catch(reason){setError((reason as Error).message);setBusy(false);}
   }
   function forget(){try{leaveActiveRoom(localStorage);}catch{}setActive(null);setError("");}
   return <div className={`player-shell player-entry-shell ${restoring?"":"has-action-dock"}`}><header className="player-topbar"><Brand href="/jogar"/><a className={`btn ${signedIn?"btn-quiet":"btn-primary"}`} href={signedIn?"/":signInHref} target="_top">{signedIn?"Minhas atividades":"Entrar"}</a></header>

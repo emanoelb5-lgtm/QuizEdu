@@ -1,3 +1,9 @@
+# Prativerso Android 1.7.0
+
+- Conexão com prativerso.b5solucoes.online, hospedado na Cloudflare.
+- Vínculo pelo login próprio Prativerso com e-mail e senha.
+- Preservados os recursos de edição, apresentação, controle remoto, quizzes, enquetes e nuvem de palavras.
+
 Prativerso Android 1.6.0 — edição preparada para a Google Play.
 
 - Alunos podem entrar durante slides, nuvens, perguntas e resultados; recebem a etapa atual.
