@@ -12,14 +12,22 @@ A publicação independente usa Cloudflare Pages com um Worker ES Module em modo
 - Diretório publicado: `dist/pages`.
 - Compatibilidade: 2026-05-15, flag `nodejs_compat`.
 
-O painel Cloudflare mantém os bindings. Não há token Cloudflare no repositório. A integração Git da conta retornou o erro 8000011 na criação do projeto; esta primeira publicação foi feita por upload direto. A publicação automática a partir do GitHub requer configurar o token Cloudflare em um workflow de CI. Não configure dados de produção nos deployments de preview.
+O painel Cloudflare mantém os bindings. O workflow `.github/workflows/cloudflare-pages.yml` compila e testa o site em cada push para `main` e em pull requests. Somente `main` pode publicar em produção. A publicação usa o projeto Pages existente por envio direto, sem depender da instalação Git da Cloudflare. O token fica exclusivamente no secret `CLOUDFLARE_API_TOKEN` do GitHub, com permissão Cloudflare Pages Edit limitada à conta deste projeto. Não coloque o token no código, em variáveis públicas ou em logs.
+
+Após a publicação, o workflow confirma que a versão ativa na Cloudflare corresponde ao commit que o iniciou e verifica as páginas de login, a API e o catálogo no domínio definitivo. Pull requests executam as verificações locais sem receber a credencial de publicação e sem gravar no banco de produção. Novas migrações do banco devem ser aplicadas antes da publicação que as utiliza.
 
 ## Atualizações e migrações
 
 1. Instale com `pnpm install --frozen-lockfile`.
 2. Aplique uma única vez as novas migrações SQL em `drizzle/`, na ordem numérica, pelo D1 da conta Cloudflare. As migrações 0000 a 0008 são necessárias nesta versão. Preserve o banco existente e nunca reaplique as migrações antigas.
 3. Valide `pnpm typecheck`, `pnpm build:cloudflare`, `pnpm test` e `pnpm test:accounts`.
-4. Envie a versão validada para main e publique a saída `dist/pages` no projeto Pages prativerso. Até configurar CI, o push sozinho não publica o site.
+4. Envie a versão validada para `main`. Com o secret de publicação configurado, o GitHub Actions publica `dist/pages` no projeto `prativerso` automaticamente e verifica a versão ativa.
+
+## Configuração inicial da publicação automática
+
+No repositório `emanoelb5-lgtm/QuizEdu`, configure em Settings → Secrets and variables → Actions um secret chamado `CLOUDFLARE_API_TOKEN`. Use um token da Cloudflare com a permissão Account → Cloudflare Pages → Edit apenas na conta `e7feeb9fb8385b5046fbff5411499b68`. Não são necessárias permissões para alterar DNS, contas de usuários ou outros produtos.
+
+O ID da conta e o nome do projeto estão no workflow; não são senhas. O projeto direto atual não pode ser convertido em projeto Git pela API (erro 8000069), e a instalação Git associada à conta foi informada como desconectada (erro 8000008). O fluxo com GitHub Actions preserva o projeto, o domínio e os dados existentes.
 
 `dist/pages/_worker.js` contém o servidor e não deve ser entregue como arquivo estático. `_routes.json` permite servir imagens e scripts estáticos sem invocar o Worker. Todas as rotas dinâmicas e APIs continuam no Worker, com D1/R2.
 
