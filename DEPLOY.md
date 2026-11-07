@@ -9,7 +9,7 @@ O Prativerso (repositório histórico QuizEdu) pode operar em uma conta Cloudfla
 1. Crie uma conta Cloudflare e selecione os recursos gratuitos disponíveis. Não é necessário comprar domínio.
 2. Clone este repositório, use Node 22.18+ (recomendado para a CLI `cf`) e execute `pnpm install --frozen-lockfile`. O repositório usa Next.js 16 + vinext e não exige Laravel/PHP.
 3. No painel Cloudflare, crie ou selecione o banco D1 `prativerso` e habilite o R2 antes de tentar criar o bucket `prativerso-imagens`. A assinatura R2 precisa estar habilitada na conta, mesmo quando o uso permanece na franquia mensal gratuita. **Em 07/11/2026, o D1 `prativerso` já foi criado e todas as cinco migrações abaixo foram aplicadas a ele. Não execute as migrações novamente nesse mesmo banco.**
-4. Guarde o `database_id` retornado e rode `pnpm build`.
+4. Confira o identificador D1 do projeto, já configurado no exemplo abaixo, e rode `pnpm build` em um ambiente de desenvolvimento com as dependências instaladas.
 5. Crie um `wrangler.deploy.json` na raiz com seu ID real:
 
 ```json
@@ -25,7 +25,7 @@ O Prativerso (repositório histórico QuizEdu) pode operar em uma conta Cloudfla
   "d1_databases": [{
     "binding": "DB",
     "database_name": "prativerso",
-    "database_id": "SUBSTITUA-PELO-ID-REAL"
+    "database_id": "6687dd06-6270-4826-91df-f02a2e2f912c"
   }],
   "r2_buckets": [{
     "binding": "BUCKET",
@@ -39,11 +39,14 @@ O Prativerso (repositório histórico QuizEdu) pode operar em uma conta Cloudfla
 ```sh
 pnpm exec wrangler d1 execute DB --remote --config wrangler.deploy.json --file drizzle/0000_wonderful_the_phantom.sql
 pnpm exec wrangler d1 execute DB --remote --config wrangler.deploy.json --file drizzle/0001_melted_skaar.sql
-pnpm exec wrangler d1 execute DB --remote --config wrangler.deploy.json --file drizzle/0002_empty_edwin_jarvis.sql\npnpm exec wrangler d1 execute DB --remote --config wrangler.deploy.json --file drizzle/0003_short_medusa.sql\npnpm exec wrangler d1 execute DB --remote --config wrangler.deploy.json --file drizzle/0004_wild_susan_delgado.sql
+pnpm exec wrangler d1 execute DB --remote --config wrangler.deploy.json --file drizzle/0002_empty_edwin_jarvis.sql
+pnpm exec wrangler d1 execute DB --remote --config wrangler.deploy.json --file drizzle/0003_short_medusa.sql
+pnpm exec wrangler d1 execute DB --remote --config wrangler.deploy.json --file drizzle/0004_wild_susan_delgado.sql
 ```
 
 7. Antes da primeira publicação, conecte o repositório GitHub `emanoelb5-lgtm/QuizEdu` à Cloudflare em **Workers & Pages → Create application → GitHub**, autorizando o aplicativo Cloudflare no GitHub se solicitado. Configure os bindings `DB` e `BUCKET`, os comandos de instalação/build e a publicação em ambiente de testes. O build próprio do projeto deve ser validado antes de optar pela autoconfiguração. Como alternativa à integração direta, publique localmente: `pnpm exec wrangler deploy --config wrangler.deploy.json`. A Cloudflare retorna uma URL HTTPS `workers.dev`. O QR code e os links compartilhados passam a usar essa origem.
-8. A conta permanente do ChatGPT NÃO funciona automaticamente no novo domínio. Implemente e teste um provedor de identidade (por exemplo, Google OAuth) com validação no servidor, ou mantenha apenas o modo temporário. Não permita que cabeçalhos `oai-authenticated-user-*` vindos da internet atribuam identidade.\n9. Só depois de validar todas as funções, migre dados e imagens, e configure o novo domínio. Para gerar um APK/AAB de teste com a nova URL, defina `PRATIVERSO_SITE_URL=https://SEU-WORKER.workers.dev` no ambiente de compilação Android. Sem essa variável, o app mantém a URL atual da hospedagem ChatGPT.
+8. A conta permanente do ChatGPT NÃO funciona automaticamente no novo domínio. Implemente e teste um provedor de identidade (por exemplo, Google OAuth) com validação no servidor, ou mantenha apenas o modo temporário. Não permita que cabeçalhos `oai-authenticated-user-*` vindos da internet atribuam identidade.
+9. Só depois de validar todas as funções, migre dados e imagens, e configure o novo domínio. Para gerar um APK/AAB de teste com a nova URL, defina `PRATIVERSO_SITE_URL=https://SEU-WORKER.workers.dev` no ambiente de compilação Android. Sem essa variável, o app mantém a URL atual da hospedagem ChatGPT.
 10. Guarde sua configuração, ative logs e consulte o painel de métricas para acompanhar as quotas. Verifique: entrar/sair, salvar aula, imagens, sala e QR code, respostas, ranking, controle remoto, sincronização Android e retomada após desconexão.
 
 O ID do banco identifica um recurso, não uma senha. Tokens de acesso ficam somente no login local/segredos da plataforma. Não coloque tokens no repositório. O bucket de imagens não precisa ser público: o aplicativo entrega as imagens pelas URLs `/api/media/<id>`.
