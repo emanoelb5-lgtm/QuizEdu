@@ -13,8 +13,8 @@ import "./home.css";
 import "./account.css";
 
 export const metadata: Metadata = {
-  title: "Prativerso · Conhecimento em prática",
-  description: "Apresentações interativas e quizzes ao vivo para aprender participando. Crie sua aula, convide a turma por QR code e acompanhe cada resposta.",
+  title: "Prativerso · Metodologia ativa na prática",
+  description: "Metodologia ativa na prática: apresentações interativas, quizzes, enquetes e nuvens de palavras. Entre na sua conta ou participe de uma sala por código ou QR code.",
   applicationName: "Prativerso",
   manifest: "/api/app-manifest",
   appleWebApp: {capable:true,title:"Prativerso",statusBarStyle:"default"},

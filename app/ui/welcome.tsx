@@ -1,28 +1,25 @@
 "use client";
-import { BarChart3, BookOpen, Check, DoorOpen, MonitorPlay, QrCode, Sparkles, Users } from "lucide-react";
+import { BarChart3, BookOpen, Check, Cloud, DoorOpen, LogIn, MessageCircle, MonitorPlay, QrCode, Sparkles, Users } from "lucide-react";
 import {ContosExampleCard} from "./contos-example-card";
 
 type WelcomeProps = {
+  signInHref?: string;
   code: string; busy: boolean; error: string;
   onCode: (value: string) => void; onJoin: () => void; onScan: () => void;
   onPresentation: () => void; onQuiz: () => void; onExample: () => void; onContos?: () => void; onRetry: () => void; onTemporary: () => void;
 };
 
-export function Welcome({code,busy,error,onCode,onJoin,onScan,onPresentation,onQuiz,onExample,onContos,onRetry,onTemporary}:WelcomeProps) {
-  function focusRoom() {
-    const input = document.getElementById("welcome-room-code");
-    input?.focus({preventScroll:true});
-    document.getElementById("welcome-join")?.scrollIntoView({behavior:window.matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"center"});
-  }
+export function Welcome({signInHref="/entrar",code,busy,error,onCode,onJoin,onScan,onPresentation,onQuiz,onExample,onContos,onRetry,onTemporary}:WelcomeProps) {
   return <section className="welcome" aria-labelledby="welcome-title">
     <div className="welcome-hero">
       <div className="welcome-intro">
         <p className="welcome-eyebrow"><Sparkles size={17} aria-hidden="true"/>APRENDER PARTICIPANDO</p>
-        <h1 id="welcome-title"><span className="welcome-title-line">Conhecimento</span>{" "}<span className="welcome-title-line">em <span className="welcome-title-emphasis">prática.</span></span></h1>
+        <h1 id="welcome-title"><span className="welcome-title-line">Metodologia</span>{" "}<span className="welcome-title-line">ativa <span className="welcome-title-emphasis">na prática</span></span></h1>
         <p className="welcome-lead">Uma aula ganha vida quando a turma participa.</p>
-        <p className="welcome-about">O Prativerso reúne apresentações interativas e quizzes ao vivo. Você prepara o conteúdo, convida a turma e transforma cada resposta em uma oportunidade de aprender.</p>
-        <div className="welcome-hero-actions"><a className="btn btn-primary" href="#welcome-create">Criar uma atividade</a><button className="btn btn-outline" onClick={focusRoom}>Tenho um código de sala</button></div>
-        <p className="welcome-intro-note"><Users size={18} aria-hidden="true"/>Para educadores, estudantes e pessoas curiosas.</p><div className="welcome-temporary-access"><button onClick={onTemporary}>Começar com conta temporária</button><span>Sem senha · basta seu nome</span></div>
+        <p className="welcome-about">O Prativerso transforma conteúdo em participação. Crie apresentações, quizzes, enquetes e nuvens de palavras. Convide a turma pelo celular e acompanhe cada descoberta ao vivo.</p>
+        <div className="welcome-hero-actions"><a className="btn btn-primary" href={signInHref}><LogIn size={20} aria-hidden="true"/>Entrar na minha conta</a><a className="btn btn-outline welcome-participate" href="/jogar"><DoorOpen size={20} aria-hidden="true"/>Entrar em uma sala</a></div>
+        <p className="welcome-intro-note"><QrCode size={19} aria-hidden="true"/>Para participar da sala, basta o código ou QR code. Sem criar conta.</p>
+        <div className="welcome-temporary-access"><button onClick={onTemporary}>Experimentar com acesso temporário</button><span>Para criar uma atividade, basta seu nome.</span></div>
       </div>
       <aside className="welcome-preview" aria-labelledby="welcome-preview-title">
         <div className="welcome-preview-heading"><span><MonitorPlay size={19} aria-hidden="true"/>DO CONTEÚDO À DESCOBERTA</span><span className="welcome-preview-label">Exemplo</span></div>
@@ -36,12 +33,18 @@ export function Welcome({code,busy,error,onCode,onJoin,onScan,onPresentation,onQ
         <div className="welcome-preview-caption"><span><MonitorPlay size={17} aria-hidden="true"/>Apresente na tela</span><span><Users size={17} aria-hidden="true"/>A turma responde</span></div>
       </aside>
     </div>
+    <ul className="welcome-tools" aria-label="O que você pode fazer no Prativerso">
+      <li><MonitorPlay size={22} aria-hidden="true"/><span>Apresentações interativas</span></li>
+      <li><BookOpen size={22} aria-hidden="true"/><span>Quizzes ao vivo</span></li>
+      <li><BarChart3 size={22} aria-hidden="true"/><span>Enquetes para ouvir a turma</span></li>
+      <li><Cloud size={22} aria-hidden="true"/><span>Nuvens de palavras</span></li>
+    </ul>
     <section className="welcome-how" aria-labelledby="welcome-how-title">
       <div className="welcome-section-heading"><p className="welcome-eyebrow">SIMPLES DE COMEÇAR</p><h2 id="welcome-how-title">Sua ideia. A turma em ação.</h2><p>Mais participação em três passos.</p></div>
       <ol className="welcome-steps">
-        <li><span className="welcome-step-icon"><MonitorPlay size={24} aria-hidden="true"/></span><div><span className="welcome-step-number">01 · PREPARE</span><h3>Dê forma à sua aula</h3><p>Crie slides, importe uma apresentação ou organize perguntas em um quiz.</p></div></li>
+        <li><span className="welcome-step-icon"><MonitorPlay size={24} aria-hidden="true"/></span><div><span className="welcome-step-number">01 · PREPARE</span><h3>Dê forma à sua aula</h3><p>Crie slides, importe uma apresentação ou adapte uma das aulas prontas.</p></div></li>
         <li><span className="welcome-step-icon"><QrCode size={24} aria-hidden="true"/></span><div><span className="welcome-step-number">02 · CONVIDE</span><h3>Traga todo mundo</h3><p>Compartilhe o código ou QR code. A turma participa pelo celular, sem precisar de conta.</p></div></li>
-        <li><span className="welcome-step-icon"><BarChart3 size={24} aria-hidden="true"/></span><div><span className="welcome-step-number">03 · ACOMPANHE</span><h3>Veja o aprendizado acontecer</h3><p>Apresente, receba as respostas e use os resultados para conversar e retomar o conteúdo.</p></div></li>
+        <li><span className="welcome-step-icon"><MessageCircle size={24} aria-hidden="true"/></span><div><span className="welcome-step-number">03 · CONVERSE</span><h3>Faça cada resposta render</h3><p>Use as respostas e os resultados para abrir conversas, tirar dúvidas e retomar o conteúdo.</p></div></li>
       </ol>
     </section>
     <div className="welcome-start-heading"><h2>Crie ou participe<span className="title-dot">.</span></h2><p>Escolha como você quer entrar nessa experiência.</p></div>
@@ -69,6 +72,6 @@ export function Welcome({code,busy,error,onCode,onJoin,onScan,onPresentation,onQ
       </section>
     </div>
     {onContos&&<section className="welcome-contos" aria-labelledby="welcome-contos-title"><h2 id="welcome-contos-title">Uma atividade pronta para experimentar</h2><ContosExampleCard busy={busy} onUse={onContos} headingLevel={3}/></section>}
-    <footer className="welcome-footer"><span>Prativerso <span aria-hidden="true">·</span> Conhecimento em prática.</span><a href="https://github.com/emanoelb5-lgtm/QuizEdu/releases/latest" target="_blank" rel="noreferrer">Baixar aplicativo Android</a><span>Aprender. Praticar. Evoluir.</span></footer>
+    <footer className="welcome-footer"><span>Prativerso <span aria-hidden="true">·</span> Metodologia ativa na prática.</span><a href="https://github.com/emanoelb5-lgtm/QuizEdu/releases/latest" target="_blank" rel="noreferrer">Baixar aplicativo Android</a><span>Aprender. Praticar. Evoluir.</span></footer>
   </section>;
 }
